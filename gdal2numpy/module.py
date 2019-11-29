@@ -26,6 +26,24 @@ import os,sys,math
 import gdal,gdalconst
 import numpy as np
 
+
+def GetExtent(filename):
+    """
+    GetExtent
+    """
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if dataset:
+        "{xmin} {ymin} {xmax} {ymax}"
+        m,n  = dataset.RasterYSize,dataset.RasterXSize
+        gt = dataset.GetGeoTransform()
+        xmin,px,_,ymax,_,py = gt
+        xmax = xmin + n*px
+        ymin = ymax + m*py
+        ymin,ymax = min(ymin,ymax),max(ymin,ymax)
+        dataset=None
+        return (xmin, ymin, xmax, ymax )
+    return (0,0,0,0)
+
 def GDAL2Numpy(pathname, band=1, dtype='', load_nodata_as = np.nan):
     """
     GDAL2Numpy
