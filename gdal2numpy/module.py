@@ -26,6 +26,28 @@ import os,sys,math
 import gdal,gdalconst
 import numpy as np
 
+def GetPixelSize(filename):
+    """
+    GetPixelSize
+    """
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if dataset:
+        gt = dataset.GetGeoTransform()
+        _, px, _, _, _, py = gt
+        dataset = None
+        return (px,py)
+    return (0,0)
+
+def GetRasterShape(filename):
+    """
+    GetRasterShape
+    """
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if dataset:
+        band = dataset.GetRasterBand(1)
+        m,n = dataset.RasterYSize,dataset.RasterXSize
+        return (m,n)
+    return (0,0)
 
 def GetExtent(filename):
     """
@@ -43,6 +65,27 @@ def GetExtent(filename):
         dataset=None
         return (xmin, ymin, xmax, ymax )
     return (0,0,0,0)
+
+def GetSpatialReference(filename):
+    """
+    GetSpatialReference
+    """
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if dataset:
+       return dataset.GetProjection()
+    return None
+
+def GetNoData(filename):
+    """
+    GetNoData
+    """
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if dataset:
+        band = dataset.GetRasterBand(1)
+        nodata = band.GetNoDataValue()
+        data, band, dataset = None, None, None
+        return nodata
+    return None
 
 def GDAL2Numpy(pathname, band=1, dtype='', load_nodata_as = np.nan):
     """
