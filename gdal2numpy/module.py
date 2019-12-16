@@ -175,7 +175,7 @@ def Numpy2AAIGrid(data, geotransform, projection, filename, save_nodata_as=-9999
     stream.write("nrows         %d\r\n" % (rows))
     stream.write("xllcorner     %d\r\n" % (x0))
     stream.write("yllcorner     %d\r\n" % (y0 + pixelYSize * rows))
-    stream.write("cellsize      %d\r\n" % (pixelXSize))
+    stream.write("cellsize      %f\r\n" % (pixelXSize)
     stream.write("NODATA_value  %d\r\n" % (save_nodata_as))
     template = (format * cols) + "\r\n"
     for row in data:
