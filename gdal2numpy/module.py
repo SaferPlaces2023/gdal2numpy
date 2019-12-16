@@ -25,6 +25,7 @@
 import os,sys,math
 import gdal,gdalconst
 import numpy as np
+from .filesystem import *
 
 def GetPixelSize(filename):
     """
