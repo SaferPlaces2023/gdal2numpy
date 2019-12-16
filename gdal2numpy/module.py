@@ -168,7 +168,7 @@ def Numpy2AAIGrid(data, geotransform, filename, save_nodata_as=-9999):
     """
     (x0, pixelXSize, rot, y0, rot, pixelYSize) = geotransform
     (rows, cols) = data.shape
-    stream = open(filename, "wb")
+    stream = open(filename, "w")
     stream.write("ncols         %d\r\n" % (cols))
     stream.write("nrows         %d\r\n" % (rows))
     stream.write("xllcorner     %d\r\n" % (x0))
