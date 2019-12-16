@@ -160,3 +160,36 @@ def Numpy2GTiff(arr, geotransform, projection, filename, save_nodata_as=-9999):
             dataset = None
             return filename
     return None
+
+def Numpy2AAIGrid(data, geotransform, filename, save_nodata_as=-9999):
+    """
+    Numpy2AAIGrid
+    """
+    (x0, pixelXSize, rot, y0, rot, pixelYSize) = geotransform
+    (rows, cols) = data.shape
+    stream = open(filename, "wb")
+    stream.write("ncols         %d\r\n" % (cols))
+    stream.write("nrows         %d\r\n" % (rows))
+    stream.write("xllcorner     %d\r\n" % (x0))
+    stream.write("yllcorner     %d\r\n" % (y0 + pixelYSize * rows))
+    stream.write("cellsize      %d\r\n" % (pixelXSize))
+    stream.write("NODATA_value  %d\r\n" % (save_nodata_as))
+    template = ("%.7g " * cols) + "\r\n"
+    for row in data:
+        line = template % tuple(row.tolist())
+        stream.write(line)
+    stream.close()
+    return filename
+
+def Numpy2Gdal(data, geotransform, projection, filename, save_nodata_as=-9999):
+    """
+    Numpy2Gdal
+    """
+    ext = os.path.splitext(filename)[1][1:].strip().lower()
+    mkdirs(justpath(filename))
+    if ext == "tif" or ext == "tiff":
+        return Numpy2GTiff(data, geotransform, projection, filename, save_nodata_as)
+    elif ext == "asc":
+        return Numpy2AAIGrid(data, geotransform, filename, save_nodata_as)
+    else:
+        return ""
