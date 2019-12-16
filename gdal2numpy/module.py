@@ -162,7 +162,7 @@ def Numpy2GTiff(arr, geotransform, projection, filename, save_nodata_as=-9999):
             return filename
     return None
 
-def Numpy2AAIGrid(data, geotransform, filename, save_nodata_as=-9999):
+def Numpy2AAIGrid(data, geotransform, filename, save_nodata_as=-9999, decimals=3):
     """
     Numpy2AAIGrid
     """
@@ -176,7 +176,7 @@ def Numpy2AAIGrid(data, geotransform, filename, save_nodata_as=-9999):
     stream.write("yllcorner     %d\r\n" % (y0 + pixelYSize * rows))
     stream.write("cellsize      %d\r\n" % (pixelXSize))
     stream.write("NODATA_value  %d\r\n" % (save_nodata_as))
-    template = ("%.7g " * cols) + "\r\n"
+    template = ("%."+decimals+"g " * cols) + "\r\n"
     for row in data:
         line = template % tuple(row.tolist())
         stream.write(line)
