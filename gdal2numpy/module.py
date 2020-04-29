@@ -131,22 +131,22 @@ def Numpy2GTiff(arr, geotransform, projection, filename, save_nodata_as=-9999):
     """
     Numpy2GTiff
     """
+    GDT = {
+        'uint8': gdal.GDT_Byte,
+        'uint16': gdal.GDT_UInt16,
+        'uint32': gdal.GDT_UInt32,
+        'int16': gdal.GDT_Int16,
+        'int32': gdal.GDT_Int32,
+
+        'float32': gdal.GDT_Float32,
+        'float64': gdal.GDT_Float64
+    }
+
     if isinstance(arr, np.ndarray):
         rows, cols = arr.shape
         if rows > 0 and cols > 0:
-            dtype = str(arr.dtype)
-            if dtype in ["uint8"]:
-                fmt = gdal.GDT_Byte
-            elif dtype in ["uint16"]:
-                fmt = gdal.GDT_UInt16
-            elif dtype in ["uint32"]:
-                fmt = gdal.GDT_UInt32
-            elif dtype in ["float32"]:
-                fmt = gdal.GDT_Float32
-            elif dtype in ["float64"]:
-                fmt = gdal.GDT_Float64
-            else:
-                fmt = gdal.GDT_Float64
+            dtype = str(arr.dtype).lower()
+            fmt = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
 
             CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", 'COMPRESS=LZW']
             driver = gdal.GetDriverByName("GTiff")
