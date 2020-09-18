@@ -88,11 +88,24 @@ def GetNoData(filename):
         return nodata
     return None
 
-def GDAL2Numpy(pathname, band=1, dtype='', load_nodata_as = np.nan):
+def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as = np.nan):
     """
     GDAL2Numpy
     """
-    dataset = gdal.Open(pathname, gdalconst.GA_ReadOnly)
+    t0 = now()
+    dtypeOf = {'Float32':np.float32,
+                 'Float64':np.float64,
+                 'CFloat32':np.float32,
+                 'CFloat64':np.float64,
+                 'Byte':np.uint8,
+                 'Int16':np.int16,
+                 'Int32':np.int32,
+                 'UInt16':np.uint16,
+                 'UInt32':np.uint32,
+                 'CInt16':np.int16,
+                 'CInt32':np.int32
+    }
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     if dataset:
         band = dataset.GetRasterBand(band)
         cols = dataset.RasterXSize
@@ -100,31 +113,49 @@ def GDAL2Numpy(pathname, band=1, dtype='', load_nodata_as = np.nan):
         geotransform = dataset.GetGeoTransform()
         projection = dataset.GetProjection()
         nodata = band.GetNoDataValue()
-        bandtype = gdal.GetDataTypeName(band.DataType)
-
+        bandtype = dtypeOf[gdal.GetDataTypeName(band.DataType)]
         wdata = band.ReadAsArray(0, 0, cols, rows)
 
         # translate nodata as Nan
         if not wdata is None:
 
+            if not np.isnan(load_nodata_as):
+                print("fixing nodata with:%s"%load_nodata_as)
+                wdata[np.isnan(wdata)] = load_nodata_as
+
             # Output datatype
             if dtype and dtype != bandtype:
+                print("fixing % with:%s" % (bandtype,dtype))
                 wdata = wdata.astype(dtype, copy=False)
 
-            if bandtype in ('Float32', 'Float64', 'CFloat32', 'CFloat64'):
-                if not nodata is None and abs(nodata) > 3.4e38:
-                    wdata[abs(wdata) > 3.4e38] = load_nodata_as
+            if bandtype  == np.float32:
+                nodata = np.float32(nodata)
+                if not nodata is None and np.isinf(nodata):
+                    print("fixing inf with:%s" % (load_nodata_as))
+                    wdata[np.isinf(wdata)] = load_nodata_as
                 elif not nodata is None:
+                    print("fixing nodata with:%s" % (load_nodata_as))
                     wdata[wdata == nodata] = load_nodata_as
-            elif bandtype in ('Byte', 'Int16', 'Int32', 'UInt16', 'UInt32', 'CInt16', 'CInt32'):
-                #wdata = wdata.astype("Float32", copy=False)
+
+
+            elif bandtype == np.float64:
+                nodata = np.float64(nodata)
+                if not nodata is None and np.isinf(nodata):
+                    print("fixing inf with:%s" % (load_nodata_as))
+                    wdata[np.isinf(wdata)] = load_nodata_as
+                elif not nodata is None:
+                    print("fixing nodata with:%s" % (load_nodata_as))
+                    wdata[wdata == nodata] = load_nodata_as
+            elif bandtype in (np.uint8, np.int16, np.uint16, np.int32, np.uint32):
                 if nodata != load_nodata_as:
+                    print("fixing nodata with:%s" % (load_nodata_as))
                     wdata[wdata == nodata] = load_nodata_as
 
         band = None
         dataset = None
+        print("Reading <%s> in %ss."%(justfname(filename), total_seconds_from(t0)))
         return (wdata, geotransform, projection)
-    print("file %s not exists!" % (pathname))
+    print("file %s not exists!" % (filename))
     return (None, None, None)
 
 def Numpy2GTiff(arr, geotransform, projection, filename, save_nodata_as=-9999):
