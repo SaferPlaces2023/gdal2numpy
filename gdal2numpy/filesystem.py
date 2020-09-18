@@ -26,10 +26,10 @@
 import os,sys,datetime
 
 def now():
-    return datetime.now()
+    return datetime.datetime.now()
 
 def total_seconds_from(t):
-    return (datetime.now()-t).total_seconds()
+    return (datetime.datetime.now()-t).total_seconds()
 
 def normpath(pathname):
     """
