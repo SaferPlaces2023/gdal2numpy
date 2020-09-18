@@ -49,6 +49,12 @@ def justpath(pathname, n=1):
         return "."
     return normpath(pathname)
 
+def justfname(pathname):
+    """
+    justfname - returns the basename
+    """
+    return normpath(os.path.basename(normpath(pathname)))
+
 def forceext(pathname, newext):
     """
     forceext
