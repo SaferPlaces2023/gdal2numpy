@@ -193,7 +193,7 @@ def Numpy2GTiff(arr, geotransform, projection, filename, save_nodata_as=-9999):
             return filename
     return None
 
-def Numpy2AAIGrid(data, geotransform, projection, filename, save_nodata_as=-9999, format="%.6g"):
+def Numpy2AAIGrid(data, geotransform, projection, filename, save_nodata_as=-9999, format=" %.5g"):
     """
     Numpy2AAIGrid
     """
