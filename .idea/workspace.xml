@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="68cf586f-f262-4ee7-8b55-2b36b3872e3f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="68cf586f-f262-4ee7-8b55-2b36b3872e3f" name="Default Changelist" comment="-- fixed import gdal" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -55,12 +53,31 @@
       <option name="project" value="LOCAL" />
       <updated>1588150752146</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="-- fixed import gdal">
+      <created>1614763962621</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1614763962621</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="-- some changes in Numpy2GTiff" />
-    <option name="LAST_COMMIT_MESSAGE" value="-- some changes in Numpy2GTiff" />
+    <MESSAGE value="-- fixed import gdal" />
+    <option name="LAST_COMMIT_MESSAGE" value="-- fixed import gdal" />
   </component>
   <component name="WindowStateProjectService">
     <state x="587" y="-872" key="CommitChangelistDialog2" timestamp="1588150751166">
