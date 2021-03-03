@@ -23,7 +23,7 @@
 # Created:
 #-------------------------------------------------------------------------------
 import os,sys,math
-import gdal,gdalconst
+from osgeo import gdal,gdalconst
 import numpy as np
 from .filesystem import *
 
