@@ -88,7 +88,7 @@ def GetNoData(filename):
         return nodata
     return None
 
-def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as = np.nan):
+def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as = np.nan, verbose=False):
     """
     GDAL2Numpy
     """
@@ -120,40 +120,48 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as = np.nan):
         if not wdata is None:
 
             if not np.isnan(load_nodata_as):
-                print("fixing nodata with:%s"%load_nodata_as)
+                if verbose:
+                    print("fixing nodata with:%s"%load_nodata_as)
                 wdata[np.isnan(wdata)] = load_nodata_as
 
             # Output datatype
             if dtype and dtype != bandtype:
-                print("fixing % with:%s" % (bandtype,dtype))
+                if verbose:
+                    print("fixing % with:%s" % (bandtype,dtype))
                 wdata = wdata.astype(dtype, copy=False)
 
             if bandtype  == np.float32:
                 nodata = np.float32(nodata)
                 if not nodata is None and np.isinf(nodata):
-                    print("fixing inf with:%s" % (load_nodata_as))
+                    if verbose:
+                        print("fixing inf with:%s" % (load_nodata_as))
                     wdata[np.isinf(wdata)] = load_nodata_as
                 elif not nodata is None:
-                    print("fixing nodata with:%s" % (load_nodata_as))
+                    if verbose:
+                        print("fixing nodata with:%s" % (load_nodata_as))
                     wdata[wdata == nodata] = load_nodata_as
 
 
             elif bandtype == np.float64:
                 nodata = np.float64(nodata)
                 if not nodata is None and np.isinf(nodata):
-                    print("fixing inf with:%s" % (load_nodata_as))
+                    if verbose:
+                        print("fixing inf with:%s" % (load_nodata_as))
                     wdata[np.isinf(wdata)] = load_nodata_as
                 elif not nodata is None:
-                    print("fixing nodata with:%s" % (load_nodata_as))
+                    if verbose:
+                        print("fixing nodata with:%s" % (load_nodata_as))
                     wdata[wdata == nodata] = load_nodata_as
             elif bandtype in (np.uint8, np.int16, np.uint16, np.int32, np.uint32):
                 if nodata != load_nodata_as:
-                    print("fixing nodata with:%s" % (load_nodata_as))
+                    if verbose:
+                        print("fixing nodata with:%s" % (load_nodata_as))
                     wdata[wdata == nodata] = load_nodata_as
 
         band = None
         dataset = None
-        print("Reading <%s> in %ss."%(justfname(filename), total_seconds_from(t0)))
+        if verbose:
+            print("Reading <%s> in %ss."%(justfname(filename), total_seconds_from(t0)))
         return (wdata, geotransform, projection)
     print("file %s not exists!" % (filename))
     return (None, None, None)
