@@ -39,8 +39,8 @@ def GetPixelSize(filename):
         gt = dataset.GetGeoTransform()
         _, px, _, _, _, py = gt
         dataset = None
-        return (px, py)
-    return (0, 0)
+        return px, py
+    return 0, 0
 
 
 def GetRasterShape(filename):
@@ -51,8 +51,8 @@ def GetRasterShape(filename):
     if dataset:
         band = dataset.GetRasterBand(1)
         m, n = dataset.RasterYSize, dataset.RasterXSize
-        return (m, n)
-    return (0, 0)
+        return m, n
+    return 0, 0
 
 
 def GetExtent(filename):
@@ -69,8 +69,8 @@ def GetExtent(filename):
         ymin = ymax + m * py
         ymin, ymax = min(ymin, ymax), max(ymin, ymax)
         dataset = None
-        return (xmin, ymin, xmax, ymax)
-    return (0, 0, 0, 0)
+        return xmin, ymin, xmax, ymax
+    return 0, 0, 0, 0
 
 
 def GetSpatialReference(filename):
@@ -90,95 +90,15 @@ def GetNoData(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     if dataset:
         band = dataset.GetRasterBand(1)
-        nodata = band.GetNoDataValue()
+        no_data = band.GetNoDataValue()
         data, band, dataset = None, None, None
-        return nodata
+        return no_data
     return None
 
 
-def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, verbose=False):
+def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[], verbose=False):
     """
     GDAL2Numpy
-    """
-    t0 = now()
-    dtypeOf = {
-        'Float32': np.float32,
-        'Float64': np.float64,
-        'CFloat32': np.float32,
-        'CFloat64': np.float64,
-        'Byte': np.uint8,
-        'Int16': np.int16,
-        'Int32': np.int32,
-        'UInt16': np.uint16,
-        'UInt32': np.uint32,
-        'CInt16': np.int16,
-        'CInt32': np.int32
-    }
-    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
-    if dataset:
-        band = dataset.GetRasterBand(band)
-        n = dataset.RasterXSize
-        m = dataset.RasterYSize
-        geotransform = dataset.GetGeoTransform()
-        projection = dataset.GetProjection()
-        nodata = band.GetNoDataValue()
-        bandtype = dtypeOf[gdal.GetDataTypeName(band.DataType)]
-        wdata = band.ReadAsArray(0, 0, n, m)
-
-        # translate nodata as Nan
-        if not wdata is None:
-
-            if not np.isnan(load_nodata_as):
-                if verbose:
-                    print("fixing nodata with:%s" % load_nodata_as)
-                wdata[np.isnan(wdata)] = load_nodata_as
-
-            # Output datatype
-            if dtype and dtype != bandtype:
-                if verbose:
-                    print("fixing % with:%s" % (bandtype, dtype))
-                wdata = wdata.astype(dtype, copy=False)
-
-            if bandtype == np.float32:
-                nodata = np.float32(nodata)
-                if not nodata is None and np.isinf(nodata):
-                    if verbose:
-                        print("fixing inf with:%s" % (load_nodata_as))
-                    wdata[np.isinf(wdata)] = load_nodata_as
-                elif not nodata is None:
-                    if verbose:
-                        print("fixing nodata with:%s" % (load_nodata_as))
-                    wdata[wdata == nodata] = load_nodata_as
-
-
-            elif bandtype == np.float64:
-                nodata = np.float64(nodata)
-                if not nodata is None and np.isinf(nodata):
-                    if verbose:
-                        print("fixing inf with:%s" % (load_nodata_as))
-                    wdata[np.isinf(wdata)] = load_nodata_as
-                elif not nodata is None:
-                    if verbose:
-                        print("fixing nodata with:%s" % (load_nodata_as))
-                    wdata[wdata == nodata] = load_nodata_as
-            elif bandtype in (np.uint8, np.int16, np.uint16, np.int32, np.uint32):
-                if nodata != load_nodata_as:
-                    if verbose:
-                        print("fixing nodata with:%s" % (load_nodata_as))
-                    wdata[wdata == nodata] = load_nodata_as
-
-        band = None
-        dataset = None
-        if verbose:
-            print("Reading <%s> in %ss." % (justfname(filename), total_seconds_from(t0)))
-        return (wdata, geotransform, projection)
-    print("file %s not exists!" % (filename))
-    return (None, None, None)
-
-
-def Read2Numpy(url, bbox, band=1, dtype=np.float32, load_nodata_as=np.nan, verbose=False):
-    """
-    Read2Numpy - read just a window, not all the file
     """
     t0 = now()
     data_type_of = {
@@ -194,9 +114,8 @@ def Read2Numpy(url, bbox, band=1, dtype=np.float32, load_nodata_as=np.nan, verbo
         'CInt16': np.int16,
         'CInt32': np.int32
     }
-    url = "/vsicurl/" + url if url and url.lower().startswith("http") else url
-    #url = "/vsizip/"  + url if url and ".zip/" in url.lower() else url
-    ds = gdal.Open(url, gdalconst.GA_ReadOnly)
+    filename = "/vsicurl/" + filename if filename and filename.lower().startswith("http") else filename
+    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
     if ds:
         band = ds.GetRasterBand(band)
         m, n = ds.RasterYSize, ds.RasterXSize
@@ -204,70 +123,62 @@ def Read2Numpy(url, bbox, band=1, dtype=np.float32, load_nodata_as=np.nan, verbo
         no_data = band.GetNoDataValue()
         band_type = data_type_of[gdal.GetDataTypeName(band.DataType)]
 
-        x0, px, r0, y0, r1, py = gt
-        X0, Y0, X1, Y1 = bbox
+        if not bbox:
+            data = band.ReadAsArray(0, 0, n, m)
+        else:
+            x0, px, r0, y0, r1, py = gt
+            X0, Y0, X1, Y1 = bbox
 
-        j0, i0 = int((X0 - x0) / px), int((Y1 - y0) / py)
-        cols, rows = math.ceil((X1 - X0) / px), math.ceil(abs(Y1 - Y0) / abs(py))
+            # calcutate starting indices
+            j0, i0 = int((X0 - x0) / px), int((Y1 - y0) / py)
+            cols, rows = math.ceil((X1 - X0) / px), math.ceil(abs(Y1 - Y0) / abs(py))
 
-        # index-safe
-        j0, i0 = min(max(j0, 0), n - 1), min(max(i0, 0), m - 1)
-        cols   = min(max(cols, 0), n)
-        rows   = min(max(rows, 0), m)
+            # index-safe
+            j0, i0 = min(max(j0, 0), n - 1), min(max(i0, 0), m - 1)
+            cols = min(max(cols, 0), n)
+            rows = min(max(rows, 0), m)
 
-        data = band.ReadAsArray(j0, i0, cols, rows)
+            # re-arrange gt
+            k = math.floor((X0 - x0) / px)
+            h = math.floor((Y1 - y0) / py)
+            gt = x0 + k * px, px, r0, y0 + h * py, r1, py
 
-        k = math.floor((X0-x0) / px)
-        h = math.floor((Y1-y0) / py)
-        gt = x0+k*px, px, r0, y0+h*py, r1, py
+            data = band.ReadAsArray(j0, i0, cols, rows)
 
+        # translate no-data as Nan
         if data is not None:
 
             if not np.isnan(load_nodata_as):
-                if verbose:
-                    print("fixing no_data with:%s" % load_nodata_as)
                 data[np.isnan(data)] = load_nodata_as
 
             # Output datatype
             if dtype and dtype != band_type:
-                if verbose:
-                    print("fixing % with:%s" % (band_type, dtype))
                 data = data.astype(dtype, copy=False)
 
             if band_type == np.float32:
                 no_data = np.float32(no_data)
                 if no_data is not None and np.isinf(no_data):
-                    if verbose:
-                        print("fixing inf with:%s" % load_nodata_as)
                     data[np.isinf(data)] = load_nodata_as
                 elif no_data is not None:
-                    if verbose:
-                        print("fixing nodata with:%s" % load_nodata_as)
                     data[data == no_data] = load_nodata_as
 
             elif band_type == np.float64:
                 no_data = np.float64(no_data)
                 if no_data is not None and np.isinf(no_data):
-                    if verbose:
-                        print("fixing inf with:%s" % load_nodata_as)
                     data[np.isinf(data)] = load_nodata_as
                 elif no_data is not None:
-                    if verbose:
-                        print("fixing nodata with:%s" % load_nodata_as)
                     data[data == no_data] = load_nodata_as
+
             elif band_type in (np.uint8, np.int16, np.uint16, np.int32, np.uint32):
                 if no_data != load_nodata_as:
-                    if verbose:
-                        print("fixing nodata with:%s" % load_nodata_as)
                     data[data == no_data] = load_nodata_as
 
         band = None
         ds = None
         if verbose:
-            print("Reading <%s> in %ss." % (justfname(url), total_seconds_from(t0)))
+            print("Reading <%s> in %ss." % (justfname(filename), total_seconds_from(t0)))
         return data, gt, prj
-
-    print("may be url <%s> not exists!" % url)
+    print("file %s not exists!" % filename)
     return None, None, None
 
 
