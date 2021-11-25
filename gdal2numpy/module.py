@@ -276,12 +276,19 @@ def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_no
             dtype = str(arr.dtype).lower()
             fmt = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
 
-            CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", 'COMPRESS=LZW'] if format=="GTiff" else []
+            if format == "GTiff":
+                CO = ["BIGTIFF=YES", "COMPRESS=LZW"]
+            elif format == "COG":
+                CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW", "INTERLEAVE=BAND",
+                      "LAYOUT=COG"]
+            else:
+                CO = []
+
             pathname, _ = os.path.split(filename)
             if pathname:
                 os.makedirs(pathname, exist_ok=True)
-            #driver = gdal.GetDriverByName("GTiff")
-            driver = gdal.GetDriverByName(format)
+            driver = gdal.GetDriverByName("GTiff")
+            #driver = gdal.GetDriverByName(format)
             dataset = driver.Create(filename, cols, rows, 1, fmt, CO)
             if (geotransform != None):
                 dataset.SetGeoTransform(geotransform)
