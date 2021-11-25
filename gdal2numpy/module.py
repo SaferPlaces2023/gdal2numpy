@@ -278,9 +278,6 @@ def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_no
 
             if format == "GTiff":
                 CO = ["BIGTIFF=YES", "COMPRESS=LZW"]
-            elif format == "COG":
-                CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW", "INTERLEAVE=BAND",
-                      "LAYOUT=COG"]
             else:
                 CO = []
 
@@ -298,6 +295,10 @@ def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_no
             dataset.GetRasterBand(1).WriteArray(arr)
             # ?dataset.GetRasterBand(1).ComputeStatistics(0)
             dataset = None
+
+            if format=="COG":
+                ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+                gdal.Translate(filename, ds, { "format": format})
             return filename
     return None
 
