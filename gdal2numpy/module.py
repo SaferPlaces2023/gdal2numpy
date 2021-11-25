@@ -26,19 +26,68 @@ import math
 
 import numpy as np
 from osgeo import gdal, gdalconst
+from osgeo import ogr, osr
 
 from .filesystem import *
+
+
+def Rectangle(minx, miny, maxx, maxy):
+    """
+    Rectangle
+    """
+    ring = ogr.Geometry(ogr.wkbLinearRing)
+    ring.AddPoint_2D(minx, miny)
+    ring.AddPoint_2D(maxx, miny)
+    ring.AddPoint_2D(maxx, maxy)
+    ring.AddPoint_2D(minx, maxy)
+    ring.AddPoint_2D(minx, miny)
+    # Create polygon
+    poly = ogr.Geometry(ogr.wkbPolygon)
+    poly.AddGeometry(ring)
+    return poly
+
+
+def Extent(bbox, s_srs=False, t_srs=False):
+    """
+    Extent
+    """
+
+    if s_srs and t_srs:
+        s_srs = GetSpatialRef(s_srs)
+        t_srs = GetSpatialRef(t_srs)
+        transform = osr.CoordinateTransformation(s_srs, t_srs)
+
+        print("EPSGTreatsAsLatLong:", s_srs.EPSGTreatsAsLatLong())
+
+        p1 = ogr.Geometry(ogr.wkbPoint)
+        p2 = ogr.Geometry(ogr.wkbPoint)
+        if s_srs.IsGeographic() or s_srs.EPSGTreatsAsLatLong():
+            p1.AddPoint(bbox[1], bbox[0])
+            p2.AddPoint(bbox[3], bbox[2])
+        else:
+            p1.AddPoint(bbox[0], bbox[1])
+            p2.AddPoint(bbox[2], bbox[3])
+
+        p1.Transform(transform)
+        p2.Transform(transform)
+
+        if t_srs.IsGeographic() or t_srs.EPSGTreatsAsLatLong():
+            return p1.GetY(), p1.GetX(), p2.GetY(), p2.GetX()
+        else:
+            return p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY()
+
+    return tuple(bbox)
 
 
 def GetPixelSize(filename):
     """
     GetPixelSize
     """
-    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
-    if dataset:
-        gt = dataset.GetGeoTransform()
+    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if ds:
+        gt = ds.GetGeoTransform()
         _, px, _, _, _, py = gt
-        dataset = None
+        ds = None
         return px, py
     return 0, 0
 
@@ -47,10 +96,10 @@ def GetRasterShape(filename):
     """
     GetRasterShape
     """
-    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
-    if dataset:
-        band = dataset.GetRasterBand(1)
-        m, n = dataset.RasterYSize, dataset.RasterXSize
+    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if ds:
+        band = ds.GetRasterBand(1)
+        m, n = ds.RasterYSize, ds.RasterXSize
         return m, n
     return 0, 0
 
@@ -59,39 +108,63 @@ def GetExtent(filename):
     """
     GetExtent
     """
-    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
-    if dataset:
+    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if ds:
         "{xmin} {ymin} {xmax} {ymax}"
-        m, n = dataset.RasterYSize, dataset.RasterXSize
-        gt = dataset.GetGeoTransform()
+        m, n = ds.RasterYSize, ds.RasterXSize
+        gt = ds.GetGeoTransform()
         xmin, px, _, ymax, _, py = gt
         xmax = xmin + n * px
         ymin = ymax + m * py
         ymin, ymax = min(ymin, ymax), max(ymin, ymax)
-        dataset = None
+        ds = None
         return xmin, ymin, xmax, ymax
     return 0, 0, 0, 0
 
 
-def GetSpatialReference(filename):
+def GetSpatialRef(filename):
     """
-    GetSpatialReference
+    GetSpatialRef
     """
-    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
-    if dataset:
-        return dataset.GetProjection()
-    return None
+    if isinstance(filename, osr.SpatialReference):
+        srs = filename
+
+    elif isinstance(filename, int):
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(filename)
+
+    elif isinstance(filename, str) and filename.lower().startswith("epsg:"):
+        code = int(filename.split(":")[1])
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(code)
+
+    elif isinstance(filename, str) and os.path.isfile(filename) and filename.lower().endswith(".shp"):
+        ds = ogr.OpenShared(filename)
+        if ds:
+            srs = ds.GetLayer().GetSpatialRef()
+        ds = None
+
+    elif isinstance(filename, str) and os.path.isfile(filename) and filename.lower().endswith(".tif"):
+        ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        if ds:
+            wkt = ds.GetProjection()
+            srs = osr.SpatialReference()
+            srs.ImportFromWkt(wkt)
+        ds = None
+    else:
+        srs = osr.SpatialReference()
+    return srs
 
 
 def GetNoData(filename):
     """
     GetNoData
     """
-    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
-    if dataset:
-        band = dataset.GetRasterBand(1)
+    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if ds:
+        band = ds.GetRasterBand(1)
         no_data = band.GetNoDataValue()
-        data, band, dataset = None, None, None
+        data, band, ds = None, None, None
         return no_data
     return None
 
@@ -182,7 +255,7 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
     return None, None, None
 
 
-def Numpy2GTiff(arr, geotransform, projection, filename, save_nodata_as=-9999):
+def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_nodata_as=-9999):
     """
     Numpy2GTiff
     """
@@ -203,8 +276,12 @@ def Numpy2GTiff(arr, geotransform, projection, filename, save_nodata_as=-9999):
             dtype = str(arr.dtype).lower()
             fmt = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
 
-            CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", 'COMPRESS=LZW']
-            driver = gdal.GetDriverByName("GTiff")
+            CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", 'COMPRESS=LZW'] if format=="GTiff" else []
+            pathname, _ = os.path.split(filename)
+            if pathname:
+                os.makedirs(pathname, exist_ok=True)
+            #driver = gdal.GetDriverByName("GTiff")
+            driver = gdal.GetDriverByName(format)
             dataset = driver.Create(filename, cols, rows, 1, fmt, CO)
             if (geotransform != None):
                 dataset.SetGeoTransform(geotransform)
