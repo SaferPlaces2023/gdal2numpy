@@ -1,11 +1,14 @@
-import os,re
+import os
+import re
+
 import setuptools
 
-PACKAGE_NAME    = "gdal2numpy"
-AUTHOR          = "Valerio Luzzi"
-EMAIL           = "valerio.luzzi@gecosistema.com"
-GITHUB          = "https://github.com/valluzzi/%s.git"%(PACKAGE_NAME)
-DESCRIPTION     = "A utils functions package"
+PACKAGE_NAME = "gdal2numpy"
+AUTHOR = "Valerio Luzzi"
+EMAIL = "valerio.luzzi@gecosistema.com"
+GITHUB = "https://github.com/valluzzi/%s.git" % (PACKAGE_NAME)
+DESCRIPTION = "A utils functions package"
+
 
 def get_version():
     VERSIONFILE = os.path.join(PACKAGE_NAME, '__init__.py')
@@ -16,6 +19,7 @@ def get_version():
         if mo:
             return mo.group(1)
     raise RuntimeError('Unable to find version string in %s.' % (VERSIONFILE,))
+
 
 setuptools.setup(
     name=PACKAGE_NAME,

@@ -298,7 +298,8 @@ def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_no
 
             if format=="COG":
                 ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
-                gdal.Translate(filename, ds, { "format": format})
+                kwargs = {"format": format}
+                gdal.Translate(filename, ds, **kwargs)
             return filename
     return None
 
