@@ -23,6 +23,7 @@
 # Created:
 # -------------------------------------------------------------------------------
 import math
+import tempfile
 
 import numpy as np
 from osgeo import gdal, gdalconst
@@ -278,15 +279,18 @@ def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_no
 
             if format == "GTiff":
                 CO = ["BIGTIFF=YES", "COMPRESS=LZW"]
+                filetif = filename
             else:
                 CO = []
+                filetif = tempfile.gettempdir() + justfname(filename)
+
 
             pathname, _ = os.path.split(filename)
             if pathname:
                 os.makedirs(pathname, exist_ok=True)
             driver = gdal.GetDriverByName("GTiff")
             #driver = gdal.GetDriverByName(format)
-            dataset = driver.Create(filename, cols, rows, 1, fmt, CO)
+            dataset = driver.Create(filetif, cols, rows, 1, fmt, CO)
             if (geotransform != None):
                 dataset.SetGeoTransform(geotransform)
             if (projection != None):
@@ -296,10 +300,12 @@ def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_no
             # ?dataset.GetRasterBand(1).ComputeStatistics(0)
             dataset = None
 
-            if format=="COG":
-                ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+            if format == "COG":
+                ds = gdal.Open(filetif, gdalconst.GA_ReadOnly)
                 kwargs = {"format": format}
                 gdal.Translate(filename, ds, **kwargs)
+                os.unlink(filetif)
+
             return filename
     return None
 
