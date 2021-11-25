@@ -282,7 +282,7 @@ def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_no
                 filetif = filename
             else:
                 CO = []
-                filetif = tempfile.gettempdir() + justfname(filename)
+                filetif = tempfile.gettempdir() + "/" + justfname(filename)
 
 
             pathname, _ = os.path.split(filename)
