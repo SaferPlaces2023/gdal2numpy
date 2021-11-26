@@ -23,7 +23,6 @@
 # Created:
 # -------------------------------------------------------------------------------
 import math
-import tempfile
 
 import numpy as np
 from osgeo import gdal, gdalconst
@@ -256,7 +255,7 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
     return None, None, None
 
 
-def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_nodata_as=-9999):
+def Numpy2GTiff(arr, gt, prj, filename, format="GTiff", save_nodata_as=-9999):
     """
     Numpy2GTiff
     """
@@ -277,34 +276,26 @@ def Numpy2GTiff(arr, geotransform, projection, filename, format="GTiff", save_no
             dtype = str(arr.dtype).lower()
             fmt = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
 
-            if format == "GTiff":
-                CO = ["BIGTIFF=YES", "COMPRESS=LZW"]
-                filetif = filename
-            else:
-                CO = []
-                filetif = tempfile.gettempdir() + "/" + justfname(filename)
-
+            CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"] if format == "GTiff" else []
 
             pathname, _ = os.path.split(filename)
             if pathname:
                 os.makedirs(pathname, exist_ok=True)
             driver = gdal.GetDriverByName("GTiff")
-            #driver = gdal.GetDriverByName(format)
-            dataset = driver.Create(filetif, cols, rows, 1, fmt, CO)
-            if (geotransform != None):
-                dataset.SetGeoTransform(geotransform)
-            if (projection != None):
-                dataset.SetProjection(projection)
+            dataset = driver.Create(filename, cols, rows, 1, fmt, CO)
+
+            if gt is not None:
+                dataset.SetGeoTransform(gt)
+            if prj is not None:
+                dataset.SetProjection(prj)
             dataset.GetRasterBand(1).SetNoDataValue(save_nodata_as)
             dataset.GetRasterBand(1).WriteArray(arr)
-            # ?dataset.GetRasterBand(1).ComputeStatistics(0)
-            dataset = None
 
-            if format == "COG":
-                ds = gdal.Open(filetif, gdalconst.GA_ReadOnly)
+            if format != "GTiff":
                 kwargs = {"format": format}
-                gdal.Translate(filename, ds, **kwargs)
-                os.unlink(filetif)
+                gdal.Translate(filename, dataset, **kwargs)
+
+            dataset = None
 
             return filename
     return None
