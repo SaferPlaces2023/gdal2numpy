@@ -23,6 +23,7 @@
 # Created:
 # -------------------------------------------------------------------------------
 import math
+import tempfile
 
 import numpy as np
 from osgeo import gdal, gdalconst
@@ -278,11 +279,13 @@ def Numpy2GTiff(arr, gt, prj, filename, format="GTiff", save_nodata_as=-9999):
 
             CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"] if format == "GTiff" else []
 
-            pathname, _ = os.path.split(filename)
+            pathname, fname = os.path.split(filename)
+            filetif = filename if format == "GTiff" else tempfile.gettempdir()+"/"+fname
+
             if pathname:
                 os.makedirs(pathname, exist_ok=True)
             driver = gdal.GetDriverByName("GTiff")
-            dataset = driver.Create(filename, cols, rows, 1, fmt, CO)
+            dataset = driver.Create(filetif, cols, rows, 1, fmt, CO)
 
             if gt is not None:
                 dataset.SetGeoTransform(gt)

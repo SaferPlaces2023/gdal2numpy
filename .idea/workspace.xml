@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="68cf586f-f262-4ee7-8b55-2b36b3872e3f" name="Default Changelist" comment="+ support COG in GDAL2Numpy">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gdal2numpy/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/gdal2numpy/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gdal2numpy/module.py" beforeDir="false" afterPath="$PROJECT_DIR$/gdal2numpy/module.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -135,7 +136,14 @@
       <option name="project" value="LOCAL" />
       <updated>1637864632554</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="+ support COG in GDAL2Numpy">
+      <created>1637911202687</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1637911202687</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
