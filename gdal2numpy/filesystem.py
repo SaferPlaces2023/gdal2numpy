@@ -25,13 +25,16 @@
 
 import datetime
 import os
+import tempfile
 
 
 def now():
     return datetime.datetime.now()
 
+
 def total_seconds_from(t):
-    return (datetime.datetime.now()-t).total_seconds()
+    return (datetime.datetime.now() - t).total_seconds()
+
 
 def normpath(pathname):
     """
@@ -41,21 +44,24 @@ def normpath(pathname):
         return ""
     return os.path.normpath(pathname.replace("\\", "/")).replace("\\", "/")
 
+
 def justpath(pathname, n=1):
     """
     justpath
     """
     for j in range(n):
         (pathname, _) = os.path.split(normpath(pathname))
-    if pathname=="":
+    if pathname == "":
         return "."
     return normpath(pathname)
+
 
 def justfname(pathname):
     """
     justfname - returns the basename
     """
     return normpath(os.path.basename(normpath(pathname)))
+
 
 def forceext(pathname, newext):
     """
@@ -64,6 +70,7 @@ def forceext(pathname, newext):
     (root, _) = os.path.splitext(normpath(pathname))
     pathname = root + ("." + newext if len(newext.strip()) > 0 else "")
     return normpath(pathname)
+
 
 def mkdirs(pathname):
     """
@@ -76,3 +83,10 @@ def mkdirs(pathname):
     except:
         pass
     return os.path.isdir(pathname)
+
+
+def tempfilename(prefix="", suffix=""):
+    """
+    return a temporary filename
+    """
+    return tempfile.gettempdir() + "/" + datetime.datetime.strftime(now(), f"{prefix}%Y%m%d%H%M%S%f{suffix}")

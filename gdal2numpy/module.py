@@ -22,9 +22,8 @@
 #
 # Created:
 # -------------------------------------------------------------------------------
-import math, os
-import tempfile
-
+import os
+import math
 import numpy as np
 from osgeo import gdal, gdalconst
 from osgeo import ogr, osr
@@ -279,8 +278,8 @@ def Numpy2GTiff(arr, gt, prj, filename, format="GTiff", save_nodata_as=-9999):
 
             CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"] if format == "GTiff" else []
 
-            pathname, fname = os.path.split(filename)
-            filetif = filename if format == "GTiff" else tempfile.gettempdir()+"/"+fname
+            pathname, _ = os.path.split(filename)
+            filetif = filename if format == "GTiff" else tempfilename(suffix=".tif")
 
             if pathname:
                 os.makedirs(pathname, exist_ok=True)
