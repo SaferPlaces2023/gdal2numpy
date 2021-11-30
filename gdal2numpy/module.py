@@ -22,7 +22,7 @@
 #
 # Created:
 # -------------------------------------------------------------------------------
-import math
+import math, os
 import tempfile
 
 import numpy as np
@@ -297,6 +297,8 @@ def Numpy2GTiff(arr, gt, prj, filename, format="GTiff", save_nodata_as=-9999):
             if format != "GTiff":
                 kwargs = {"format": format}
                 gdal.Translate(filename, dataset, **kwargs)
+                dataset = None
+                os.unlink(filetif)
 
             dataset = None
 
