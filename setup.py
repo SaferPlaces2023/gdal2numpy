@@ -1,13 +1,13 @@
 
 import setuptools
 
-VERSION = "0.0.46"
+VERSION = "0.0.47"
 
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi"
 EMAIL = "valerio.luzzi@gecosistema.com"
-GITHUB = "https://github.com/valluzzi/%s.git" % (PACKAGE_NAME)
-DESCRIPTION = "A utils functions package"
+GITHUB = f"https://github.com/valluzzi/{PACKAGE_NAME}.git"
+DESCRIPTION = "An utils functions package"
 
 setuptools.setup(
     name=PACKAGE_NAME,

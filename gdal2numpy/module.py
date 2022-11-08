@@ -255,9 +255,17 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
     return None, None, None
 
 
-def Numpy2GTiff(arr, gt, prj, filename, format="GTiff", save_nodata_as=-9999):
+def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, metadata=None):
     """
-    Numpy2GTiff
+    Numpy2GTiff - Write a numpy array in  a GTiff file
+    :param arr: the numpy array
+    :param gt:  the geotransform array (x0, px, r0, y0, r1, py)
+    :param prj: the proj4 string
+    :param fileout: the output filename
+    :param format: the format GTiff/COG/etc...
+    :param save_nodata_as: the nodata
+    :param metadata:
+    :return: returns the pathname
     """
     GDT = {
         'uint8': gdal.GDT_Byte,
@@ -276,13 +284,19 @@ def Numpy2GTiff(arr, gt, prj, filename, format="GTiff", save_nodata_as=-9999):
             dtype = str(arr.dtype).lower()
             fmt = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
 
-            CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"] if format == "GTiff" else []
+            CO = []
+            filetif = fileout
+            if format == "GTiff":
+                CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"]
+            else:
+                filetif = tempfilename(suffix=".tif")
 
-            pathname, _ = os.path.split(filename)
-            filetif = filename if format == "GTiff" else tempfilename(suffix=".tif")
-
+            # Create the path to fileout if not exists
+            pathname, _ = os.path.split(fileout)
             if pathname:
                 os.makedirs(pathname, exist_ok=True)
+
+            #Create the output dataset
             driver = gdal.GetDriverByName("GTiff")
             dataset = driver.Create(filetif, cols, rows, 1, fmt, CO)
 
@@ -292,16 +306,20 @@ def Numpy2GTiff(arr, gt, prj, filename, format="GTiff", save_nodata_as=-9999):
                 dataset.SetProjection(prj)
             dataset.GetRasterBand(1).SetNoDataValue(save_nodata_as)
             dataset.GetRasterBand(1).WriteArray(arr)
+            if metadata:
+                dataset.SetMetadata(metadata)
 
             if format != "GTiff":
                 kwargs = {"format": format}
-                gdal.Translate(filename, dataset, **kwargs)
+                gdal.Translate(fileout, dataset, **kwargs)
                 dataset = None
                 os.unlink(filetif)
+                return fileout
 
+            dataset.FlushCache()
             dataset = None
 
-            return filename
+            return fileout
     return None
 
 

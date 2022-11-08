@@ -29,10 +29,19 @@ import tempfile
 
 
 def now():
+    """
+    now
+    :return: returns the time in ms
+    """
     return datetime.datetime.now()
 
 
 def total_seconds_from(t):
+    """
+    total_seconds_from
+    :param t: the time in ms
+    :return: return the timedelta in ms from now es now()-t
+    """
     return (datetime.datetime.now() - t).total_seconds()
 
 
