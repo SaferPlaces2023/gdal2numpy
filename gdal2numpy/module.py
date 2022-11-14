@@ -169,6 +169,38 @@ def GetNoData(filename):
     return None
 
 
+def GetMetaData(filename):
+    """
+    GetMetaData - get metadata from filename
+    :param filename: the pathname
+    :return: returns a dictionary with metadata
+    """
+    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if ds:
+        m, n = ds.RasterYSize, ds.RasterXSize
+        band = ds.GetRasterBand(1)
+        gt = ds.GetGeoTransform()
+        wkt = ds.GetProjection()
+        meta = ds.GetMetadata()
+        nodata = band.GetNoDataValue()
+        minx, px, _, maxy, _, py = gt
+        maxx = minx + n * px
+        miny = maxy + m * py
+        miny, maxy = min(miny, maxy), max(miny, maxy)
+        ds = None
+        return {
+            "m": m,
+            "n": n,
+            "px": px,
+            "py": py,
+            "wkt": wkt,
+            "nodata": nodata,
+            "extent": [minx, miny, maxx, maxy],
+            "metadata": meta
+        }
+    return {}
+
+
 def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[], verbose=False):
     """
     GDAL2Numpy
@@ -296,39 +328,40 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             if pathname:
                 os.makedirs(pathname, exist_ok=True)
 
-            #Create the output dataset
+            # Create the output dataset
             driver = gdal.GetDriverByName("GTiff")
-            dataset = driver.Create(filetif, cols, rows, 1, fmt, CO)
+            ds = driver.Create(filetif, cols, rows, 1, fmt, CO)
 
             if gt is not None:
-                dataset.SetGeoTransform(gt)
+                ds.SetGeoTransform(gt)
             if prj is not None:
-                dataset.SetProjection(prj)
-            dataset.GetRasterBand(1).SetNoDataValue(save_nodata_as)
-            dataset.GetRasterBand(1).WriteArray(arr)
-            if metadata:
-                dataset.SetMetadata(metadata)
+                ds.SetProjection(prj)
+            if metadata is not None:
+                ds.SetMetadata(metadata)
+                # ds.GetRasterBand(1).SetMetadata(metadata) set metadata to the specified band
+            ds.GetRasterBand(1).SetNoDataValue(save_nodata_as)
+            ds.GetRasterBand(1).WriteArray(arr)
 
             if format != "GTiff":
                 kwargs = {"format": format}
-                gdal.Translate(fileout, dataset, **kwargs)
-                dataset = None
+                gdal.Translate(fileout, ds, **kwargs)
+                ds = None
                 os.unlink(filetif)
                 return fileout
 
-            dataset.FlushCache()
-            dataset = None
+            ds.FlushCache()
+            ds = None
 
             return fileout
     return None
 
 
-def Numpy2AAIGrid(data, geotransform, projection, filename, save_nodata_as=-9999, format=" %.5g"):
+def Numpy2AAIGrid(data, gt, prj, filename, save_nodata_as=-9999, format=" %.5g"):
     """
     Numpy2AAIGrid
     """
     ## projection is not used
-    (x0, pixelXSize, rot, y0, rot, pixelYSize) = geotransform
+    (x0, pixelXSize, rot, y0, rot, pixelYSize) = gt
     (rows, cols) = data.shape
     data = np.where(np.isnan(data), save_nodata_as, data)
     stream = open(filename, "w")
@@ -346,15 +379,54 @@ def Numpy2AAIGrid(data, geotransform, projection, filename, save_nodata_as=-9999
     return filename
 
 
-def Numpy2Gdal(data, geotransform, projection, filename, save_nodata_as=-9999):
+def Numpy2Gdal(data, gt, prj, filename, save_nodata_as=-9999):
     """
     Numpy2Gdal
     """
     ext = os.path.splitext(filename)[1][1:].strip().lower()
     mkdirs(justpath(filename))
     if ext == "tif" or ext == "tiff":
-        return Numpy2GTiff(data, geotransform, projection, filename, save_nodata_as)
+        return Numpy2GTiff(data, gt, prj, filename, save_nodata_as)
     elif ext == "asc":
-        return Numpy2AAIGrid(data, geotransform, projection, filename, save_nodata_as)
+        return Numpy2AAIGrid(data, gt, prj, filename, save_nodata_as)
     else:
         return ""
+
+
+def GetTag(filename, tagname, band=0):
+    """
+    GetTag - get a tag in metadata of the file or of the band if specified
+    """
+    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if ds:
+        if not band:
+            metadata = ds.GetMetadata()
+        elif 0 < band <= ds.RasterCount:
+            metadata = ds.GetRasterBand(band).GetMetadata()
+        else:
+            metadata = {}
+        if tagname in metadata:
+            ds = None
+            return metadata[tagname]
+    ds = None
+    return None
+
+
+def SetTag(filename, tagname, tagvalue="", band=0):
+    """
+    SetTag - set a tag in metadata of the file or of the band if specified
+    """
+    ds = gdal.Open(filename, gdalconst.GA_Update)
+    if ds:
+        if tagname:
+            if not band:
+                metadata = ds.GetMetadata()
+                metadata[tagname] = f"{tagvalue}"
+                ds.SetMetadata(metadata)
+            elif 0 < band <= ds.RasterCount:
+                metadata = ds.GetRasterBand(band).GetMetadata()
+                metadata[tagname] = f"{tagvalue}"
+                ds.GetRasterBand(band).SetMetadata(metadata)
+
+        ds.FlushCache()
+        ds = None
