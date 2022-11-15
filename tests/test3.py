@@ -22,8 +22,7 @@
 #
 # Created:
 # -------------------------------------------------------------------------------
-import os
-from gdal2numpy import *
+from src.gdal2numpy import *
 
 if __name__ == "__main__":
 

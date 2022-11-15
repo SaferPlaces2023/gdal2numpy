@@ -22,7 +22,7 @@
 #
 # Created:
 # -------------------------------------------------------------------------------
-from gdal2numpy import *
+from src.gdal2numpy import *
 
 if __name__ == "__main__":
     filename = "CLSA_LiDAR.tif"
