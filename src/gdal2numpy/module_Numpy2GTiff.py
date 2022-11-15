@@ -86,6 +86,8 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             if format != "GTiff":
                 kwargs = {"format": format}
                 gdal.Translate(fileout, ds, **kwargs)
+                gdal.SetConfigOption('COMPRESS_OVERVIEW', 'LZW')
+                ds.BuildOverviews('NEAREST', [4, 8, 16, 32, 64, 128], gdal.TermProgress_nocb)
                 ds = None
                 os.unlink(filetif)
                 return fileout

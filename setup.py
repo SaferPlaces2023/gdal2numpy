@@ -1,7 +1,6 @@
-
 import setuptools
 
-VERSION = "0.0.51"
+VERSION = "0.0.52"
 
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi"
@@ -20,10 +19,10 @@ setuptools.setup(
     url=GITHUB,
     packages=setuptools.find_packages("src"),
     package_dir={'': 'src'},
-    classifiers=(
+    classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-    ),
+    ],
     install_requires=['gdal', 'numpy']
 )
