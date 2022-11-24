@@ -24,6 +24,7 @@
 # -------------------------------------------------------------------------------
 
 import datetime
+import json
 import os
 import tempfile
 
@@ -90,6 +91,20 @@ def forceext(pathname, newext):
     return normpath(pathname)
 
 
+def israster(pathname):
+    """
+    israster
+    """
+    return pathname and os.path.isfile(pathname) and justext(pathname).lower() in ("tif",)
+
+
+def isshape(pathname):
+    """
+    isshape
+    """
+    return pathname and os.path.isfile(pathname) and justext(pathname).lower() in ("shp",)
+
+
 def mkdirs(pathname):
     """
     mkdirs - create a folder
@@ -108,3 +123,52 @@ def tempfilename(prefix="", suffix=""):
     return a temporary filename
     """
     return tempfile.gettempdir() + "/" + datetime.datetime.strftime(now(), f"{prefix}%Y%m%d%H%M%S%f{suffix}")
+
+
+def strtofile(text, filename, append=False):
+    """
+    strtofile
+    """
+    try:
+        flag = "a" if append else "w"
+        if isinstance(text, (str,)):
+            text = text.encode("utf-8")
+        if isinstance(text, (bytes,)):
+            flag += 'b'
+        mkdirs(justpath(filename))
+        with open(filename, flag) as stream:
+            if text:
+                stream.write(text)
+    except Exception as ex:
+        print(ex)
+        return ""
+    return filename
+
+
+def jsontofile(obj, filename):
+    """
+    jsontofile
+    """
+    return strtofile(json.dumps(obj), filename)
+
+def filetostr(filename):
+    """
+    filetostr
+    """
+    try:
+        with open(filename, "r", encoding="utf-8") as stream:
+            return stream.read()
+    except:
+        return None
+
+def filetojson(filename):
+    """
+    filetojson
+    """
+    try:
+        with open(filename, "r", encoding="utf-8") as stream:
+            return json.load(stream)
+    except:
+        return None
+
+
