@@ -32,6 +32,7 @@ if __name__ == "__main__":
 
 
     print("type:", GetMetaData(filename))
+    print("type:", GetTag(filename, "type"))
 
 
 
