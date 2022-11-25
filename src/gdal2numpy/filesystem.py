@@ -54,6 +54,14 @@ def normpath(pathname):
         return ""
     return os.path.normpath(pathname.replace("\\", "/")).replace("\\", "/")
 
+def juststem(pathname):
+    """
+    juststem
+    """
+    pathname = os.path.basename(pathname)
+    (root, ext) = os.path.splitext(pathname)
+    return root
+
 
 def justpath(pathname, n=1):
     """
@@ -151,6 +159,7 @@ def jsontofile(obj, filename):
     """
     return strtofile(json.dumps(obj), filename)
 
+
 def filetostr(filename):
     """
     filetostr
@@ -160,6 +169,7 @@ def filetostr(filename):
             return stream.read()
     except:
         return None
+
 
 def filetojson(filename):
     """
