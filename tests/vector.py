@@ -27,11 +27,11 @@ from gdal2numpy import *
 if __name__ == "__main__":
     workdir, _ = os.path.split(__file__)
     filename = f"{workdir}/OSM_BUILDINGS_091244.shp"
-    print("type:", GetTag(filename, "type"))
+
     SetTag(filename, "type", "buildings")
 
 
-    print("type:", GetTag(filename, "type"))
+    print("type:", GetMetaData(filename))
 
 
 

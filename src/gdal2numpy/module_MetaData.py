@@ -352,6 +352,7 @@ def SetTag(filename, tagname, tagvalue="", band=0):
                     ds.GetRasterBand(band).SetMetadata(metadata)
             ds.FlushCache()
             ds = None
+
     elif isshape(filename):
         filemeta = forceext(filename, "mta")
         meta = filetojson(filemeta)
