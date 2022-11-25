@@ -25,5 +25,6 @@
 from .module_GDAL2Numpy import *
 from .module_Numpy2GTiff import *
 from .module_MetaData import *
-from .rasterlike import rasterlike
+from .module_ogr import SetGDALEnv
+from .rasterlike import RasterLike
 from .gdalwarp import gdalwarp
