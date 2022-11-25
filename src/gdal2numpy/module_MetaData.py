@@ -277,29 +277,34 @@ def GetMetaData(filename):
     :param filename: the pathname
     :return: returns a dictionary with metadata
     """
-    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
-    if ds:
-        m, n = ds.RasterYSize, ds.RasterXSize
-        band = ds.GetRasterBand(1)
-        gt = ds.GetGeoTransform()
-        wkt = ds.GetProjection()
-        meta = ds.GetMetadata()
-        nodata = band.GetNoDataValue()
-        minx, px, _, maxy, _, py = gt
-        maxx = minx + n * px
-        miny = maxy + m * py
-        miny, maxy = min(miny, maxy), max(miny, maxy)
-        ds = None
-        return {
-            "m": m,
-            "n": n,
-            "px": px,
-            "py": py,
-            "wkt": wkt,
-            "nodata": nodata,
-            "extent": [minx, miny, maxx, maxy],
-            "metadata": meta
-        }
+    if israster(filename):
+        ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        if ds:
+            m, n = ds.RasterYSize, ds.RasterXSize
+            band = ds.GetRasterBand(1)
+            gt = ds.GetGeoTransform()
+            wkt = ds.GetProjection()
+            meta = ds.GetMetadata()
+            nodata = band.GetNoDataValue()
+            minx, px, _, maxy, _, py = gt
+            maxx = minx + n * px
+            miny = maxy + m * py
+            miny, maxy = min(miny, maxy), max(miny, maxy)
+            ds = None
+            return {
+                "m": m,
+                "n": n,
+                "px": px,
+                "py": py,
+                "wkt": wkt,
+                "nodata": nodata,
+                "extent": [minx, miny, maxx, maxy],
+                "metadata": meta
+            }
+    elif isshape(filename):
+        filemeta = forceext(filename, "mta")
+        return filetojson(filemeta)
+
     return {}
 
 
