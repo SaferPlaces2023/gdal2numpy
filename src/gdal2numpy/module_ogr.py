@@ -44,6 +44,7 @@ def ogr_move(src, dst):
             src = forceext(src, ext)
             dst = dst if os.path.isdir(dst) else forceext(dst, ext)
             if os.path.isfile(src):
+                print(f"move {src} into {dst}")
                 shutil.move(src, dst)
 
     return res
