@@ -53,6 +53,7 @@ def reasampling_method(method):
     else:
         return gdalconst.GRIORA_Bilinear
 
+
 def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False, pixelsize=(0, 0), resampleAlg="near", format="GTiff"):
     """
     gdalwarp

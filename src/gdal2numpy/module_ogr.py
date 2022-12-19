@@ -25,11 +25,38 @@
 import glob
 import math
 import os
+import shutil
 import site
 from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
-
 from .filesystem import justext, forceext, justpath
+
+
+def ogr_move(src, dst):
+    """
+    copyshp
+    """
+    res = shutil.move(src, dst)
+    if "shp" == justext(src).lower():
+        for ext in (
+        "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
+        "qlr", "mta"):
+            src = forceext(src, ext)
+            shutil.move(src, forceext(dst, ext))
+    return res
+
+def ogr_copy(src, dst):
+    """
+    copyshp
+    """
+    res = shutil.copy(src, dst)
+    if "shp" == justext(src).lower():
+        for ext in (
+        "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
+        "qlr", "mta"):
+            src = forceext(src, ext)
+            shutil.copy(src, forceext(dst, ext))
+    return res
 
 
 def ogr_remove(filename):
