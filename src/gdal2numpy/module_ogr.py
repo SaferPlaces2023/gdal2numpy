@@ -44,7 +44,8 @@ def ogr_move(src, dst):
             src = forceext(src, ext)
             dst = dst if os.path.isdir(dst) else forceext(dst, ext)
             if os.path.isfile(src):
-                print(f"move {src} into {dst}")
+                if os.path.isfile(forceext(dst, ext)):
+                    os.unlink(forceext(dst, ext))
                 shutil.move(src, dst)
 
     return res
@@ -60,7 +61,7 @@ def ogr_copy(src, dst):
         "qlr", "mta", "cpg"):
             src = forceext(src, ext)
             if os.path.isfile(src):
-                shutil.copy(src, forceext(dst, ext))
+                shutil.copy2(src, forceext(dst, ext))
     return res
 
 
