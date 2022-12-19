@@ -42,7 +42,8 @@ def ogr_move(src, dst):
         "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
         "qlr", "mta"):
             src = forceext(src, ext)
-            shutil.move(src, forceext(dst, ext))
+            if os.path.isfile(src):
+                shutil.move(src, forceext(dst, ext))
     return res
 
 def ogr_copy(src, dst):
@@ -55,7 +56,8 @@ def ogr_copy(src, dst):
         "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
         "qlr", "mta"):
             src = forceext(src, ext)
-            shutil.copy(src, forceext(dst, ext))
+            if os.path.isfile(src):
+                shutil.copy(src, forceext(dst, ext))
     return res
 
 
