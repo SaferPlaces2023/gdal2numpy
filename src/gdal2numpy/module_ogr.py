@@ -40,7 +40,7 @@ def ogr_move(src, dst):
     if "shp" == justext(src).lower():
         for ext in (
         "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
-        "qlr", "mta"):
+        "qlr", "mta", "cpg"):
             src = forceext(src, ext)
             dst = dst if os.path.isdir(dst) else forceext(dst, ext)
             if os.path.isfile(src):
@@ -57,7 +57,7 @@ def ogr_copy(src, dst):
     if "shp" == justext(src).lower():
         for ext in (
         "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
-        "qlr", "mta"):
+        "qlr", "mta", "cpg"):
             src = forceext(src, ext)
             if os.path.isfile(src):
                 shutil.copy(src, forceext(dst, ext))
