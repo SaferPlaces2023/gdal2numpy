@@ -175,3 +175,33 @@ def SetTag(filename, tagname, tagvalue="", band=0):
         if "metadata" in meta:
             meta["metadata"][tagname] = tagvalue
             jsontofile(meta, filemeta)
+
+def SetTags(filename, meta, band=0):
+    """
+    SetTags - set tags metadata of the file or of the band if specified
+    """
+    if israster(filename):
+        ds = gdal.Open(filename, gdalconst.GA_Update)
+        if ds:
+            for tagname in meta:
+                tagvalue = meta[tagname]
+                if not band:
+                    metadata = ds.GetMetadata()
+                    metadata[tagname] = f"{tagvalue}"
+                    ds.SetMetadata(metadata)
+                elif 0 < band <= ds.RasterCount:
+                    metadata = ds.GetRasterBand(band).GetMetadata()
+                    metadata[tagname] = f"{tagvalue}"
+                    ds.GetRasterBand(band).SetMetadata(metadata)
+            ds.FlushCache()
+            ds = None
+
+    elif isshape(filename):
+        filemeta = forceext(filename, "mta")
+        meta = filetojson(filemeta)
+        meta = meta if meta else {"metadata": {}}
+        if "metadata" in meta:
+            for tagname in meta:
+                tagvalue = meta[tagname]
+                meta["metadata"][tagname] = tagvalue
+            jsontofile(meta, filemeta)
