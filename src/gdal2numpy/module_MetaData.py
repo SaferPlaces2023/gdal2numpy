@@ -153,12 +153,8 @@ def SetTag(filename, tagname, tagvalue="", band=0):
     """
     SetTag - set a tag in metadata of the file or of the band if specified
     """
-    print("0) SetTag...", filename, isshape(filename), os.path.isfile(filename))
-    print("============================")
     if israster(filename):
-
         ds = gdal.Open(filename, gdalconst.GA_Update)
-        print("1) SetTag...", ds)
         if ds:
             if tagname:
                 if not band:
@@ -173,15 +169,13 @@ def SetTag(filename, tagname, tagvalue="", band=0):
             ds = None
 
     elif isshape(filename):
-        print("2) SetTag...")
         filemeta = forceext(filename, "mta")
         meta = filetojson(filemeta)
         meta = meta if meta else {"metadata": {}}
-        print("2a) SetTag...", meta)
         if "metadata" in meta:
             meta["metadata"][tagname] = tagvalue
             jsontofile(meta, filemeta)
-            print("2b) SetTag...", meta, filemeta)
+
 
 def SetTags(filename, meta, band=0):
     """
