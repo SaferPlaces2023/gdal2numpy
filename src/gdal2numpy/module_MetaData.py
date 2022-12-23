@@ -153,7 +153,8 @@ def SetTag(filename, tagname, tagvalue="", band=0):
     """
     SetTag - set a tag in metadata of the file or of the band if specified
     """
-    print("0) SetTag...")
+    print("0) SetTag...". filename, isshape(filename), os.path.isfile(filename))
+    print("============================")
     if israster(filename):
 
         ds = gdal.Open(filename, gdalconst.GA_Update)
