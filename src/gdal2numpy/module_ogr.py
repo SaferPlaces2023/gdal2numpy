@@ -60,8 +60,12 @@ def ogr_copy(src, dst):
         "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
         "qlr", "mta", "cpg"):
             src = forceext(src, ext)
+            filedst = forceext(dst, ext)
+            filedst = dst if os.path.isdir(dst) else filedst
             if os.path.isfile(src):
-                shutil.copy2(src, forceext(dst, ext))
+                if os.path.isfile(filedst):
+                    os.unlink(filedst)
+                shutil.copy2(src, filedst)
     return res
 
 
