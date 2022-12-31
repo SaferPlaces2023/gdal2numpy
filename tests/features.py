@@ -33,7 +33,8 @@ if __name__ == "__main__":
 
 
     print(GetFieldNames(filename, ["Integer", "Integer64"]))
+    # print(GetValues(filename, "height"))
 
-    print(GetValues(filename, "height"))
+    print(GetRange(filename, fieldname="height"))
 
 

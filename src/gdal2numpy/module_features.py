@@ -22,6 +22,7 @@
 #
 # Created:     31/12/2022
 # -------------------------------------------------------------------------------
+import numpy as np
 from osgeo import ogr
 from .filesystem import isshape
 
@@ -80,6 +81,18 @@ def GetValues(fileshp, fieldname):
         return [feature.GetField(fieldname) for feature in GetFeatures(fileshp)]
     return []
 
+
+def GetRange(fileshp, fieldname):
+    """
+    GetRange - returns the min-max values
+    """
+    minimum, maximum = np.Inf, -np.Inf
+    for feature in GetFeatures(fileshp):
+        value = feature.GetField(fieldname)
+        if value is not None:
+            minimum = min(value, minimum)
+            maximum = max(value, maximum)
+    return minimum, maximum
 
 
 
