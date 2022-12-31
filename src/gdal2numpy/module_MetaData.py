@@ -28,6 +28,7 @@ from osgeo import gdal, gdalconst
 from .filesystem import forceext, israster, isshape, filetojson, jsontofile
 from .module_GDAL2Numpy import GDAL2Numpy
 from .module_Numpy2GTiff import Numpy2GTiff
+from .module_features import GetRange
 
 
 def GetRasterShape(filename):
@@ -78,13 +79,17 @@ def GDALFixNoData(filename, format="GTiff", nodata=-9999):
     return False
 
 
-def GetMinMax(filename):
+def GetMinMax(filename, fieldname=None):
     """
     GetMinMax
     """
-    data, _, _ = GDAL2Numpy(filename)
-    return np.nanmin(data), np.nanmax(data)
+    if israster(filename):
+        data, _, _ = GDAL2Numpy(filename)
+        return np.nanmin(data), np.nanmax(data)
+    elif isshape(filename):
+        return GetRange(filename, fieldname)
 
+    return np.Inf, -np.Inf
 
 def GetMetaData(filename):
     """

@@ -86,13 +86,13 @@ def GetRange(fileshp, fieldname):
     """
     GetRange - returns the min-max values
     """
-    minimum, maximum = np.Inf, -np.Inf
+    minValue, maxValue = np.Inf, -np.Inf
     for feature in GetFeatures(fileshp):
         value = feature.GetField(fieldname)
         if value is not None:
-            minimum = min(value, minimum)
-            maximum = max(value, maximum)
-    return minimum, maximum
+            minValue = min(value, minValue)
+            maxValue = max(value, maxValue)
+    return minValue, maxValue
 
 
 
