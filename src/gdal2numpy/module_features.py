@@ -87,11 +87,12 @@ def GetRange(fileshp, fieldname):
     GetRange - returns the min-max values
     """
     minValue, maxValue = np.Inf, -np.Inf
-    for feature in GetFeatures(fileshp):
-        value = feature.GetField(fieldname)
-        if value is not None:
-            minValue = min(value, minValue)
-            maxValue = max(value, maxValue)
+    if fieldname in GetFieldNames(fileshp, ["Integer", "Integer64", "Real"]):
+        for feature in GetFeatures(fileshp):
+            value = feature.GetField(fieldname)
+            if value is not None:
+                minValue = min(value, minValue)
+                maxValue = max(value, maxValue)
     return minValue, maxValue
 
 
