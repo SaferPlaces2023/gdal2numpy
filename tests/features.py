@@ -1,6 +1,6 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Licence:
-# Copyright (c) 2012-2020 Valerio for Gecosistema S.r.l.
+# Copyright (c) 2012-2022 Valerio for Gecosistema S.r.l.
 #
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
@@ -15,18 +15,25 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 #
-# Name:        module.py_
+# Name:        features.py
 # Purpose:
 #
 # Author:      Luzzi Valerio
 #
 # Created:
-#-------------------------------------------------------------------------------
-from .module_GDAL2Numpy import *
-from .module_Numpy2GTiff import *
-from .module_MetaData import *
-from .module_ogr import *
-from .module_features import *
-from .rasterlike import RasterLike
-from .rasterizelike import RasterizeLike
-from .gdalwarp import gdalwarp
+# -------------------------------------------------------------------------------
+from gdal2numpy import *
+from osgeo import ogr
+
+if __name__ == "__main__":
+    workdir, _ = os.path.split(__file__)
+    filename = f"{workdir}/OSM_BUILDINGS_091244.shp"
+
+    print(GetFieldNames(filename))
+
+
+    print(GetFieldNames(filename, ["Integer", "Integer64"]))
+    ds = None
+
+
+

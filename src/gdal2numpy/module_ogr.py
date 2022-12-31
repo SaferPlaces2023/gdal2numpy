@@ -29,7 +29,7 @@ import shutil
 import site
 from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
-from .filesystem import justext, forceext, justpath
+from .filesystem import justext, forceext, justpath, isshape, israster
 
 
 def ogr_move(src, dst):
@@ -160,13 +160,13 @@ def GetSpatialRef(filename):
         srs = osr.SpatialReference()
         srs.ImportFromWkt(wkt)
 
-    elif isinstance(filename, str) and os.path.isfile(filename) and filename.lower().endswith(".shp"):
+    elif isinstance(filename, str) and isshape(filename):
         ds = ogr.OpenShared(filename)
         if ds:
             srs = ds.GetLayer().GetSpatialRef()
         ds = None
 
-    elif isinstance(filename, str) and os.path.isfile(filename) and filename.lower().endswith(".tif"):
+    elif isinstance(filename, str) and israster(filename):
         ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
         if ds:
             wkt = ds.GetProjection()
