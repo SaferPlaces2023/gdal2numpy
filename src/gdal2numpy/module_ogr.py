@@ -54,7 +54,7 @@ def ogr_copy(src, dst):
     """
     copyshp
     """
-    res = shutil.copy(src, dst)
+    res = shutil.copy2(src, dst)
     if "shp" == justext(src).lower():
         for ext in (
         "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
@@ -77,6 +77,10 @@ def ogr_remove(filename):
         if justext(filename).lower() in ("shp",):
             driver = ogr.GetDriverByName("ESRI Shapefile")
             driver.DeleteDataSource(filename)
+            for ext in ("qlr", "mta", "cpg"):
+                fileaux = forceext(filename, ext)
+                if os.path.isfile(fileaux):
+                    os.unlink(fileaux)
         else:
             os.unlink(filename)
     return not os.path.isfile(filename)
