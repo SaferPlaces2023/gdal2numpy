@@ -54,6 +54,7 @@ def normpath(pathname):
         return ""
     return os.path.normpath(pathname.replace("\\", "/")).replace("\\", "/")
 
+
 def juststem(pathname):
     """
     juststem

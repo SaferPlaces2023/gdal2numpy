@@ -29,7 +29,7 @@ import shutil
 import site
 from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
-from .filesystem import justext, forceext, justpath, isshape, israster
+from .filesystem import justext, juststem, forceext, justpath, isshape, israster
 
 
 def ogr_move(src, dst):
@@ -39,8 +39,8 @@ def ogr_move(src, dst):
     res = shutil.move(src, dst)
     if "shp" == justext(src).lower():
         for ext in (
-        "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
-        "qlr", "mta", "cpg"):
+                "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
+                "qlr", "mta", "cpg"):
             src = forceext(src, ext)
             dst = dst if os.path.isdir(dst) else forceext(dst, ext)
             if os.path.isfile(src):
@@ -50,6 +50,7 @@ def ogr_move(src, dst):
 
     return res
 
+
 def ogr_copy(src, dst):
     """
     copyshp
@@ -57,8 +58,8 @@ def ogr_copy(src, dst):
     res = shutil.copy2(src, dst)
     if "shp" == justext(src).lower():
         for ext in (
-        "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
-        "qlr", "mta", "cpg"):
+                "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
+                "qlr", "mta", "cpg"):
             src = forceext(src, ext)
             filedst = forceext(dst, ext)
             filedst = dst if os.path.isdir(dst) else filedst
@@ -273,7 +274,7 @@ def SetGDALEnv():
     """
     SetGDALEnv
     """
-    os.environ["__PROJ_LIB__"]  = os.environ["PROJ_LIB"] if "PROJ_LIB" in os.environ else ""
+    os.environ["__PROJ_LIB__"] = os.environ["PROJ_LIB"] if "PROJ_LIB" in os.environ else ""
     os.environ["__GDAL_DATA__"] = os.environ["GDAL_DATA"] if "GDAL_DATA" in os.environ else ""
     os.environ["PROJ_LIB"] = find_PROJ_LIB()
     os.environ["GDAL_DATA"] = find_GDAL_DATA()
@@ -349,3 +350,20 @@ def CreateRectangleShape(minx, miny, maxx, maxy, srs, fileshp="tempxy...."):
     layer.CreateFeature(feature)
     feature, layer, ds = None, None, None
     return fileshp
+
+
+def CreateShapeFileLayer(fileshp, srs, geom_type=ogr.wkbPoint, cpg="UTF-8"):
+    """
+    CreateShapeFileLayer - wrap CreateDataSource just for shapefiles
+    """
+    fileshp = forceext(fileshp, "shp")
+    ogr_remove(fileshp)
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+    ds = driver.CreateDataSource(fileshp)
+    filecpg = forceext(fileshp, "cpg")
+    with open(filecpg, "w") as stream:
+        stream.write(cpg)
+    srs = GetSpatialRef(srs)
+    layer = ds.CreateLayer(juststem(fileshp), srs, geom_type=geom_type)
+    ds = None
+    return layer

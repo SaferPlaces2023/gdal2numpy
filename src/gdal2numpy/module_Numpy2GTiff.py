@@ -28,7 +28,7 @@ from osgeo import gdal
 from .filesystem import justpath, mkdirs, tempfilename
 
 
-def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, metadata=None):
+def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, metadata=None, verbose=False):
     """
     Numpy2GTiff - Write a numpy array in  a GTiff file
     :param arr: the numpy array
@@ -59,6 +59,17 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
 
             CO = []
             filetif = fileout
+
+            # patch 18/01/2023
+            if f"{format}".upper() == "COG":
+                #check we have cog driver
+                driver = gdal.GetDriverByName("COG")
+                # fallback on GTiff
+                format = format if driver else "GTiff"
+                if verbose and not driver:
+                    print(f"Falling back on GTiff because COG driver is not available.")
+            # ---
+
             if format == "GTiff":
                 CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"]
             else:
