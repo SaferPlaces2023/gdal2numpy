@@ -121,7 +121,7 @@ def mkdirs(pathname):
     try:
         if os.path.isfile(pathname):
             pathname = justpath(pathname)
-        os.makedirs(pathname)
+        os.makedirs(pathname, exist_ok=True)
     except:
         pass
     return os.path.isdir(pathname)

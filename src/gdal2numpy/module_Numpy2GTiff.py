@@ -25,7 +25,40 @@
 import os
 import numpy as np
 from osgeo import gdal
-from .filesystem import justpath, mkdirs, tempfilename
+from .filesystem import justpath, mkdirs
+
+
+def GTiff2Cog(filetif, fileout, verbose=False):
+    """
+    GTiff2Cog - Convert a GTiff to COG
+    """
+    ds = gdal.Open(filetif)
+    if not ds:
+        return None
+
+    driver = gdal.GetDriverByName("COG")
+    if driver:
+        COMPRESSION = "DEFLATE"
+        CO = [f"COMPRESS={COMPRESSION}", ]
+        if verbose:
+            print(f"Creating a COG..", CO)
+        ds.BuildOverviews('NEAREST', [4, 8, 16, 32, 64, 128])
+        dst_ds = driver.CreateCopy(fileout, ds, False, CO)
+        dst_ds = None
+    else:
+        BLOCKSIZE = 512
+        COMPRESSION = "DEFLATE"
+        CO = ["BIGTIFF=YES",
+              "TILED=YES",
+              f"BLOCKXSIZE={BLOCKSIZE}",
+              f"BLOCKXSIZE={BLOCKSIZE}",
+              f"COMPRESS={COMPRESSION}", "-ro"]
+        driver = gdal.GetDriverByName("GTiff")  # GTiff or MEM
+        dst_ds = driver.CreateCopy(fileout, ds, False, CO)
+        dst_ds = None
+    ds = None
+
+    return fileout if os.path.isfile(fileout) else None
 
 
 def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, metadata=None, verbose=False):
@@ -55,34 +88,29 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
         rows, cols = arr.shape
         if rows > 0 and cols > 0:
             dtype = str(arr.dtype).lower()
-            fmt = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
+            dtype = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
 
-            CO = []
-            filetif = fileout
+            BLOCKSIZE = 512
+            COMPRESSION = "LZW"
+            CO = ["BIGTIFF=YES",
+                  "TILED=YES",
+                  f"BLOCKXSIZE={BLOCKSIZE}",
+                  f"BLOCKXSIZE={BLOCKSIZE}",
+                  f"COMPRESS={COMPRESSION}"]
 
-            # patch 18/01/2023
-            if f"{format}".upper() == "COG":
-                #check we have cog driver
-                driver = gdal.GetDriverByName("COG")
-                # fallback on GTiff
-                format = format if driver else "GTiff"
-                if verbose and not driver:
-                    print(f"Falling back on GTiff because COG driver is not available.")
-            # ---
+            driver = gdal.GetDriverByName("COG")
+            cog = driver and f"{format}".upper() == "COG"
 
-            if format == "GTiff":
-                CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"]
-            else:
-                filetif = tempfilename(suffix=".tif")
+            drivername = "GTiff" if not cog else "MEM"
+            CO = CO if not cog else []
 
             # Create the path to fileout if not exists
             pathname, _ = os.path.split(fileout)
-            if pathname:
-                os.makedirs(pathname, exist_ok=True)
+            mkdirs(pathname)
 
             # Create the output dataset
-            driver = gdal.GetDriverByName("GTiff")
-            ds = driver.Create(filetif, cols, rows, 1, fmt, CO)
+            driver = gdal.GetDriverByName(drivername)  # GTiff or MEM
+            ds = driver.Create(fileout, cols, rows, 1, dtype, CO)  # fileout is ignore if MEM
 
             if gt is not None:
                 ds.SetGeoTransform(gt)
@@ -94,14 +122,15 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             ds.GetRasterBand(1).SetNoDataValue(save_nodata_as)
             ds.GetRasterBand(1).WriteArray(arr)
 
-            if format != "GTiff":
-                kwargs = {"format": format}
-                gdal.Translate(fileout, ds, **kwargs)
-                gdal.SetConfigOption('COMPRESS_OVERVIEW', 'LZW')
-                ds.BuildOverviews('NEAREST', [4, 8, 16, 32, 64, 128], gdal.TermProgress_nocb)
-                ds = None
-                os.unlink(filetif)
-                return fileout
+            if cog:
+                COMPRESSION = "DEFLATE"
+                CO = [f"COMPRESS={COMPRESSION}", ]
+                if verbose:
+                    print(f"Creating a COG..", CO)
+                driver = gdal.GetDriverByName("COG")
+                ds.BuildOverviews('NEAREST', [4, 8, 16, 32, 64, 128])
+                dst_ds = driver.CreateCopy(fileout, ds, False, CO)
+                ds = dst_ds
 
             ds.FlushCache()
             ds = None

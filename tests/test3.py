@@ -23,21 +23,21 @@
 # Created:
 # -------------------------------------------------------------------------------
 import os
-from src.gdal2numpy import *
+from gdal2numpy import *
+
 
 if __name__ == "__main__":
 
     workdir, _ = os.path.split(__file__)
-    filename = f"{workdir}/CLSA_LiDAR.tif"
-    fileout = f"{workdir}/dem.tif"
-    #data, gt, prj = GDAL2Numpy(filename)
+    filename = f"{workdir}/MINAMBIENTE_ITALY.tif"
+    fileout = f"{workdir}/MINAMBIENTE_ITALY.cog.tif"
+    data, gt, prj = GDAL2Numpy(filename)
 
-    #Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=-9999, metadata={"UM": "meters", "type": "DTM"})
+    #Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=-9999, metadata={"UM": "meters", "type": "DTM"}, format="COG", verbose=True)
 
-    SetTag(filename, "UM", "meters", 1)
-    SetTag(filename, "type", "DTM")
+    GTiff2Cog(filename, fileout)
 
-    print(GetMetaData(filename)["metadata"])
-
-
-    print(GetTag(filename, "UM", 1))
+    #SetTag(filename, "UM", "meters", 1)
+    #SetTag(filename, "type", "DTM")
+    #print(GetMetaData(filename)["metadata"])
+    #print(GetTag(filename, "UM", 1))
