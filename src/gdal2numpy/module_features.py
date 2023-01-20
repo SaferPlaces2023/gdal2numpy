@@ -224,7 +224,7 @@ def AddField(fileshp, fieldname, dtype=np.float32, defaultValue=None, verbose=Fa
             res = True
 
         # setting the default value
-        if res and defaultValue is not None:
+        if fielddef and defaultValue is not None:
             for feature in layer:
                 feature.SetField(fieldname, defaultValue)
                 layer.SetFeature(feature)

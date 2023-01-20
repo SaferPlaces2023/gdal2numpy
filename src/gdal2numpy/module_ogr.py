@@ -367,3 +367,12 @@ def CreateShapeFileLayer(fileshp, srs, geom_type=ogr.wkbPoint, cpg="UTF-8"):
     layer = ds.CreateLayer(juststem(fileshp), srs, geom_type=geom_type)
     ds = None
     return layer
+
+
+def CopyShape(fileshp, fileout):
+    """
+    CopyShape
+    """
+    ds = gdal.VectorTranslate(fileout, fileshp, format='ESRI Shapefile',
+                              accessMode='overwrite')
+    ds = None  # force flush
