@@ -33,7 +33,7 @@ def OpenShape(fileshp, exclusive=False, verbose=False):
     """
     if not fileshp:
         ds = None
-    elif isinstance(fileshp, str) and os.path.isfile(fileshp):
+    elif isinstance(fileshp, str) and isshape(fileshp):
         if verbose:
             print(f"Opening {fileshp}...")
         ds = ogr.Open(fileshp, exclusive)
