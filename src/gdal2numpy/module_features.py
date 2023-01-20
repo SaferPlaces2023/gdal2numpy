@@ -224,7 +224,7 @@ def AddField(fileshp, fieldname, dtype=np.float32, defaultValue=None, verbose=Fa
             if defaultValue is not None:
                 for feature in layer:
                     feature.SetField(fieldname, defaultValue)
-                    layer.setFeature(feature)
+                    layer.SetFeature(feature)
             res = True
 
     ds = None if closeOnExit else ds
