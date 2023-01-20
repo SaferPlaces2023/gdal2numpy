@@ -152,11 +152,7 @@ def FieldExists(fileshp, fieldname, verbose=False):
     closeOnExit = type(ds) != type(fileshp)
     if ds:
         layer = ds.GetLayer()
-        for j in range(layer.GetLayerDefn().GetFieldCount()):
-            fielddef = layer.GetLayerDefn().GetFieldDefn(j)
-            if fielddef.GetName().upper() == f"{fieldname}".upper():
-                idx = j
-                break
+        idx = layer.GetLayerDefn().GetFieldIndex(fieldname)
         ds = None if closeOnExit else ds
     return idx
 
@@ -166,7 +162,7 @@ def DeleteField(fileshp, fieldname, verbose=True):
     DeleteField
     """
     res = False
-    ds = OpenShape(fileshp, 1, verbose=verbose)
+    ds = OpenShape(fileshp, 1)
     closeOnExit = type(ds) != type(fileshp)
     j = FieldExists(ds, fieldname)
     if j >= 0:
