@@ -174,7 +174,7 @@ def DeleteField(fileshp, fieldname, verbose=True):
     return res
 
 
-def AddField(fileshp, fieldname, dtype=np.float32, verbose=False):
+def AddField(fileshp, fieldname, dtype=np.float32, defaultValue=None, verbose=False):
     """
     AddField
     """
@@ -221,6 +221,10 @@ def AddField(fileshp, fieldname, dtype=np.float32, verbose=False):
             if verbose:
                 print(f"Creating a new field {fieldname}({width}:{precision})")
             layer.CreateField(newfield)
+            if defaultValue is not None:
+                for feature in layer:
+                    feature.SetField(fieldname, defaultValue)
+                    layer.setFeature(feature)
             res = True
 
     ds = None if closeOnExit else ds

@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.86"
+VERSION = "0.0.87"
 
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi"
