@@ -29,25 +29,45 @@ from .filesystem import isshape
 
 def OpenShape(fileshp, exclusive=False, verbose=False):
     """
-    OpenShape
+    OpenDataset
     """
     if not fileshp:
         ds = None
-    elif isinstance(fileshp, str) and isshape(fileshp):
+    elif isinstance(fileshp, str) and os.path.isfile(fileshp):
         if verbose:
             print(f"Opening {fileshp}...")
         ds = ogr.Open(fileshp, exclusive)
-    elif isinstance(fileshp, ogr.DataSource) and fileshp.GetUpdate() >= exclusive:
+    elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
         if verbose:
             print(f"Dataset already open...")
         ds = fileshp
-    elif isinstance(fileshp, ogr.DataSource) and fileshp.GetUpdate() < exclusive:
+    elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) < exclusive:
         if verbose:
             print(f"Change the open mode: Open({exclusive})")
         ds = ogr.Open(fileshp.GetName(), exclusive)
     else:
         ds = None
     return ds
+
+
+def GetAccess(ds):
+    """
+    GetAccess - return the open mode exclusive or shared
+    trying to create/delete a field
+    """
+    res = -1
+    if ds:
+        ogr.UseExceptions()
+        try:
+            layer = ds.GetLayer()
+            layer.CreateField(ogr.FieldDefn("__test__", ogr.OFTInteger))
+            j = layer.GetLayerDefn().GetFieldIndex("__test__")
+            layer.DeleteField(j)
+            res = 1
+        except Exception as ex:
+            res = 0
+        ogr.DontUseExceptions()
+    return res
 
 
 def GetFeatures(fileshp):
