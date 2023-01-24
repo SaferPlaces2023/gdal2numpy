@@ -152,7 +152,15 @@ def FieldExists(fileshp, fieldname, verbose=False):
     closeOnExit = type(ds) != type(fileshp)
     if ds:
         layer = ds.GetLayer()
+        # idx = -1
         idx = layer.GetLayerDefn().GetFieldIndex(fieldname)
+        # layerdefn = layer.GetLayerDefn()
+        # n = layerdefn.GetFieldCount()
+        # for j in range(n):
+        #    fielddefn = layerdefn.GetFieldDefn(j)
+        #    if fielddefn.GetName().upper() == f"{fieldname}".upper():
+        #        idx = j
+        # print(f"searching field {fieldname}={idx}")
         ds = None if closeOnExit else ds
     return idx
 
@@ -183,6 +191,11 @@ def AddField(fileshp, fieldname, dtype=np.float32, defaultValue=None, verbose=Fa
         np.int16: {"dtype": ogr.OFTInteger, "width": 5, "precision": 0},
         np.int32: {"dtype": ogr.OFTInteger, "width": 10, "precision": 0},
         np.int64: {"dtype": ogr.OFTInteger64, "width": 20, "precision": 0},
+        np.uint8: {"dtype": ogr.OFTInteger, "width": 3, "precision": 0},
+        np.uint16: {"dtype": ogr.OFTInteger, "width": 5, "precision": 0},
+        np.uint32: {"dtype": ogr.OFTInteger, "width": 10, "precision": 0},
+        np.uint64: {"dtype": ogr.OFTInteger64, "width": 20, "precision": 0},
+        np.float16: {"dtype": ogr.OFTReal, "width": 10, "precision": 3},
         np.float32: {"dtype": ogr.OFTReal, "width": 19, "precision": 4},
         np.float64: {"dtype": ogr.OFTReal, "width": 24, "precision": 6},
         np.bool_: {"dtype": ogr.OFTInteger, "width": 1, "precision": 0},
@@ -224,7 +237,7 @@ def AddField(fileshp, fieldname, dtype=np.float32, defaultValue=None, verbose=Fa
             res = True
 
         # setting the default value
-        if fielddef and defaultValue is not None:
+        if res and defaultValue is not None:
             for feature in layer:
                 feature.SetField(fieldname, defaultValue)
                 layer.SetFeature(feature)
@@ -232,3 +245,5 @@ def AddField(fileshp, fieldname, dtype=np.float32, defaultValue=None, verbose=Fa
 
     ds = None if closeOnExit else ds
     return res
+
+
