@@ -182,7 +182,7 @@ def DeleteField(fileshp, fieldname, verbose=True):
     return res
 
 
-def AddField(fileshp, fieldname, dtype=np.float32, defaultValue=None, verbose=False):
+def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defaultValue=None, verbose=False):
     """
     AddField
     """
@@ -204,19 +204,19 @@ def AddField(fileshp, fieldname, dtype=np.float32, defaultValue=None, verbose=Fa
         str: {"dtype": ogr.OFTString, "width": 254, "precision": 0},
     }
     res = False
-    ds = OpenShape(fileshp, 1, verbose=verbose)
+    ds = OpenShape(fileshp, 1, verbose=False)
     closeOnExit = type(fileshp) != type(ds)
     if ds:
         layer = ds.GetLayer()
         field = NUMPY2OGR[dtype] if dtype in NUMPY2OGR else {"dtype": ogr.OFTString, "width": 254, "precision": 0}
-        width = field["width"]
-        precision = field["precision"]
+        width = width if width>0 else field["width"]
+        precision = precision if precision>=0 else field["precision"]
         newfield = ogr.FieldDefn(fieldname, field["dtype"])
         newfield.SetWidth(width)
         newfield.SetPrecision(precision)
 
         # Check the field not exists
-        j = FieldExists(ds, fieldname, verbose=verbose)
+        j = FieldExists(ds, fieldname, verbose=False)
         fielddef = layer.GetLayerDefn().GetFieldDefn(j) if j >= 0 else None
 
         # Nessun cambiamento
