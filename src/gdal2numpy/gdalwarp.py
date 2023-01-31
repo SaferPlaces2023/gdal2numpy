@@ -82,6 +82,10 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         kwargs["cutlineLayer"] = juststem(cutline)
 
     SetGDALEnv()
+    # inplace gdalwarp
+    if fileout == filelist:
+        fileout = gdal.Open(filelist, gdalconst.GA_Update)
+    # ----
     gdal.Warp(fileout, filelist, **kwargs)
     RestoreGDALEnv()
     # ----------------------------------------------------------------------
