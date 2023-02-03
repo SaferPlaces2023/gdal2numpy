@@ -209,13 +209,13 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
     if ds:
         layer = ds.GetLayer()
         field = NUMPY2OGR[dtype] if dtype in NUMPY2OGR else {"dtype": ogr.OFTString, "width": 254, "precision": 0}
-        width = width if width>0 else field["width"]
-        precision = precision if precision>=0 else field["precision"]
+        width = width if width > 0 else field["width"]
+        precision = precision if precision >= 0 else field["precision"]
         newfield = ogr.FieldDefn(fieldname, field["dtype"])
         newfield.SetWidth(width)
         newfield.SetPrecision(precision)
         if defaultValue is not None:
-            newfield.SetDefault(defaultValue)
+            newfield.SetDefault(f"{defaultValue}")
 
         # Check the field not exists
         j = FieldExists(ds, fieldname, verbose=False)
