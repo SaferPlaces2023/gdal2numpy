@@ -214,6 +214,8 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
         newfield = ogr.FieldDefn(fieldname, field["dtype"])
         newfield.SetWidth(width)
         newfield.SetPrecision(precision)
+        if defaultValue is not None:
+            newfield.SetDefault(defaultValue)
 
         # Check the field not exists
         j = FieldExists(ds, fieldname, verbose=False)
@@ -237,10 +239,10 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
             res = True
 
         # setting the default value
-        if res and defaultValue is not None:
-            for feature in layer:
-                feature.SetField(fieldname, defaultValue)
-                layer.SetFeature(feature)
+        # if res and defaultValue is not None:
+        #    for feature in layer:
+        #        feature.SetField(fieldname, defaultValue)
+        #        layer.SetFeature(feature)
         # ----
 
     ds = None if closeOnExit else ds

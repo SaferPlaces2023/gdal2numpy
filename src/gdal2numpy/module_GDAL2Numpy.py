@@ -27,7 +27,6 @@ import numpy as np
 from osgeo import gdal, gdalconst
 from .filesystem import now, total_seconds_from, justfname
 
-
 def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[], verbose=False):
     """
     GDAL2Numpy
@@ -46,6 +45,7 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
         'CInt16': np.int16,
         'CInt32': np.int32
     }
+
     filename = "/vsicurl/" + filename if filename and filename.lower().startswith("http") else filename
     ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
     if ds:
