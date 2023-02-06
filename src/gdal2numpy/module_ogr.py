@@ -29,8 +29,15 @@ import shutil
 import site
 from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
-from .filesystem import justext, juststem, forceext, justpath, isshape, israster
+from .filesystem import justext, juststem, forceext, justpath, isshape, israster, strtofile
 
+def create_cpg(fileshp):
+    """
+    create_file_cpg - add a file.cpg
+    :param fileshp:
+    :return:
+    """
+    strtofile("UFT-8", forceext(fileshp, "cpg"))
 
 def ogr_move(src, dst):
     """
