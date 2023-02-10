@@ -204,10 +204,12 @@ def SetTags(filename, meta, band=0):
 
     elif isshape(filename):
         filemeta = forceext(filename, "mta")
-        meta = filetojson(filemeta)
-        meta = meta if meta else {"metadata": {}}
+        mta = filetojson(filemeta)
+        if not mta:
+            mta = {"metadata": {}}
         if "metadata" in meta:
-            for tagname in meta:
-                tagvalue = meta[tagname]
-                meta["metadata"][tagname] = tagvalue
-            jsontofile(meta, filemeta)
+            # update mta from meta
+            for tagname in meta["metadata"]:
+                tagvalue = meta["metadata"][tagname]
+                mta["metadata"][tagname] = tagvalue
+            jsontofile(mta, filemeta)
