@@ -202,6 +202,23 @@ def SameSpatialRef(filename1, filename2):
     return None
 
 
+def GetGeometryType(filename):
+    """
+    GetGeometryType
+    :param filename:
+    :return:
+    """
+    ds = ogr.OpenShared(filename)
+    if ds:
+        lyr = ds.GetLayer()
+        if lyr:
+            geomtype = lyr.GetGeomType()
+            name = ogr.GeometryTypeToName(geomtype)
+            ds = None
+            return name
+        ds = None
+    return None
+
 def Rectangle(minx, miny, maxx, maxy):
     """
     Rectangle - create ogr polygon from bbox
