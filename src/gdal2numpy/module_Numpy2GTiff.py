@@ -28,11 +28,26 @@ from osgeo import gdal
 from .filesystem import justpath, mkdirs
 
 
+def CalculateOverviews(ds):
+    """
+    CalculateOverviews - Calculate overviews
+    :param ds:
+    :return:
+    """
+    m, n = ds.RasterYSize, ds.RasterXSize
+    s = 2
+    overviews = []
+    while m // s > 1 and n // s > 1:
+        overviews.append(s)
+        s *= 2
+    return overviews
+
+
 def GTiff2Cog(filetif, fileout, verbose=False):
     """
     GTiff2Cog - Convert a GTiff to COG
     """
-    ds = gdal.Open(filetif)
+    ds = gdal.Open(filetif, 1) # open the file in write mode to build overviews
     if not ds:
         return None
 
@@ -42,7 +57,8 @@ def GTiff2Cog(filetif, fileout, verbose=False):
         CO = [f"COMPRESS={COMPRESSION}", ]
         if verbose:
             print(f"Creating a COG..", CO)
-        ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
+        #ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
+        ds.BuildOverviews("NEAREST", CalculateOverviews(ds))
         dst_ds = driver.CreateCopy(fileout, ds, False, CO)
         dst_ds = None
     else:
@@ -128,7 +144,8 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
                 if verbose:
                     print(f"Creating a COG..", CO)
                 driver = gdal.GetDriverByName("COG")
-                ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
+                # ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
+                ds.BuildOverviews("NEAREST", CalculateOverviews(ds))
                 dst_ds = driver.CreateCopy(fileout, ds, False, CO)
                 ds = dst_ds
 
