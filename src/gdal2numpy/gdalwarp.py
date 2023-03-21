@@ -58,6 +58,9 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     """
     gdalwarp
     """
+
+    gdal.SetConfigOption('CPLErrorHandling', 'silent')
+
     fileout = fileout if fileout else tempfilename(suffix=".tif")
 
     kwargs = {
@@ -88,5 +91,6 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     # ----
     gdal.Warp(fileout, filelist, **kwargs)
     RestoreGDALEnv()
+    gdal.SetConfigOption('CPLErrorHandling', 'once')
     # ----------------------------------------------------------------------
     return fileout

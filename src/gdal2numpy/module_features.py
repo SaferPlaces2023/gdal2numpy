@@ -240,11 +240,11 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
 
         # setting the default value
         if res and defaultValue is not None:
-            layer.StartTransaction()
+            #layer.StartTransaction()
             for feature in layer:
                 feature.SetField(fieldname, defaultValue)
                 layer.SetFeature(feature)
-            layer.CommitTransaction()
+            # layer.CommitTransaction()
         # ----
 
     ds = None if closeOnExit else ds
