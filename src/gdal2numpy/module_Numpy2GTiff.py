@@ -139,6 +139,7 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             ds.GetRasterBand(1).WriteArray(arr)
 
             if cog:
+                gdal.SetConfigOption('CPLErrorHandling', 'silent')
                 COMPRESSION = "DEFLATE"
                 CO = [f"COMPRESS={COMPRESSION}", ]
                 if verbose:
@@ -148,6 +149,7 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
                 ds.BuildOverviews("NEAREST", CalculateOverviews(ds))
                 dst_ds = driver.CreateCopy(fileout, ds, False, CO)
                 ds = dst_ds
+                gdal.SetConfigOption('CPLErrorHandling', 'once')
 
             ds.FlushCache()
             ds = None
