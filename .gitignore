@@ -3,4 +3,5 @@ dist
 *.egg-info
 .idea
 .idea/*
-tests/dem.tif
+tests/*.tif
+*.tif
