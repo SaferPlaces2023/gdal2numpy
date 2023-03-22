@@ -100,25 +100,25 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
         'float64': gdal.GDT_Float64
     }
 
+    if format.upper() == "GTIFF":
+        CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"]
+    elif format.upper() == "COG":
+        CO = ["BIGTIFF=YES", "COMPRESS=DEFLATE", "NUM_THREADS=ALL_CPUS"]
+    else:
+        CO = []
+
+
     if isinstance(arr, np.ndarray):
         rows, cols = arr.shape
         if rows > 0 and cols > 0:
             dtype = str(arr.dtype).lower()
             dtype = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
 
-            BLOCKSIZE = 512
-            COMPRESSION = "LZW"
-            CO = ["BIGTIFF=YES",
-                  "TILED=YES",
-                  f"BLOCKXSIZE={BLOCKSIZE}",
-                  f"BLOCKXSIZE={BLOCKSIZE}",
-                  f"COMPRESS={COMPRESSION}"]
-
             driver = gdal.GetDriverByName("COG")
             cog = driver and f"{format}".upper() == "COG"
 
             drivername = "GTiff" if not cog else "MEM"
-            CO = CO if not cog else []
+            MEM_CO = CO if not cog else []
 
             # Create the path to fileout if not exists
             pathname, _ = os.path.split(fileout)
@@ -126,7 +126,7 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
 
             # Create the output dataset
             driver = gdal.GetDriverByName(drivername)  # GTiff or MEM
-            ds = driver.Create(fileout, cols, rows, 1, dtype, CO)  # fileout is ignore if MEM
+            ds = driver.Create(fileout, cols, rows, 1, dtype, MEM_CO)  # fileout is ignore if MEM
 
             if gt is not None:
                 ds.SetGeoTransform(gt)
@@ -140,8 +140,6 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
 
             if cog:
                 gdal.SetConfigOption('CPLErrorHandling', 'silent')
-                COMPRESSION = "DEFLATE"
-                CO = [f"COMPRESS={COMPRESSION}", ]
                 if verbose:
                     print(f"Creating a COG..", CO)
                 driver = gdal.GetDriverByName("COG")

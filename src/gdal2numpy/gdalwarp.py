@@ -66,7 +66,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     if format.lower() == "gtiff":
         co = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"]
     elif format.lower() == "cog":
-        co = ["BIGTIFF=YES", "COMPRESS=LZW", "NUM_THREADS=ALL_CPUS"]
+        co = ["BIGTIFF=YES", "COMPRESS=DEFLATE", "NUM_THREADS=ALL_CPUS"]
     else:
         co = []
 
