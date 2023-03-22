@@ -63,10 +63,17 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
 
     fileout = fileout if fileout else tempfilename(suffix=".tif")
 
+    if format.lower() == "gtiff":
+        co = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"]
+    elif format.lower() == "cog":
+        co = ["BIGTIFF=YES", "COMPRESS=LZW", "NUM_THREADS=ALL_CPUS"]
+    else:
+        co = []
+
     kwargs = {
         "format": format,
         "outputType": gdalconst.GDT_Float32,
-        "creationOptions": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"],
+        "creationOptions": co,
         "dstNodata": -9999,
         "resampleAlg": reasampling_method(resampleAlg),
         "multithread": True
