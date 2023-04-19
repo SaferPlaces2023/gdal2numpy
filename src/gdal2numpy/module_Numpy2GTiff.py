@@ -144,7 +144,7 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
                 stdValue = np.nanstd(arr)
                 print("Statistics: ", minValue, maxValue, meanValue, stdValue)
                 print("============================================================")
-                #ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
+                ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
             # ---
 
             ds.GetRasterBand(1).SetNoDataValue(save_nodata_as)
