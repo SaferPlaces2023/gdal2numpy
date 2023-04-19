@@ -29,6 +29,7 @@ from .filesystem import forceext, israster, isshape, filetojson, jsontofile
 from .module_GDAL2Numpy import GDAL2Numpy
 from .module_Numpy2GTiff import Numpy2GTiff
 from .module_features import GetRange
+from .module_ogr import GetExtent
 
 
 def GetRasterShape(filename):
@@ -211,4 +212,23 @@ def SetTags(filename, meta, band=0):
             tagvalue = meta[tagname]
             if "metadata" in mta:
                 mta["metadata"][tagname] = tagvalue
+        jsontofile(mta, filemeta)
+
+
+def setExtent(fileshp):
+    """
+    setExtent - set extent of a shapefile
+    """
+    if isshape(fileshp):
+        extent = GetExtent(fileshp)
+        filemeta = forceext(fileshp, "mta")
+        mta = filetojson(filemeta)
+        mta = {"metadata": {}} if not mta else mta
+        if "metadata" in mta:
+            mta["metadata"]["extent"] = {
+                "minx": extent[0],
+                "miny": extent[1],
+                "maxx": extent[2],
+                "maxy": extent[3]
+            }
         jsontofile(mta, filemeta)
