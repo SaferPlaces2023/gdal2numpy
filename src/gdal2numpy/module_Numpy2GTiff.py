@@ -138,6 +138,8 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
 
             # Set the statistics
             if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
+                data = np.array(arr)
+                data[data == save_nodata_as] = np.nan
                 minValue = float(np.nanmin(arr))
                 maxValue = float(np.nanmax(arr))
                 meanValue = float(np.nanmean(arr))
