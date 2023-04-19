@@ -137,13 +137,13 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
                 # ds.GetRasterBand(1).SetMetadata(metadata) set metadata to the specified band
 
             # Set the statistics
-            minValue = np.nanmin(arr)
-            maxValue = np.nanmax(arr)
-            meanValue = np.nanmean(arr)
-            stdValue = np.nanstd(arr)
-            print("Statistics: ", minValue, maxValue, meanValue, stdValue)
-
-            ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
+            if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
+                minValue = np.nanmin(arr)
+                maxValue = np.nanmax(arr)
+                meanValue = np.nanmean(arr)
+                stdValue = np.nanstd(arr)
+                print("Statistics: ", minValue, maxValue, meanValue, stdValue)
+                ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
             # ---
 
             ds.GetRasterBand(1).SetNoDataValue(save_nodata_as)
