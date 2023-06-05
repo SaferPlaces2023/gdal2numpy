@@ -80,6 +80,23 @@ def GDALFixNoData(filename, format="GTiff", nodata=-9999):
     return False
 
 
+def IsEmpty(filename, nodata=-9999):
+    """
+    IsEmpty - check all values are nodata
+    """
+    if os.path.isfile(filename):
+        ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        if ds:
+            band = ds.GetRasterBand(1)
+            nodata = band.GetNoDataValue()
+            data = band.ReadAsArray()
+            data[np.isnan(data)] = nodata
+            data[abs(data) >= 1e10] = nodata
+            ds = None
+            return np.all(data == nodata)
+    return False 
+
+
 def GetMinMax(filename, fieldname=None):
     """
     GetMinMax
@@ -91,6 +108,7 @@ def GetMinMax(filename, fieldname=None):
         return GetRange(filename, fieldname)
 
     return np.Inf, -np.Inf
+
 
 def GetMetaData(filename):
     """

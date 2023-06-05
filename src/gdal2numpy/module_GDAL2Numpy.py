@@ -35,8 +35,8 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
     data_type_of = {
         'Float32': np.float32,
         'Float64': np.float64,
-        'CFloat32': np.float32,
-        'CFloat64': np.float64,
+         #'CFloat32': np.float32,
+         #'CFloat64': np.float64,
         'Byte': np.uint8,
         'Int16': np.int16,
         'Int32': np.int32,
