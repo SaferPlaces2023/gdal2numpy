@@ -133,6 +133,14 @@ def GetPixelSize(filename, um="m"):
     return None, None
 
 
+def GetPixelArea(filename, um="m"):
+    """
+    GetPixelArea
+    """
+    px, py = GetPixelSize(filename, um)
+    return abs(px * py)
+
+
 def SamePixelSize(filename1, filename2, decimals=-1):
     """
     SamePixelSize
