@@ -27,7 +27,8 @@ import datetime
 import json
 import os
 import tempfile
-
+import hashlib
+from .module_log import Logger
 
 def now():
     """
@@ -149,7 +150,7 @@ def strtofile(text, filename, append=False):
             if text:
                 stream.write(text)
     except Exception as ex:
-        print(ex)
+        Logger.error(ex)
         return ""
     return filename
 
@@ -179,7 +180,39 @@ def filetojson(filename):
     try:
         with open(filename, "r", encoding="utf-8") as stream:
             return json.load(stream)
-    except:
+    except Exception as ex:
+        Logger.error(ex)
         return None
+    
+
+def md5text(text):
+    """
+    md5text - Returns the md5 of the text
+    """
+    if text is not None:
+        hashcode = hashlib.md5()
+        if isinstance(text, (bytes, bytearray)):
+            hashcode.update(text)
+        else:
+            hashcode.update(text.encode("utf-8"))
+        return hashcode.hexdigest()
+    return None
 
 
+def md5sum(filename):
+    """
+    md5sum - returns themd5 of the file
+    """
+    if os.path.isfile(filename):
+        f = open(filename, mode='rb')
+        d = hashlib.md5()
+        while True:
+            buf = f.read(4096)
+            if not buf:
+                break
+            d.update(buf)
+        f.close()
+        res=  d.hexdigest()
+        return res
+    else:
+        return ""

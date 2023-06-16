@@ -26,6 +26,7 @@ import math
 import numpy as np
 from osgeo import gdal, gdalconst
 from .filesystem import now, total_seconds_from, justfname
+from .module_log import Logger
 
 def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[], verbose=False):
     """
@@ -107,8 +108,7 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
 
         band = None
         ds = None
-        if verbose:
-            print("Reading <%s> in %ss." % (justfname(filename), total_seconds_from(t0)))
+        Logger.info(f"Reading {justfname(filename)} in {total_seconds_from(t0)}s.")
         return data, gt, prj
-    print("file %s not exists!" % filename)
+    Logger.error(f"file <{filename}> not exists!")
     return None, None, None

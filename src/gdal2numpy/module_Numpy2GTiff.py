@@ -26,6 +26,7 @@ import os
 import numpy as np
 from osgeo import gdal
 from .filesystem import justpath, mkdirs
+from .module_log import Logger
 
 
 def CalculateOverviews(ds):
@@ -55,8 +56,7 @@ def GTiff2Cog(filetif, fileout, verbose=False):
     if driver:
         COMPRESSION = "DEFLATE"
         CO = [f"COMPRESS={COMPRESSION}", ]
-        if verbose:
-            print(f"Creating a COG..", CO)
+        Logger.error(f"Creating a COG..{CO}")
         #ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
         ds.BuildOverviews("NEAREST", CalculateOverviews(ds))
         dst_ds = driver.CreateCopy(fileout, ds, False, CO)
@@ -144,8 +144,6 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
                 maxValue = float(np.nanmax(arr))
                 meanValue = float(np.nanmean(arr))
                 stdValue = float(np.nanstd(arr))
-                # print("Statistics: ", minValue, maxValue, meanValue, stdValue, dtype)
-                # print("============================================================")
                 ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
             # ---
 
@@ -153,8 +151,7 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             ds.GetRasterBand(1).WriteArray(arr)
 
             if cog:
-                if verbose:
-                    print(f"Creating a COG..", CO)
+                Logger.debug(f"Creating a COG..{CO}")
                 driver = gdal.GetDriverByName("COG")
                 # ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
                 ds.BuildOverviews("NEAREST", CalculateOverviews(ds))

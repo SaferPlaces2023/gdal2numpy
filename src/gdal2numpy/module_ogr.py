@@ -109,7 +109,7 @@ def Haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def GetPixelSize(filename):
+def GetPixelSize(filename, um = "m"):
     """
     GetPixelSize
     """
@@ -123,7 +123,7 @@ def GetPixelSize(filename):
         srs = osr.SpatialReference()
         srs.ImportFromProj4(prj)
 
-        if srs.IsGeographic():
+        if srs.IsGeographic() and um == "m":
             dx = Haversine(maxy, minx, maxy, minx + px * n) / n
             dy = Haversine(maxy, minx, maxy + m * py, minx) / m
             return round(dx, 1), round(dy, 1)
@@ -198,7 +198,7 @@ def SameSpatialRef(filename1, filename2):
     srs1 = GetSpatialRef(filename1)
     srs2 = GetSpatialRef(filename2)
     if srs1 and srs2:
-        return srs1.IsSame(srs2)
+        return srs1.IsSame(srs2) or srs1.ExportToProj4() == srs2.ExportToProj4()
     return None
 
 
@@ -338,22 +338,6 @@ def find_GDAL_DATA():
         if len(pathnames):
             break
     return justpath(pathnames[0]) if len(pathnames) else ""
-
-
-def Rectangle(minx, miny, maxx, maxy):
-    """
-    Rectangle
-    """
-    ring = ogr.Geometry(ogr.wkbLinearRing)
-    ring.AddPoint_2D(minx, miny)
-    ring.AddPoint_2D(maxx, miny)
-    ring.AddPoint_2D(maxx, maxy)
-    ring.AddPoint_2D(minx, maxy)
-    ring.AddPoint_2D(minx, miny)
-    # Create polygon
-    poly = ogr.Geometry(ogr.wkbPolygon)
-    poly.AddGeometry(ring)
-    return poly
 
 
 def CreateRectangleShape(minx, miny, maxx, maxy, srs, fileshp="tempxy...."):

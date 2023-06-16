@@ -6,4 +6,4 @@ cmd /c git push
 cmd /c rmdir /Q /S build
 cmd /c rmdir /Q /S dist
 cmd /c python setup.py sdist
-cmd /c twine upload dist/*
+cmd /c twine upload dist/*RasterizeLike"

@@ -23,27 +23,27 @@
 # Created:     31/12/2022
 # -------------------------------------------------------------------------------
 import numpy as np
-from osgeo import ogr
-from .filesystem import isshape
+import tempfile
+from osgeo import ogr, osr
+from .filesystem import isshape, isshape, md5sum, justfname
+from .module_ogr import SameSpatialRef, GetSpatialRef
+from .module_log import Logger
 
 
-def OpenShape(fileshp, exclusive=False, verbose=False):
+def OpenShape(fileshp, exclusive=False):
     """
     OpenDataset
     """
     if not fileshp:
         ds = None
     elif isinstance(fileshp, str) and isshape(fileshp):
-        if verbose:
-            print(f"Opening {fileshp}...")
+        Logger.info(f"Opening {fileshp}...")
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
-        if verbose:
-            print(f"Dataset already open...")
+        Logger.info(f"Dataset already open...")
         ds = fileshp
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) < exclusive:
-        if verbose:
-            print(f"Change the open mode: Open({exclusive})")
+        Logger.info(f"Change the open mode: Open({exclusive})")
         ds = ogr.Open(fileshp.GetName(), exclusive)
     else:
         ds = None
@@ -65,6 +65,7 @@ def GetAccess(ds):
             layer.DeleteField(j)
             res = 1
         except Exception as ex:
+            Logger.error(ex)
             res = 0
         ogr.DontUseExceptions()
     return res
@@ -76,7 +77,7 @@ def GetFeatures(fileshp):
     """
     ds = OpenShape(fileshp)
     if ds:
-        return [feature for feature in ds.GetLayer()]
+        return list(ds.GetLayer())
     return []
 
 
@@ -113,11 +114,18 @@ def GetFieldNames(fileshp, filter=None):
     if ds:
         defn = ds.GetLayer().GetLayerDefn()
         fields = [defn.GetFieldDefn(j) for j in range(defn.GetFieldCount())]
-        if filter:
+        if filter is not None:
             return [field.GetName() for field in fields if ogr.GetFieldTypeName(field.GetType()) in filter]
         # return all
         return [field.GetName() for field in fields]
     return []
+
+
+def GetNumericFieldNames(fileshp):
+    """
+    GetNumericFieldNames
+    """
+    return GetFieldNames(fileshp, ["Integer", "Integer64", "Real"])
 
 
 def GetValues(fileshp, fieldname):
@@ -143,12 +151,12 @@ def GetRange(fileshp, fieldname):
     return minValue, maxValue
 
 
-def FieldExists(fileshp, fieldname, verbose=False):
+def FieldExists(fileshp, fieldname):
     """
     FieldExists
     """
     idx = -1
-    ds = OpenShape(fileshp, False, verbose=verbose)
+    ds = OpenShape(fileshp)
     closeOnExit = type(ds) != type(fileshp)
     if ds:
         layer = ds.GetLayer()
@@ -160,22 +168,21 @@ def FieldExists(fileshp, fieldname, verbose=False):
         #    fielddefn = layerdefn.GetFieldDefn(j)
         #    if fielddefn.GetName().upper() == f"{fieldname}".upper():
         #        idx = j
-        # print(f"searching field {fieldname}={idx}")
+        # Logger.info(f"searching field {fieldname}={idx}")
         ds = None if closeOnExit else ds
     return idx
 
 
-def DeleteField(fileshp, fieldname, verbose=True):
+def DeleteField(fileshp, fieldname):
     """
     DeleteField
     """
     res = False
-    ds = OpenShape(fileshp, 1)
+    ds = OpenShape(fileshp, True)
     closeOnExit = type(ds) != type(fileshp)
     j = FieldExists(ds, fieldname)
     if j >= 0:
-        if verbose:
-            print("Deleting...", fieldname, j)
+        Logger.debug(f"Deleting...{fieldname}({j})")
         ds.GetLayer().DeleteField(j)
         res = True
     ds = None if closeOnExit else ds
@@ -204,11 +211,12 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
         str: {"dtype": ogr.OFTString, "width": 254, "precision": 0},
     }
     res = False
-    ds = OpenShape(fileshp, 1, verbose=False)
+    ds = OpenShape(fileshp, True)
     closeOnExit = type(fileshp) != type(ds)
     if ds:
         layer = ds.GetLayer()
-        field = NUMPY2OGR[dtype] if dtype in NUMPY2OGR else {"dtype": ogr.OFTString, "width": 254, "precision": 0}
+        field = NUMPY2OGR[dtype] if dtype in NUMPY2OGR else {
+            "dtype": ogr.OFTString, "width": 254, "precision": 0}
         width = width if width > 0 else field["width"]
         precision = precision if precision >= 0 else field["precision"]
         newfield = ogr.FieldDefn(fieldname, field["dtype"])
@@ -218,7 +226,7 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
             newfield.SetDefault(f"{defaultValue}")
 
         # Check the field not exists
-        j = FieldExists(ds, fieldname, verbose=False)
+        j = FieldExists(ds, fieldname)
         fielddef = layer.GetLayerDefn().GetFieldDefn(j) if j >= 0 else None
 
         # Nessun cambiamento
@@ -228,19 +236,20 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
             res = False
         # Stesso tipo o verso strighe
         elif fielddef and fielddef.GetType() == field["dtype"] or field["dtype"] == ogr.OFTString:
-            if verbose:
-                print(f"Altering field definition of {fieldname}({width}:{precision})")
-            layer.AlterFieldDefn(j, newfield, ogr.ALTER_TYPE_FLAG | ogr.ALTER_WIDTH_PRECISION_FLAG)
+            Logger.info(
+                f"Altering field definition of {fieldname}({width}:{precision})")
+            layer.AlterFieldDefn(
+                j, newfield, ogr.ALTER_TYPE_FLAG | ogr.ALTER_WIDTH_PRECISION_FLAG)
             res = True
         else:
-            if verbose:
-                print(f"Creating a new field {fieldname}({width}:{precision})")
+            Logger.info(
+                f"Creating a new field {fieldname}({width}:{precision})")
             layer.CreateField(newfield)
             res = True
 
         # setting the default value
         if res and defaultValue is not None:
-            #layer.StartTransaction()
+            # layer.StartTransaction()
             for feature in layer:
                 feature.SetField(fieldname, defaultValue)
                 layer.SetFeature(feature)
@@ -251,3 +260,55 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
     return res
 
 
+def Transform(fileshp, t_srs, fileout=None):
+    """
+    Transform - reproject the shapefile
+    t_srs: target spatial reference Can be also a template filepath
+    """
+    if SameSpatialRef(fileshp, t_srs):
+        Logger.debug("Nothing to do. The srs is the same.")
+        return fileshp
+
+    t_srs = GetSpatialRef(t_srs)
+    t_code = f"{t_srs.GetAuthorityName(None)}_{t_srs.GetAuthorityCode(None)}"
+    fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
+
+    if isshape(fileout):
+        Logger.debug(f"Using cached file:<{fileout}>...")
+        return fileout
+
+    ds = OpenShape(fileshp)
+    if ds:
+        layer = ds.GetLayer()
+
+        # set spatial reference and transformation
+        defn = layer.GetLayerDefn()
+        s_srs = layer.GetSpatialRef()
+        transform = osr.CoordinateTransformation(s_srs, t_srs)
+
+        driver = ogr.GetDriverByName("Esri Shapefile")
+        dw = driver.CreateDataSource(fileout)
+        outlayer = dw.CreateLayer('', t_srs, defn.GetGeomType())
+
+        # Copy each field
+        for j in range(defn.GetFieldCount()):
+            fielddefn = defn.GetFieldDefn(j)
+            outlayer.CreateField(fielddefn)
+
+        # Copy and transform each feature
+        for feature in layer:
+            transformed = feature.GetGeometryRef()
+            transformed.Transform(transform)
+
+            geom = ogr.CreateGeometryFromWkb(transformed.ExportToWkb())
+            defn = outlayer.GetLayerDefn()
+            new_feature = ogr.Feature(defn)
+            for j in range(defn.GetFieldCount()):
+                new_feature.SetField(j, feature.GetField(j))
+            new_feature.SetGeometry(geom)
+            outlayer.CreateFeature(new_feature)
+            new_feature = None
+
+        ds, dw = None, None
+        return fileout
+    return False
