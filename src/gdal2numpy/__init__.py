@@ -22,6 +22,7 @@
 #
 # Created:
 #-------------------------------------------------------------------------------
+from .filesystem import *
 from .module_GDAL2Numpy import *
 from .module_Numpy2GTiff import *
 from .module_MetaData import *

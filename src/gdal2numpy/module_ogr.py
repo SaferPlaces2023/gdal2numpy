@@ -109,7 +109,7 @@ def Haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def GetPixelSize(filename, um = "m"):
+def GetPixelSize(filename, um="m"):
     """
     GetPixelSize
     """
