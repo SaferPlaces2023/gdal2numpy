@@ -56,7 +56,7 @@ def GTiff2Cog(filetif, fileout, verbose=False):
     if driver:
         COMPRESSION = "DEFLATE"
         CO = [f"COMPRESS={COMPRESSION}", ]
-        Logger.error(f"Creating a COG..{CO}")
+        Logger.debug(f"Creating a COG..{CO}")
         #ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
         ds.BuildOverviews("NEAREST", CalculateOverviews(ds))
         dst_ds = driver.CreateCopy(fileout, ds, False, CO)

@@ -3,7 +3,7 @@ import logging
 #logging.basicConfig(format="[%(asctime)s][%(levelname)-8s] %(message)s")
 logging.basicConfig(format="[%(levelname)-8s] %(message)s")
 Logger = logging.getLogger(__name__)
-Logger.setLevel(logging.DEBUG)
+Logger.setLevel(logging.WARNING)
 
 
 def set_log_level(verbose, debug):

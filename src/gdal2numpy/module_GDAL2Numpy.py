@@ -27,6 +27,7 @@ import numpy as np
 from osgeo import gdal, gdalconst
 from .filesystem import now, total_seconds_from, justfname
 from .module_log import Logger
+from .module_memory import mem_usage
 
 def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[], verbose=False):
     """
@@ -55,6 +56,7 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
         gt, prj = ds.GetGeoTransform(), ds.GetProjection()
         no_data = band.GetNoDataValue()
         band_type = data_type_of[gdal.GetDataTypeName(band.DataType)]
+        Logger.debug("Data type: %s" % band_type)
 
         if not bbox:
             data = band.ReadAsArray(0, 0, n, m)
@@ -86,6 +88,7 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
 
             # Output datatype
             if dtype and dtype != band_type:
+                Logger.debug("Converting data type from %s to %s" % (band_type, dtype))
                 data = data.astype(dtype, copy=False)
 
             if band_type == np.float32:
@@ -108,7 +111,8 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
 
         band = None
         ds = None
-        Logger.info(f"Reading {justfname(filename)} in {total_seconds_from(t0)}s.")
+        mem_usage()
+        Logger.debug(f"Reading {justfname(filename)} in {total_seconds_from(t0)}s.")
         return data, gt, prj
     Logger.error(f"file <{filename}> not exists!")
     return None, None, None
