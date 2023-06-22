@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.128"
+VERSION = "0.0.129"
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi"
 EMAIL = "valerio.luzzi@gecosistema.com"
