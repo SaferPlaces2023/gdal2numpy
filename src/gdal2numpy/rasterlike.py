@@ -37,6 +37,8 @@ def RasterLike(filetif, filetpl, fileout=None, resampleAlg="near", format="GTiff
     """
     RasterLike: adatta un raster al raster template ( dem ) ricampionando, riproiettando estendendo/clippando il file raster se necessario.
     """
+    fileout = fileout if fileout else tempfilename(suffix=".tif")
+    
     if SameSpatialRef(filetif, filetpl) and \
         SamePixelSize(filetif, filetpl, decimals=2) and \
             SameExtent(filetif, filetpl, decimals=3):
