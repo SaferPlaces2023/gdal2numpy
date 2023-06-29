@@ -44,9 +44,10 @@ def CalculateOverviews(ds):
     return overviews
 
 
-def GTiff2Cog(filetif, fileout, verbose=False):
+def GTiff2Cog(filetif, fileout, algo="NEAREST", verbose=False):
     """
     GTiff2Cog - Convert a GTiff to COG
+    algo = one of "AVERAGE", "AVERAGE_MAGPHASE", "RMS", "BILINEAR", "CUBIC", "CUBICSPLINE", "GAUSS", "LANCZOS", "MODE", "NEAREST", or "NONE"
     """
     ds = gdal.Open(filetif, 1) # open the file in write mode to build overviews
     if not ds:
@@ -58,7 +59,7 @@ def GTiff2Cog(filetif, fileout, verbose=False):
         CO = [f"COMPRESS={COMPRESSION}", ]
         Logger.debug(f"Creating a COG..{CO}")
         #ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
-        ds.BuildOverviews("NEAREST", CalculateOverviews(ds))
+        ds.BuildOverviews(algo, CalculateOverviews(ds))
         dst_ds = driver.CreateCopy(fileout, ds, False, CO)
         dst_ds = None
     else:
