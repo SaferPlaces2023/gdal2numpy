@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.129"
+VERSION = "0.0.130"
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi"
 EMAIL = "valerio.luzzi@gecosistema.com"
@@ -23,5 +23,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['gdal', 'numpy']
+    install_requires=['gdal', 'numpy', 'httpx']
 )
