@@ -10,3 +10,4 @@ tests/*.prj
 tests/*.dbf
 tests/*.mta
 tests/*.aux.xml
+*.whl
