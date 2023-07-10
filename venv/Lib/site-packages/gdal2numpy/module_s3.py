@@ -294,6 +294,8 @@ def copy(src, dst, client=None):
     """
     copy
     """
+    dst = dst if dst else justpath(tempname4S3(src))
+
     if os.path.isfile(src) and iss3(dst):
         s3_upload(src, dst, client=client)
     elif iss3(src) and not iss3(dst):
