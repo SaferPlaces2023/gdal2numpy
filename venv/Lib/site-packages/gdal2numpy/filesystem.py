@@ -128,6 +128,16 @@ def mkdirs(pathname):
     return os.path.isdir(pathname)
 
 
+def tempdir(name=""):
+    """
+    tempdir
+    :return: a temporary directory
+    """
+    foldername = normpath(tempfile.gettempdir() + "/" + name)
+    os.makedirs(foldername, exist_ok=True)
+    return foldername
+
+
 def tempfilename(prefix="", suffix=""):
     """
     return a temporary filename

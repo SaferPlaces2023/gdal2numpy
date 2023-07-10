@@ -26,8 +26,10 @@ import math
 import numpy as np
 from osgeo import gdal, gdalconst
 from .filesystem import now, total_seconds_from, justfname
+from .module_s3 import *
 from .module_log import Logger
 from .module_memory import mem_usage
+
 
 def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[], verbose=False):
     """
@@ -37,16 +39,16 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
     data_type_of = {
         'Float32': np.float32,
         'Float64': np.float64,
-         #'CFloat32': np.float32,
-         #'CFloat64': np.float64,
         'Byte': np.uint8,
         'Int16': np.int16,
         'Int32': np.int32,
         'UInt16': np.uint16,
         'UInt32': np.uint32,
-        'CInt16': np.int16,
-        'CInt32': np.int32
     }
+
+    # check if filename is a s3 url, in case download it in a temporary file
+    if iss3(filename):
+        filename = s3_download(filename)
 
     filename = "/vsicurl/" + filename if filename and filename.lower().startswith("http") else filename
     ds = gdal.Open(filename, gdalconst.GA_ReadOnly)

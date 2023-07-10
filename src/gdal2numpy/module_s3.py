@@ -39,6 +39,19 @@ def iss3(filename):
         (filename.startswith("s3:/") or filename.startswith("/vsis3/"))
 
 
+def isfile(filename):
+    """
+    isfile
+    """
+    if not filename:
+        return False    
+    elif isinstance(filename, str) and os.path.isfile(filename):
+        return True
+    elif iss3(filename) and s3_exists(filename):
+        return True
+    return False
+
+
 def get_bucket_name_key(uri):
     """
     get_bucket_name_key - get bucket name and key name from uri

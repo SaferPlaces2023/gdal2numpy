@@ -25,7 +25,9 @@
 import os
 import json
 
-from osgeo import ogr, osr
+from osgeo import ogr
+from .module_ogr import GetSpatialRef
+
 
 def infer_geometry_type(features):
     """
@@ -85,7 +87,7 @@ def infer_layerDefn(features):
     return fields
 
 
-def ShapeFileFromGeoJSON(features, fileshp=""):
+def ShapeFileFromGeoJSON(features, fileshp="", t_srs=4326):
     """
     ShapeFileFromGeoJSON
     """
@@ -100,8 +102,7 @@ def ShapeFileFromGeoJSON(features, fileshp=""):
         geom.Destroy()
         
         # create spatial reference
-        t_srs = osr.SpatialReference()
-        t_srs.ImportFromEPSG(4326)
+        t_srs = GetSpatialRef(t_srs)
 
         # create shapefile
         # - if exists, delete

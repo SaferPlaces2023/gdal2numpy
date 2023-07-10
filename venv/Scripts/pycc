@@ -1,0 +1,3 @@
+#!d:\users\vlr20\projects\github\gdal2numpy\venv\scripts\python.exe
+from numba.pycc import main
+main()
