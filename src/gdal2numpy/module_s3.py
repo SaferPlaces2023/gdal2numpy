@@ -312,9 +312,10 @@ def copy(src, dst=None, client=None):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         
     for ext in exts:
+        print("copying", forceext(src,ext), " in ", forceext(dst,ext))
         copy(forceext(src,ext), forceext(dst,ext))
 
-    return f"{dst}/{justfname(src)}"
+    return dst
 
 def move(src, dst, client=None):
     """
