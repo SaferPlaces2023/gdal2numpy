@@ -52,6 +52,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
     RasterizeLike - Rasterize a shapefile like a raster file
     """
     filedem = s3_download(filedem) if iss3(filedem) else filedem
+    fileshp = s3_download(fileshp) if iss3(fileshp) else fileshp
     fileshp = Transform(fileshp, filedem)
 
     dataset = gdal.Open(filedem, gdalconst.GA_ReadOnly)

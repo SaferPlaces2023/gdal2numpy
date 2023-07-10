@@ -26,7 +26,7 @@ import numpy as np
 from osgeo import gdal, gdalconst
 from osgeo import ogr
 from .module_features import GetNumericFieldNames, Transform
-from .module_s3 import s3_download, iss3
+from .module_s3 import copy, iss3
 from .module_log import Logger
 
 dtypeOf = {
@@ -51,8 +51,8 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
     """
     RasterizeLike - Rasterize a shapefile like a raster file
     """
-    filedem = s3_download(filedem) if iss3(filedem) else filedem
-    fileshp = s3_download(fileshp) if iss3(fileshp) else fileshp
+    filedem = copy(filedem) if iss3(filedem) else filedem
+    fileshp = copy(fileshp) if iss3(fileshp) else fileshp
     fileshp = Transform(fileshp, filedem)
 
     dataset = gdal.Open(filedem, gdalconst.GA_ReadOnly)
