@@ -306,9 +306,9 @@ def copy(src, dst=None, client=None):
         shutil.copy2(src, dst)
     
     exts = []
-    if isshape(src):
+    if src.endswith(".shp"):
         exts = ["shx", "dbf", "prj", "cpg", "mta"]
-    elif israster(src):
+    elif src.endswith(".tif"):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         
     for ext in exts:
