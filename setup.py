@@ -23,5 +23,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["psutil","gdal", "numpy"]
+    install_requires=["psutil","gdal", "numpy", "boto3"]
 )
