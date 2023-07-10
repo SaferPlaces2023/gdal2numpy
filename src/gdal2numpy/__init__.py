@@ -29,6 +29,7 @@ from .module_MetaData import *
 from .module_ogr import *
 from .module_features import *
 from .module_geojson import ShapeFileFromGeoJSON
+from .module_s3 import *
 from .rasterlike import RasterLike
 from .rasterizelike import RasterizeLike
 from .gdalwarp import gdalwarp
