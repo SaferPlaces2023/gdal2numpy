@@ -290,7 +290,7 @@ def s3_move(src, dst, client=None):
     return res
 
 
-def copy(src, dst, client=None):
+def copy(src, dst=None, client=None):
     """
     copy
     """
