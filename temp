@@ -1,0 +1,61 @@
+[master e3a8c9c] fix
+ 24 files changed, 12 insertions(+), 12 deletions(-)
+ rename venv/Lib/site-packages/{gdal2numpy-0.0.151.dist-info => gdal2numpy-0.0.152.dist-info}/INSTALLER (100%)
+ rename venv/Lib/site-packages/{gdal2numpy-0.0.151.dist-info => gdal2numpy-0.0.152.dist-info}/LICENSE (100%)
+ rename venv/Lib/site-packages/{gdal2numpy-0.0.151.dist-info => gdal2numpy-0.0.152.dist-info}/METADATA (96%)
+ rename venv/Lib/site-packages/{gdal2numpy-0.0.151.dist-info => gdal2numpy-0.0.152.dist-info}/RECORD (78%)
+ rename venv/Lib/site-packages/{gdal2numpy-0.0.151.dist-info => gdal2numpy-0.0.152.dist-info}/REQUESTED (100%)
+ rename venv/Lib/site-packages/{gdal2numpy-0.0.151.dist-info => gdal2numpy-0.0.152.dist-info}/WHEEL (100%)
+ rename venv/Lib/site-packages/{gdal2numpy-0.0.151.dist-info => gdal2numpy-0.0.152.dist-info}/top_level.txt (100%)
+running sdist
+running egg_info
+writing src\gdal2numpy.egg-info\PKG-INFO
+writing dependency_links to src\gdal2numpy.egg-info\dependency_links.txt
+writing requirements to src\gdal2numpy.egg-info\requires.txt
+writing top-level names to src\gdal2numpy.egg-info\top_level.txt
+reading manifest file 'src\gdal2numpy.egg-info\SOURCES.txt'
+writing manifest file 'src\gdal2numpy.egg-info\SOURCES.txt'
+running check
+creating gdal2numpy-0.0.153
+creating gdal2numpy-0.0.153\src
+creating gdal2numpy-0.0.153\src\gdal2numpy
+creating gdal2numpy-0.0.153\src\gdal2numpy.egg-info
+creating gdal2numpy-0.0.153\tests
+copying files to gdal2numpy-0.0.153...
+copying LICENSE -> gdal2numpy-0.0.153
+copying README.md -> gdal2numpy-0.0.153
+copying setup.cfg -> gdal2numpy-0.0.153
+copying setup.py -> gdal2numpy-0.0.153
+copying src\gdal2numpy\__init__.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\filesystem.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\gdalwarp.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_GDAL2Numpy.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_MetaData.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_Numpy2GTiff.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_features.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_geojson.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_log.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_memory.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_ogr.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\module_s3.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\rasterizelike.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy\rasterlike.py -> gdal2numpy-0.0.153\src\gdal2numpy
+copying src\gdal2numpy.egg-info\PKG-INFO -> gdal2numpy-0.0.153\src\gdal2numpy.egg-info
+copying src\gdal2numpy.egg-info\SOURCES.txt -> gdal2numpy-0.0.153\src\gdal2numpy.egg-info
+copying src\gdal2numpy.egg-info\dependency_links.txt -> gdal2numpy-0.0.153\src\gdal2numpy.egg-info
+copying src\gdal2numpy.egg-info\requires.txt -> gdal2numpy-0.0.153\src\gdal2numpy.egg-info
+copying src\gdal2numpy.egg-info\top_level.txt -> gdal2numpy-0.0.153\src\gdal2numpy.egg-info
+copying tests\test_features.py -> gdal2numpy-0.0.153\tests
+copying tests\test_gdal2numpy.py -> gdal2numpy-0.0.153\tests
+copying tests\test_geojson.py -> gdal2numpy-0.0.153\tests
+copying tests\test_metadata.py -> gdal2numpy-0.0.153\tests
+copying tests\test_raster.py -> gdal2numpy-0.0.153\tests
+copying tests\test_rasterize.py -> gdal2numpy-0.0.153\tests
+copying tests\test_s3.py -> gdal2numpy-0.0.153\tests
+Writing gdal2numpy-0.0.153\setup.cfg
+creating dist
+Creating tar archive
+removing 'gdal2numpy-0.0.153' (and everything under it)
+Uploading distributions to https://upload.pypi.org/legacy/
+Uploading gdal2numpy-0.0.153.tar.gz
+  0%|          | 0.00/22.4k [00:00<?, ?B/s] 36%|###5      | 8.00k/22.4k [00:00<00:00, 20.9kB/s]100%|##########| 22.4k/22.4k [00:01<00:00, 13.6kB/s]

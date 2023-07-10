@@ -52,8 +52,12 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
     RasterizeLike - Rasterize a shapefile like a raster file
     """
     filedem = copy(filedem) if iss3(filedem) else filedem
+    print("filedem is:", filedem)
     fileshp = copy(fileshp) if iss3(fileshp) else fileshp
+    print("fileshp is:", fileshp)
     fileshp = Transform(fileshp, filedem)
+    print("fileshp is:", fileshp)
+    print("=====================================")
 
     dataset = gdal.Open(filedem, gdalconst.GA_ReadOnly)
     vector = ogr.OpenShared(fileshp)
