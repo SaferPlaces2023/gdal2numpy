@@ -173,7 +173,7 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             if iss3(fileout):
                 move(filetif, fileout)
 
-            return fileout
+            return filetif
     return None
 
 
