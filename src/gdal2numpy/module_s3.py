@@ -312,7 +312,6 @@ def copy(src, dst=None, client=None):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         
     for ext in exts:
-        print("copying", forceext(src,ext), " in ", forceext(dst,ext))
         copy(forceext(src,ext), forceext(dst,ext))
 
     return dst
@@ -321,6 +320,8 @@ def move(src, dst, client=None):
     """
     move
     """
+    dst = dst if dst else tempname4S3(src)
+    
     if os.path.isfile(src) and iss3(dst):
         s3_upload(src, dst, remove_src=True, client=client)
     elif iss3(src) and not iss3(dst):
@@ -338,3 +339,5 @@ def move(src, dst, client=None):
         
     for ext in exts:
         move(forceext(src,ext), forceext(dst,ext))
+
+    return dst
