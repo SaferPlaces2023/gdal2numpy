@@ -314,6 +314,8 @@ def copy(src, dst=None, client=None):
     for ext in exts:
         copy(forceext(src,ext), forceext(dst,ext))
 
+    return f"{dst}/{justfname(src)}"
+
 def move(src, dst, client=None):
     """
     move
