@@ -3,6 +3,7 @@ dist
 *.egg-info
 .idea
 .idea/*
+venv/
 tests/*.tif
 tests/*.shp
 tests/*.shx

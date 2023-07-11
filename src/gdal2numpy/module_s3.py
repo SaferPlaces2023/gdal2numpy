@@ -125,9 +125,9 @@ def s3_equals(file1, file2, client=None):
     """
     etag1 = etag(file1, client)
     etag2 = etag(file2, client)
-    print(file1, etag1) 
-    print(file2, etag2)
-    print("====================================")
+    # print(file1, etag1) 
+    # print(file2, etag2)
+    # print("====================================")
     if etag1 and etag2:
         return etag1 == etag2
     return False
@@ -196,9 +196,6 @@ def s3_download(uri, fileout=None, remove_src=False, client=None):
                 if os.path.isdir(fileout):
                     fileout = f"{fileout}/{justfname(key)}"
 
-                print(fileout, os.path.isfile(fileout))
-                print("s3_equals", s3_equals(uri, fileout, client))
-                print("===")
                 if os.path.isfile(fileout) and s3_equals(uri, fileout, client):
                     Logger.debug(f"using cached file {fileout}")
                 else:
