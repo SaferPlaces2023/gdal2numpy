@@ -26,6 +26,7 @@ import os
 import hashlib
 import boto3
 import shutil
+import datetime
 from botocore.exceptions import ClientError
 from .filesystem import *
 from .module_log import Logger
@@ -149,11 +150,18 @@ def tempname4S3(uri):
     return tmp
 
 
-def s3_upload(filename, uri, remove_src=False, client=None):
+def s3_upload(filename, uri, remove_src=False, deltaT = None, client=None):
     """
     Upload a file to an S3 bucket
     Examples: s3_upload(filename, "s3://saferplaces.co/a/rimini/lidar_rimini_building_2.tif")
     """
+    if deltaT and isinstance(deltaT, int):
+        deltaT = datetime.timedelta(hours=deltaT)
+        expiration_date = datetime.datetime.utcnow() + deltaT
+    elif deltaT and isinstance(deltaT, datetime.timedelta):
+        expiration_date = datetime.datetime.utcnow() + deltaT
+    else:
+        expiration_date = None
 
     # Upload the file
     try:
@@ -165,8 +173,14 @@ def s3_upload(filename, uri, remove_src=False, client=None):
             else:
                 Logger.debug(
                     f"uploading {filename} into {bucket_name}/{key}...")
+                if deltaT:
+                    extra = {"Expires": expiration_date.isoformat()}
+                else:
+                    extra = None
                 client.upload_file(Filename=filename,
-                                   Bucket=bucket_name, Key=key)
+                                   Bucket=bucket_name, Key=key,
+                                   ExtraArgs=extra)
+                
             if remove_src:
                 Logger.debug(f"removing {filename}")
                 os.unlink(filename)  # unlink and not ogr_remove!!!
@@ -293,14 +307,14 @@ def s3_move(src, dst, client=None):
     return res
 
 
-def copy(src, dst=None, client=None):
+def copy(src, dst=None, deltaT=None, client=None):
     """
     copy
     """
     dst = dst if dst else tempname4S3(src)
 
     if os.path.isfile(src) and iss3(dst):
-        s3_upload(src, dst, client=client)
+        s3_upload(src, dst, deltaT=deltaT, client=client)
     elif iss3(src) and not iss3(dst):
         s3_download(src, dst, client=client)
     elif iss3(src) and iss3(dst):
@@ -319,14 +333,14 @@ def copy(src, dst=None, client=None):
 
     return dst
 
-def move(src, dst, client=None):
+def move(src, dst, deltaT=None, client=None):
     """
     move
     """
     dst = dst if dst else tempname4S3(src)
 
     if os.path.isfile(src) and iss3(dst):
-        s3_upload(src, dst, remove_src=True, client=client)
+        s3_upload(src, dst, remove_src=True, deltaT=deltaT, client=client)
     elif iss3(src) and not iss3(dst):
         s3_download(src, dst, remove_src=True, client=client)
     elif iss3(src) and iss3(dst):
