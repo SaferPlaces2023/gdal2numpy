@@ -18,9 +18,10 @@ class Test(unittest.TestCase):
         """
         #def RasterizeLike(fileshp, filedem, file_tif="", dtype=None, burn_fieldname="", \
         #          z_value=None, factor=1.0, nodata=None):
-        dem, _, _ = GDAL2Numpy(filedem, load_nodata_as=np.nan)
+        dem, _, _   = GDAL2Numpy(filedem, load_nodata_as=np.nan)
         data, _, _  = RasterizeLike(fileshp, filedem, burn_fieldname="height", nodata=0)
         self.assertEqual(data.shape, dem.shape)
+
 
     def test_rasterlike(self):
         """

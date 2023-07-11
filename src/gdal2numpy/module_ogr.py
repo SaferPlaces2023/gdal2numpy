@@ -31,6 +31,8 @@ from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
 from .filesystem import justext, juststem, forceext, justpath, isshape, israster, strtofile
 
+
+
 def create_cpg(fileshp):
     """
     create_file_cpg - add a file.cpg
@@ -392,3 +394,5 @@ def CopyShape(fileshp, fileout):
     ds = gdal.VectorTranslate(fileout, fileshp, format='ESRI Shapefile',
                               accessMode='overwrite')
     ds = None  # force flush
+
+

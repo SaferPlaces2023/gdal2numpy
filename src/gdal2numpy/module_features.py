@@ -25,10 +25,10 @@
 import numpy as np
 import tempfile
 from osgeo import ogr, osr
-from .filesystem import isshape, isshape, md5sum, justfname
+from .filesystem import isshape, isshape, md5sum
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_log import Logger
-
+from .module_s3 import iss3, copy
 
 def OpenShape(fileshp, exclusive=False):
     """
@@ -39,6 +39,8 @@ def OpenShape(fileshp, exclusive=False):
     elif isinstance(fileshp, str) and isshape(fileshp):
         Logger.info(f"Opening {fileshp}...")
         ds = ogr.Open(fileshp, exclusive)
+    elif isinstance(fileshp, str) and iss3(fileshp) and fileshp.endswith(".shp"):
+        ds = ogr.Open(copy(fileshp), exclusive)
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
         Logger.info(f"Dataset already open...")
         ds = fileshp

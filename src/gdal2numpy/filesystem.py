@@ -193,7 +193,23 @@ def filetojson(filename):
     except Exception as ex:
         Logger.error(ex)
         return None
+
     
+def listify(text, sep=",", trim=False):
+    """
+    listify -  make a list from string
+    """
+    if text is None:
+        return []
+    elif isinstance(text, str):
+        arr = text.split(sep)
+        if trim:
+            arr = [item.strip() for item in arr]
+        return arr
+    elif isinstance(text, (tuple, list)):
+        return text
+    return [text]
+
 
 def md5text(text):
     """
