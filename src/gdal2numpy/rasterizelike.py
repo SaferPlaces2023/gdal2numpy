@@ -27,6 +27,8 @@ from osgeo import gdal, gdalconst
 from osgeo import ogr
 from .module_features import GetNumericFieldNames, Transform
 from .module_s3 import copy, iss3
+from .module_gdal import OpenRaster
+from .module_features import OpenShape
 from .module_log import Logger
 
 dtypeOf = {
@@ -54,11 +56,13 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
     gdal.SetConfigOption("SHAPE_RESTORE_SHX", "YES")
     gdal.SetConfigOption("SHAPE_ENCODING", "UTF-8")
 
-    filedem = copy(filedem) if iss3(filedem) else filedem
+    #filedem = copy(filedem) if iss3(filedem) else filedem
     fileshp = copy(fileshp) if iss3(fileshp) else fileshp
     fileshp = Transform(fileshp, filedem)
 
-    dataset = gdal.Open(filedem, gdalconst.GA_ReadOnly)
+    #dataset = gdal.Open(filedem, gdalconst.GA_ReadOnly)
+    #vector = ogr.OpenShared(fileshp)
+    dataset = OpenRaster(filedem)
     vector = ogr.OpenShared(fileshp)
     if dataset and vector:
         band = dataset.GetRasterBand(1)

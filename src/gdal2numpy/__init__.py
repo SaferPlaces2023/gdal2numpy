@@ -33,4 +33,5 @@ from .module_geojson import ShapeFileFromGeoJSON
 from .module_s3 import *
 from .rasterlike import RasterLike
 from .rasterizelike import RasterizeLike
+from .module_gdal import *
 from .gdalwarp import gdalwarp

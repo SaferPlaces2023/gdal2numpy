@@ -229,6 +229,7 @@ def GetGeometryType(filename):
         ds = None
     return None
 
+
 def Rectangle(minx, miny, maxx, maxy):
     """
     Rectangle - create ogr polygon from bbox
