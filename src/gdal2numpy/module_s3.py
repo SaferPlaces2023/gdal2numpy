@@ -150,18 +150,11 @@ def tempname4S3(uri):
     return tmp
 
 
-def s3_upload(filename, uri, remove_src=False, deltaT = None, client=None):
+def s3_upload(filename, uri, remove_src=False, client=None):
     """
     Upload a file to an S3 bucket
     Examples: s3_upload(filename, "s3://saferplaces.co/a/rimini/lidar_rimini_building_2.tif")
     """
-    if deltaT and isinstance(deltaT, int):
-        deltaT = datetime.timedelta(hours=deltaT)
-        expiration_date = datetime.datetime.utcnow() + deltaT
-    elif deltaT and isinstance(deltaT, datetime.timedelta):
-        expiration_date = datetime.datetime.utcnow() + deltaT
-    else:
-        expiration_date = None
 
     # Upload the file
     try:
@@ -173,13 +166,13 @@ def s3_upload(filename, uri, remove_src=False, deltaT = None, client=None):
             else:
                 Logger.debug(
                     f"uploading {filename} into {bucket_name}/{key}...")
-                if deltaT:
-                    extra = {"Expires": expiration_date.isoformat()}
-                else:
-                    extra = None
+
+                extra_args = {}
+
                 client.upload_file(Filename=filename,
                                    Bucket=bucket_name, Key=key,
-                                   ExtraArgs=extra)
+                                   ExtraArgs=extra_args)
+                
                 
             if remove_src:
                 Logger.debug(f"removing {filename}")
@@ -307,14 +300,14 @@ def s3_move(src, dst, client=None):
     return res
 
 
-def copy(src, dst=None, deltaT=None, client=None):
+def copy(src, dst=None, client=None):
     """
     copy
     """
     dst = dst if dst else tempname4S3(src)
 
     if os.path.isfile(src) and iss3(dst):
-        s3_upload(src, dst, deltaT=deltaT, client=client)
+        s3_upload(src, dst, client=client)
     elif iss3(src) and not iss3(dst):
         s3_download(src, dst, client=client)
     elif iss3(src) and iss3(dst):
@@ -329,18 +322,18 @@ def copy(src, dst=None, deltaT=None, client=None):
         exts = [] #["tfw", "jpw", "prj", "aux.xml"]
         
     for ext in exts:
-        copy(forceext(src,ext), forceext(dst,ext))
+        copy(forceext(src,ext), forceext(dst,ext), client=client)
 
     return dst
 
-def move(src, dst, deltaT=None, client=None):
+def move(src, dst, client=None):
     """
     move
     """
     dst = dst if dst else tempname4S3(src)
 
     if os.path.isfile(src) and iss3(dst):
-        s3_upload(src, dst, remove_src=True, deltaT=deltaT, client=client)
+        s3_upload(src, dst, remove_src=True, client=client)
     elif iss3(src) and not iss3(dst):
         s3_download(src, dst, remove_src=True, client=client)
     elif iss3(src) and iss3(dst):
@@ -355,6 +348,6 @@ def move(src, dst, deltaT=None, client=None):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         
     for ext in exts:
-        move(forceext(src,ext), forceext(dst,ext))
+        move(forceext(src,ext), forceext(dst,ext), client=client)
 
     return dst

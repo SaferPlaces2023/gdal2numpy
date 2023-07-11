@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.166"
+VERSION = "0.0.167"
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi"
 EMAIL = "valerio.luzzi@gecosistema.com"
@@ -23,5 +23,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["psutil","gdal", "numpy", "boto3"]
+    install_requires=["psutil", "gdal", "numpy", "boto3"]
 )
