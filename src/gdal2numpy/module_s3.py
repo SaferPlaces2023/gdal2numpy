@@ -82,7 +82,7 @@ def get_client(client=None):
     return client if client else boto3.client('s3')
 
 
-def etag(filename, client=None, chunk_size=16 * 1024 * 1024):
+def etag(filename, client=None, chunk_size=8 * 1024 * 1024):
     """
     calculates a multipart upload etag for amazon s3
     Arguments:
