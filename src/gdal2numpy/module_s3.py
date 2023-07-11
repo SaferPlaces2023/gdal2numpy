@@ -125,15 +125,11 @@ def s3_equals(file1, file2, client=None):
     """
     etag1 = etag(file1, client)
     etag2 = etag(file2, client)
-    etag1a = etag(file1, client, chunk_size=15* 1024 * 1024) if os.path.isfile(file1) else etag1
-    etag2a = etag(file2, client, chunk_size=14* 1024 * 1024) if os.path.isfile(file2) else etag2
-    print(etag1)
-    print(etag1a)
-    print(etag2)
-    print(etag2a)
-    print("---")
+    print(file1, etag1) 
+    print(file2, etag2)
+    print("====================================")
     if etag1 and etag2:
-        return etag1 == etag2 or etag1 ==etag2a or etag1a == etag2 or etag1a == etag2a
+        return etag1 == etag2
     return False
 
 
