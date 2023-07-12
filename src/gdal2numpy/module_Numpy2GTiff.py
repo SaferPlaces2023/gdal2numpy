@@ -53,6 +53,18 @@ def GTiff2Cog(filetif, fileout, algo="NEAREST", verbose=False):
     ds = gdal.Open(filetif, 1) # open the file in write mode to build overviews
     if not ds:
         return None
+    # Set the statistics
+    dtype = ds.GetRasterBand(1).DataType
+    arr = ds.GetRasterBand(1).ReadAsArray()
+    nodata = ds.GetRasterBand(1).GetNoDataValue()
+    if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
+        data = np.array(arr)
+        data[data == nodata] = np.nan
+        minValue = float(np.nanmin(arr))
+        maxValue = float(np.nanmax(arr))
+        meanValue = float(np.nanmean(arr))
+        stdValue = float(np.nanstd(arr))
+        ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
 
     driver = gdal.GetDriverByName("COG")
     if driver:
@@ -74,6 +86,7 @@ def GTiff2Cog(filetif, fileout, algo="NEAREST", verbose=False):
         driver = gdal.GetDriverByName("GTiff")  # GTiff or MEM
         dst_ds = driver.CreateCopy(fileout, ds, False, CO)
         dst_ds = None
+    
     ds = None
 
     return fileout if os.path.isfile(fileout) else None
