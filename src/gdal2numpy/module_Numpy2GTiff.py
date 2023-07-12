@@ -58,13 +58,12 @@ def GTiff2Cog(filetif, fileout, algo="NEAREST", verbose=False):
     arr = ds.GetRasterBand(1).ReadAsArray()
     nodata = ds.GetRasterBand(1).GetNoDataValue()
     if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
-        data = np.array(arr)
-        data[data <= -9999] = np.nan
+        arr[arr <= -9999] = np.nan
         minValue = float(np.nanmin(arr))
         maxValue = float(np.nanmax(arr))
         meanValue = float(np.nanmean(arr))
         stdValue = float(np.nanstd(arr))
-        print(f"minValue={minValue}, maxValue={maxValue}, meanValue={meanValue}, stdValue={stdValue}")
+        #print(f"minValue={minValue}, maxValue={maxValue}, meanValue={meanValue}, stdValue={stdValue}")
         ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
 
     driver = gdal.GetDriverByName("COG")
@@ -163,10 +162,10 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
                 data = np.array(arr)
                 data[data == save_nodata_as] = np.nan
-                minValue = float(np.nanmin(arr))
-                maxValue = float(np.nanmax(arr))
-                meanValue = float(np.nanmean(arr))
-                stdValue = float(np.nanstd(arr))
+                minValue = float(np.nanmin(data))
+                maxValue = float(np.nanmax(data))
+                meanValue = float(np.nanmean(data))
+                stdValue = float(np.nanstd(data))
                 ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
             # ---
 
