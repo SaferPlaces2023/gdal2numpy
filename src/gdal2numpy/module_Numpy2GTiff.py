@@ -59,7 +59,7 @@ def GTiff2Cog(filetif, fileout, algo="NEAREST", verbose=False):
     nodata = ds.GetRasterBand(1).GetNoDataValue()
     if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
         data = np.array(arr)
-        data[data == nodata] = np.nan
+        data[data <= -9999] = np.nan
         minValue = float(np.nanmin(arr))
         maxValue = float(np.nanmax(arr))
         meanValue = float(np.nanmean(arr))
