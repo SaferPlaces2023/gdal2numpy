@@ -28,7 +28,7 @@ from osgeo import ogr
 from .module_features import GetNumericFieldNames, Transform
 from .module_s3 import copy, iss3
 from .module_gdal import OpenRaster
-from .module_features import OpenShape
+from .module_openshape import OpenShape
 from .module_log import Logger
 
 dtypeOf = {

@@ -30,8 +30,8 @@ import site
 from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
 from .filesystem import justext, juststem, forceext, justpath, isshape, israster, strtofile
-
-
+from .module_gdal import OpenRaster
+from .module_openshape import OpenShape
 
 def create_cpg(fileshp):
     """
@@ -254,7 +254,8 @@ def GetExtent(filename, t_srs=None):
     minx, miny, maxx, maxy = 0, 0, 0, 0
     ext = justext(filename).lower()
     if ext == "tif":
-        ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        #ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        ds = OpenRaster(filename)
         if ds:
             "{xmin} {ymin} {xmax} {ymax}"
             m, n = ds.RasterYSize, ds.RasterXSize
@@ -271,8 +272,9 @@ def GetExtent(filename, t_srs=None):
     elif ext in ("shp", "dbf"):
 
         filename = forceext(filename, "shp")
-        driver = ogr.GetDriverByName("ESRI Shapefile")
-        ds = driver.Open(filename, 0)
+        #driver = ogr.GetDriverByName("ESRI Shapefile")
+        #ds = driver.Open(filename, 0)
+        ds = OpenShape(filename, 0)
         if ds:
             layer = ds.GetLayer()
             minx, maxx, miny, maxy = layer.GetExtent()

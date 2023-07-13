@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         test_upload_s3: 
         """
         filetif = f"{workdir}/lidar_rimini_building_2.tif"
-        filer = "s3://saferplaces.co/test/lidar_rimini_building_2.tif"
+        filer = "s3://ead.saferplaces.co/test/lidar_rimini_building_2.tif"
         copy(filetif, filer)
         etag1 = etag(filetif)
         etag2 = etag(filer)
