@@ -56,16 +56,16 @@ def GetTransform(filename):
     return None
 
 
-def GetNoData(filename):
+def GetNoData(filename, band=1):
     """
     GetNoData
     """
     ds = OpenRaster(filename)
     if ds:
-        band = ds.GetRasterBand(1)
-        no_data = band.GetNoDataValue()
-        data, band, ds = None, None, None
-        return no_data
+        # check if band exists
+        if band>0 and band <= ds.RasterCount:
+            bandx = ds.GetRasterBand(band)
+            return bandx.GetNoDataValue()
     return None
 
 

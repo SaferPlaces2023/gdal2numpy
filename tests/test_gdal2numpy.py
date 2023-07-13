@@ -38,6 +38,7 @@ class Test(unittest.TestCase):
         """
         filedem = "s3://saferplaces.co/test/lidar_rimini_building_2.tif"
         data, gt, prj = GDAL2Numpy(filedem, load_nodata_as=np.nan)
+        print(prj)
         self.assertTrue(data.size>0)
 
    

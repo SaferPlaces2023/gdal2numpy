@@ -27,6 +27,7 @@ import numpy as np
 from osgeo import gdal, gdalconst
 from .filesystem import justpath, mkdirs
 from .module_open import OpenRaster
+from .module_ogr import GetSpatialRef
 from .module_s3 import *
 from .module_log import Logger
 
@@ -154,6 +155,8 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             if gt is not None:
                 ds.SetGeoTransform(gt)
             if prj is not None:
+                srs = GetSpatialRef(prj)
+                prj = srs.ExportToWkt()
                 ds.SetProjection(prj)
             if metadata is not None:
                 ds.SetMetadata(metadata)
