@@ -23,6 +23,7 @@ class Test(unittest.TestCase):
         """
         test_distance 
         """
+        print("test_distance")
         #fileline = f"{workdir}/lidar_rimini_building_2.shoreline.tif"
         fileline = f"s3://saferplaces.co/test/lidar_rimini_building_2.shoreline.tif"
         fileout  = f"s3://saferplaces.co/test/lidar_rimini_building_2.dist.tif"

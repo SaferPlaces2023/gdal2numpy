@@ -35,15 +35,16 @@ def OpenShape(fileshp, exclusive=False):
     if not fileshp:
         ds = None
     elif isinstance(fileshp, str) and isshape(fileshp):
-        Logger.info(f"Opening {fileshp}...")
+        Logger.debug(f"Opening {fileshp}...")
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, str) and iss3(fileshp) and fileshp.endswith(".shp"):
+        Logger.debug(f"Downloading file from s3...")
         ds = ogr.Open(copy(fileshp), exclusive)
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
-        Logger.info(f"Dataset already open...")
+        Logger.debug(f"Dataset already open...")
         ds = fileshp
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) < exclusive:
-        Logger.info(f"Change the open mode: Open({exclusive})")
+        Logger.debug(f"Change the open mode: Open({exclusive})")
         ds = ogr.Open(fileshp.GetName(), exclusive)
     else:
         ds = None

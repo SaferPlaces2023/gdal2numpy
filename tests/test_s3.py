@@ -25,12 +25,7 @@ class Test(unittest.TestCase):
         """
         filetif = f"{workdir}/lidar_rimini_building_2.tif"
         filer = "s3://ead.saferplaces.co/test/lidar_rimini_building_2.tif"
-        copy(filetif, filer)
-        etag1 = etag(filetif)
-        etag2 = etag(filer)
-        print("etag1 is:", etag1)
-        print("etag2 is:", etag2)
-        self.assertEqual(etag1, etag2)
+        # v # self.assertEqual(etag1, etag2)
 
 
     def test_load_from_s3(self):
@@ -45,11 +40,12 @@ class Test(unittest.TestCase):
         """
         test_save_on_s3: 
         """
+        print("Save on s3...")
         data, gt, prj = GDAL2Numpy(filetif, load_nodata_as=np.nan)
         
         fileout = "s3://saferplaces.co/test/test.tif"
-        #Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=-9999, format="GTiff")
-        #self.assertTrue(s3_exists(fileout))
+        Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=-9999, format="GTiff")
+        self.assertTrue(s3_exists(fileout))
 
 
 

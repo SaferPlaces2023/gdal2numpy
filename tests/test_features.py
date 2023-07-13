@@ -11,6 +11,7 @@ class TestFeatures(unittest.TestCase):
         """
         test_get_fieldnames: test that the function returns the correct field names
         """
+        
         result = GetFieldNames(fileshp)
         self.assertEqual(result, ['FID', 'height', 'descr', 'val', 'mit'])
 

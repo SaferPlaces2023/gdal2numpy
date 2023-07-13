@@ -4,6 +4,7 @@ dist
 .idea
 .idea/*
 venv
+tests/__pycache__
 tests/*.tif
 tests/*.shp
 tests/*.shx
