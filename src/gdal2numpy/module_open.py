@@ -22,7 +22,8 @@
 #
 # Created:     31/12/2022
 # -------------------------------------------------------------------------------
-from osgeo import ogr
+import os
+from osgeo import ogr, gdal
 from .filesystem import isshape, isshape
 from .module_log import Logger
 from .module_s3 import iss3, copy
@@ -70,3 +71,43 @@ def GetAccess(ds):
     return res
 
 
+def isstring(s):
+    """
+    isstring
+    """
+    return isinstance(s, str)
+
+
+def OpenRaster(filename, update=0):
+    """
+    OpenRaster
+    """
+    if not filename:
+        return None
+    elif isstring(filename) and filename.lower().endswith(".tif"):
+        
+        if os.path.isfile(filename):
+            pass
+        elif filename.lower().startswith("http"):
+            filename = f"/vsicurl/{filename}"
+        elif ".zip/" in filename.lower():
+            filename = f"/vsizip/{filename}"
+        elif ".gz/" in filename.lower():
+            filename = f"/vsigzip/{filename}"
+        elif ".tar/" in filename.lower():
+            filename = f"/vsitar/{filename}"
+        elif ".tar.gz/" in filename.lower():
+            filename = f"/vsitar/{filename}"
+        elif ".tgz/" in filename.lower():
+            filename = f"/vsitar/{filename}"
+        elif ".7z/" in filename.lower():
+            filename = f"/vsi7z/{filename}"
+        elif ".rar/" in filename.lower():
+            filename = f"/vsirar/{filename}"
+        elif iss3(filename):
+            filename = copy(filename)
+    else:
+        return None
+    
+    ds = ds if isinstance(filename, gdal.Dataset) else gdal.Open(filename, update)
+    return ds

@@ -25,7 +25,7 @@
 import os
 from osgeo import ogr
 from .filesystem import justpath, listify, tempfilename
-from .module_openshape import OpenShape
+from .module_open import OpenShape
 from .module_s3 import iss3, move, tempname4S3
 from .module_log import Logger
 

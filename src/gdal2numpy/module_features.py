@@ -29,7 +29,7 @@ from .filesystem import isshape, isshape, md5sum
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_log import Logger
 from .module_s3 import iss3, copy
-from .module_openshape import OpenShape
+from .module_open import OpenShape
 
 
 

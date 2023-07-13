@@ -27,8 +27,8 @@ from osgeo import gdal, gdalconst
 from osgeo import ogr
 from .module_features import GetNumericFieldNames, Transform
 from .module_s3 import copy, iss3
-from .module_gdal import OpenRaster
-from .module_openshape import OpenShape
+from .module_open import OpenRaster
+from .module_open import OpenShape
 from .module_log import Logger
 
 dtypeOf = {
@@ -60,14 +60,12 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
     fileshp = copy(fileshp) if iss3(fileshp) else fileshp
     fileshp = Transform(fileshp, filedem)
 
-    #dataset = gdal.Open(filedem, gdalconst.GA_ReadOnly)
-    #vector = ogr.OpenShared(fileshp)
-    dataset = OpenRaster(filedem)
+    ds = OpenRaster(filedem)
     vector = ogr.OpenShared(fileshp)
-    if dataset and vector:
-        band = dataset.GetRasterBand(1)
-        m, n = dataset.RasterYSize, dataset.RasterXSize
-        gt, prj = dataset.GetGeoTransform(), dataset.GetProjection()
+    if ds and vector:
+        band = ds.GetRasterBand(1)
+        m, n = ds.RasterYSize, ds.RasterXSize
+        gt, prj = ds.GetGeoTransform(), ds.GetProjection()
         nodata = band.GetNoDataValue() if nodata is None else nodata
         dtype = dtypeOf[dtype] if dtype else band.DataType
 
@@ -117,7 +115,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
 
         data = band.ReadAsArray(0, 0, n, m)
 
-        dataset, vector, target_ds = None, None, None
+        ds, vector, target_ds = None, None, None
         return data, gt, prj
 
     Logger.error(f"file <{fileshp}> or <{filedem}> does not exist!")

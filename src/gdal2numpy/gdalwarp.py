@@ -26,6 +26,7 @@ import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename
 from .module_ogr import SetGDALEnv, RestoreGDALEnv
+from .module_open import OpenRaster
 
 def reasampling_method(method):
     """
@@ -94,7 +95,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     SetGDALEnv()
     # inplace gdalwarp
     if fileout == filelist:
-        fileout = gdal.Open(filelist, gdalconst.GA_Update)
+        fileout = OpenRaster(fileout, update=True)
     # ----
     gdal.Warp(fileout, filelist, **kwargs)
     RestoreGDALEnv()

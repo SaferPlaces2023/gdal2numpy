@@ -30,8 +30,8 @@ import site
 from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
 from .filesystem import justext, juststem, forceext, justpath, isshape, israster, strtofile
-from .module_gdal import OpenRaster
-from .module_openshape import OpenShape
+from .module_open import OpenRaster
+from .module_open import OpenShape
 
 def create_cpg(fileshp):
     """
@@ -183,13 +183,13 @@ def GetSpatialRef(filename):
         srs.ImportFromWkt(wkt)
 
     elif isinstance(filename, str) and isshape(filename):
-        ds = ogr.OpenShared(filename)
+        ds = OpenShape(filename)
         if ds:
             srs = ds.GetLayer().GetSpatialRef()
         ds = None
 
     elif isinstance(filename, str) and israster(filename):
-        ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        ds = OpenRaster(filename)
         if ds:
             wkt = ds.GetProjection()
             srs = osr.SpatialReference()
@@ -254,7 +254,6 @@ def GetExtent(filename, t_srs=None):
     minx, miny, maxx, maxy = 0, 0, 0, 0
     ext = justext(filename).lower()
     if ext == "tif":
-        #ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
         ds = OpenRaster(filename)
         if ds:
             "{xmin} {ymin} {xmax} {ymax}"

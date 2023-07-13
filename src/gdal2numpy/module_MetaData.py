@@ -26,17 +26,19 @@ import os
 import numpy as np
 from osgeo import gdal, gdalconst
 from .filesystem import forceext, israster, isshape, filetojson, jsontofile
+from .module_s3 import isfile
 from .module_GDAL2Numpy import GDAL2Numpy
 from .module_Numpy2GTiff import Numpy2GTiff
 from .module_features import GetRange
 from .module_ogr import GetExtent
+from .module_open import OpenRaster
 
 
 def GetRasterShape(filename):
     """
     GetRasterShape
     """
-    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    ds = OpenRaster(filename)
     if ds:
         m, n = ds.RasterYSize, ds.RasterXSize
         return m, n
@@ -47,7 +49,7 @@ def GetNoData(filename):
     """
     GetNoData
     """
-    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    ds = OpenRaster(filename)
     if ds:
         band = ds.GetRasterBand(1)
         no_data = band.GetNoDataValue()
@@ -60,11 +62,11 @@ def SetNoData(filename, nodata):
     """
     SetNoData
     """
-    dataset = gdal.Open(filename, gdalconst.GA_Update)
-    if dataset:
-        band = dataset.GetRasterBand(1)
+    ds = OpenRaster(filename, gdalconst.GA_Update)
+    if ds:
+        band = ds.GetRasterBand(1)
         nodata = band.SetNoDataValue(nodata)
-        data, band, dataset = None, None, None
+        data, band, ds = None, None, None
     return None
 
 
@@ -72,7 +74,7 @@ def GDALFixNoData(filename, format="GTiff", nodata=-9999):
     """
     GDALFixNoData
     """
-    if os.path.isfile(filename):
+    if isfile(filename):
         data, gt, prj = GDAL2Numpy(filename, load_nodata_as=nodata)
         data[abs(data) >= 1e10] = nodata
         Numpy2GTiff(data, gt, prj, filename, format=format, save_nodata_as=nodata)
@@ -84,8 +86,8 @@ def IsEmpty(filename, nodata=-9999):
     """
     IsEmpty - check all values are nodata
     """
-    if os.path.isfile(filename):
-        ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    if isfile(filename):
+        ds = OpenRaster(filename)
         if ds:
             band = ds.GetRasterBand(1)
             nodata = band.GetNoDataValue()
@@ -117,7 +119,7 @@ def GetMetaData(filename):
     :return: returns a dictionary with metadata
     """
     if israster(filename):
-        ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        ds = OpenRaster(filename)
         if ds:
             m, n = ds.RasterYSize, ds.RasterXSize
             band = ds.GetRasterBand(1)
@@ -152,7 +154,7 @@ def GetTag(filename, tagname, band=0):
     GetTag - get a tag in metadata of the file or of the band if specified
     """
     if israster(filename):
-        ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        ds = OpenRaster(filename)
         if ds:
             if not band:
                 metadata = ds.GetMetadata()
@@ -178,7 +180,7 @@ def SetTag(filename, tagname, tagvalue="", band=0):
     SetTag - set a tag in metadata of the file or of the band if specified
     """
     if israster(filename):
-        ds = gdal.Open(filename, gdalconst.GA_Update)
+        ds = OpenRaster(filename, gdalconst.GA_Update)
         if ds:
             if tagname:
                 if not band:
@@ -207,7 +209,7 @@ def SetTags(filename, meta, band=0):
     SetTags - set tags metadata of the file or of the band if specified
     """
     if israster(filename):
-        ds = gdal.Open(filename, gdalconst.GA_Update)
+        ds = OpenRaster(filename, gdalconst.GA_Update)
         if ds:
             for tagname in meta:
                 tagvalue = meta[tagname]

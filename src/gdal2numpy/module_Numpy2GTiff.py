@@ -24,8 +24,9 @@
 # -------------------------------------------------------------------------------
 import os
 import numpy as np
-from osgeo import gdal
+from osgeo import gdal, gdalconst
 from .filesystem import justpath, mkdirs
+from .module_open import OpenRaster
 from .module_s3 import *
 from .module_log import Logger
 
@@ -50,7 +51,7 @@ def GTiff2Cog(filetif, fileout, algo="NEAREST", verbose=False):
     GTiff2Cog - Convert a GTiff to COG
     algo = one of "AVERAGE", "AVERAGE_MAGPHASE", "RMS", "BILINEAR", "CUBIC", "CUBICSPLINE", "GAUSS", "LANCZOS", "MODE", "NEAREST", or "NONE"
     """
-    ds = gdal.Open(filetif, 1) # open the file in write mode to build overviews
+    ds = OpenRaster(filetif, gdalconst.GA_Update) # open the file in write mode to build overviews
     if not ds:
         return None
     # Set the statistics
