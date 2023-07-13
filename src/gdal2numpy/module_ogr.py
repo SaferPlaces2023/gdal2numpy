@@ -115,7 +115,7 @@ def GetPixelSize(filename, um="m"):
     """
     GetPixelSize
     """
-    ds = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    ds = OpenRaster(filename)
     if ds:
         m, n = ds.RasterYSize, ds.RasterXSize
         minx, px, _, maxy, _, py = ds.GetGeoTransform()
@@ -218,7 +218,7 @@ def GetGeometryType(filename):
     :param filename:
     :return:
     """
-    ds = ogr.OpenShared(filename)
+    ds = OpenShape(filename, 0)
     if ds:
         lyr = ds.GetLayer()
         if lyr:
