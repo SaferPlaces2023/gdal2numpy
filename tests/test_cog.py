@@ -5,7 +5,7 @@ from gdal2numpy import *
 
 workdir = justpath(__file__)
 
-filetif = f"{workdir}/32632_DEM_2m.tif"
+filetif = f"{workdir}/data/CLSA_LiDAR.tif"
 
 
 class Test(unittest.TestCase):
@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
         """
         test_cog: 
         """
-        fileout = f"{workdir}/32632_DEM_2m_cog.tif"
+        fileout = f"{workdir}/data/CLSA_LiDAR.cog.tif"
         GTiff2Cog(filetif, fileout)  
         self.assertTrue(os.path.exists(fileout))      
 

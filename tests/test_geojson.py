@@ -41,22 +41,17 @@ class Test(unittest.TestCase):
             }
         }
         features = [f1, f2]
-        ShapeFileFromGeoJSON(features, fileshp)
+        #ShapeFileFromGeoJSON(features, fileshp)
 
-    def test_file(self):
+
+
+    def test_s3(self):
         """
-        test_file: 
+        test_s3: 
         """
-        filegeojson = f"{workdir}/pourpoints.json"
-        fileshp = f"{workdir}/pourpoints.shp"
-        features = []
-        with open(filegeojson) as f:
-            line = f.readline()
-            while line:
-                feature = json.loads(line)
-                features.append(feature)
-                line = f.readline()
-        ShapeFileFromGeoJSON(features, fileshp)
+        filegeojson = f"s3://saferplaces.co/test/pourpoints.json"
+        fileshp = f"{workdir}/data/pourpoints.shp"
+        ShapeFileFromGeoJSON(filegeojson, fileshp)
 
 
 if __name__ == '__main__':

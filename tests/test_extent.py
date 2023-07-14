@@ -5,7 +5,7 @@ from gdal2numpy import *
 
 workdir = justpath(__file__)
 
-filetif = f"{workdir}/CLSA_LiDAR.tif"
+filetif = f"{workdir}/data/CLSA_LiDAR.tif"
 
 
 class Test(unittest.TestCase):
@@ -23,8 +23,9 @@ class Test(unittest.TestCase):
         """
         test_upload_s3: 
         """
-        filetif = f"{workdir}/lidar_rimini_building_2.tif"
-        filer = "s3://ead.saferplaces.co/test/lidar_rimini_building_2.tif"
+        
+        filer = "s3://saferplaces.co/test/CLSA_LiDAR.tif"
+        copy(filetif, filer)
         ext1 = GetExtent(filetif)
         ext2 = GetExtent(filer)
         print("ext1 is:", ext1)

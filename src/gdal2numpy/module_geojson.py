@@ -28,8 +28,7 @@ import json
 from osgeo import ogr
 from .filesystem import justpath
 from .module_ogr import GetSpatialRef
-from .module_s3 import iss3, move, get_bucket_name_key
-
+from .module_s3 import *
 
 def infer_geometry_type(features):
     """
@@ -96,13 +95,38 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
     fileshp = fileout or f"{justpath(__file__)}/temp.shp"
     _, fileshp = get_bucket_name_key(fileshp)
     os.makedirs(justpath(fileshp), exist_ok=True)
-    # detect geometry type from first feature
+    
     if features:
+
+        # case 1: features is a list of features
+        if isinstance(features, (list, tuple)):
+            pass
+        # case 2: features is a dict with type FeatureCollection
+        elif isinstance(features, dict) and features["type"] == "FeatureCollection":
+            if "crs" in features:
+                t_srs = features["crs"]["properties"]["name"]
+            features = features["features"]
+        # case 3: features is a geojson file name
+        elif isinstance(features, str) and isfile(features):
+            filetmp = copy(features) if iss3(features) else features
+            with open(filetmp, "r") as fp:
+                text = fp.read()
+                if "FeatureCollection" in text:
+                    FeatureCollection = json.loads(text)
+                    if "crs" in FeatureCollection:
+                        t_srs = FeatureCollection["crs"]["properties"]["name"]
+                    features = FeatureCollection["features"]
+                else:
+                    features = text.split("\n")
+                    features = [json.loads(feature) for feature in features if feature]
+        else:
+            Logger.error(f"features type not supported: {type(features)}")
+            return 
+        # detect geometry type from first feature
         first = features[0]
         geom = ogr.CreateGeometryFromJson(json.dumps(first["geometry"]))
         geom_type = geom.GetGeometryType()
         geom.Destroy()
-        
         # create spatial reference
         t_srs = GetSpatialRef(t_srs)
 
