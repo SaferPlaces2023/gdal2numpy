@@ -30,6 +30,7 @@ from .filesystem import justpath
 from .module_ogr import GetSpatialRef
 from .module_s3 import *
 
+
 def infer_geometry_type(features):
     """
     infer_geometry_type
@@ -55,8 +56,8 @@ def infer_width(features, fieldname, default_width=6):
         fieldvalue = feature["properties"][fieldname]
         if isinstance(fieldvalue, float) and "." in f"{fieldvalue}":
             coma = 1
-            precision = max( len(f"{fieldvalue}".split(".")[-1]), precision)
-        int_part = max( len(f"{fieldvalue}".split(".")[0]), int_part)
+            precision = max(len(f"{fieldvalue}".split(".")[-1]), precision)
+        int_part = max(len(f"{fieldvalue}".split(".")[0]), int_part)
 
     width = int_part+coma+precision
     return width, precision
@@ -95,7 +96,7 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
     fileshp = fileout or f"{justpath(__file__)}/temp.shp"
     _, fileshp = get_bucket_name_key(fileshp)
     os.makedirs(justpath(fileshp), exist_ok=True)
-    
+
     if features:
 
         # case 1: features is a list of features
@@ -118,10 +119,11 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
                     features = FeatureCollection["features"]
                 else:
                     features = text.split("\n")
-                    features = [json.loads(feature) for feature in features if feature]
+                    features = [json.loads(feature)
+                                for feature in features if feature]
         else:
             Logger.error(f"features type not supported: {type(features)}")
-            return 
+            return
         # detect geometry type from first feature
         first = features[0]
         geom = ogr.CreateGeometryFromJson(json.dumps(first["geometry"]))
@@ -139,7 +141,7 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
         # - create new shapefile
         ds = driver.CreateDataSource(fileshp)
         layer = ds.CreateLayer(fileshp, geom_type=geom_type, srs=t_srs)
-        
+
         # create fields from first feature
         fields = infer_layerDefn(features)
         for field in fields:
@@ -154,7 +156,8 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
             ogr_feature.SetGeometry(geom)
             for field in fields:
                 fieldname = field.GetName()
-                ogr_feature.SetField(fieldname, feature["properties"][fieldname])
+                ogr_feature.SetField(
+                    fieldname, feature["properties"][fieldname])
 
             layer.CreateFeature(ogr_feature)
             ogr_feature = None
