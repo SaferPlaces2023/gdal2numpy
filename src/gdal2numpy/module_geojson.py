@@ -27,6 +27,7 @@ import json
 
 from osgeo import ogr
 from .module_ogr import GetSpatialRef
+from .module_s3 import iss3, move, get_bucket_name_key
 
 
 def infer_geometry_type(features):
@@ -87,12 +88,14 @@ def infer_layerDefn(features):
     return fields
 
 
-def ShapeFileFromGeoJSON(features, fileshp="", t_srs=4326):
+def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
     """
     ShapeFileFromGeoJSON
     """
     driver = ogr.GetDriverByName("ESRI Shapefile")
-    fileshp = fileshp or os.path.join(os.path.dirname(__file__), "temp.shp")
+    
+    fileshp = fileout or os.path.join(os.path.dirname(__file__), "temp.shp")
+    _, fileshp = get_bucket_name_key(fileshp)
 
     # detect geometry type from first feature
     if features:
@@ -133,3 +136,6 @@ def ShapeFileFromGeoJSON(features, fileshp="", t_srs=4326):
             ogr_feature = None
 
         ds.Destroy()
+
+        if iss3(fileout):
+            move(fileshp, fileout)
