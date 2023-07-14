@@ -26,6 +26,7 @@ import os
 import json
 
 from osgeo import ogr
+from .filesystem import justpath
 from .module_ogr import GetSpatialRef
 from .module_s3 import iss3, move, get_bucket_name_key
 
@@ -92,11 +93,9 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
     """
     ShapeFileFromGeoJSON
     """
-    driver = ogr.GetDriverByName("ESRI Shapefile")
-    
-    fileshp = fileout or os.path.join(os.path.dirname(__file__), "temp.shp")
+    fileshp = fileout or f"{justpath(__file__)}/temp.shp"
     _, fileshp = get_bucket_name_key(fileshp)
-
+    os.makedirs(justpath(fileshp), exist_ok=True)
     # detect geometry type from first feature
     if features:
         first = features[0]
@@ -109,6 +108,7 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
 
         # create shapefile
         # - if exists, delete
+        driver = ogr.GetDriverByName("ESRI Shapefile")
         if os.path.exists(fileshp):
             driver.DeleteDataSource(fileshp)
 

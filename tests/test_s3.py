@@ -48,6 +48,26 @@ class Test(unittest.TestCase):
         self.assertTrue(s3_exists(fileout))
 
 
+    def test_save_json(self):
+        """
+        test_save_json
+        """
+        fileout = "s3://saferplaces.co/test/features.shp"
+        features = [
+            {
+                "type": "Feature",
+                "properties": {
+                    "name": "Coors Field",
+                    "amenity": "Baseball Stadium",
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [-104.99404, 39.75621]
+                }
+            }
+        ]
+        ShapeFileFromGeoJSON(features, fileout, t_srs=4326)
+
 
 if __name__ == '__main__':
     unittest.main()
