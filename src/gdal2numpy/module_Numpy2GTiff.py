@@ -155,8 +155,9 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             if gt is not None:
                 ds.SetGeoTransform(gt)
             if prj is not None:
-                # srs = GetSpatialRef(prj)
-                # prj = srs.ExportToWkt()
+                if not f"{prj}".upper().startswith("PROJCS["):
+                    srs = GetSpatialRef(prj)
+                    prj = srs.ExportToWkt()
                 ds.SetProjection(prj)
             if metadata is not None:
                 ds.SetMetadata(metadata)

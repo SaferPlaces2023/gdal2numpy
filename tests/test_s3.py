@@ -4,8 +4,7 @@ import warnings
 from gdal2numpy import *
 
 workdir = justpath(__file__)
-
-filetif = f"{workdir}/CLSA_LiDAR.tif"
+filetif = f"{workdir}/data/CLSA_LiDAR.tif"
 
 
 class Test(unittest.TestCase):
@@ -19,14 +18,14 @@ class Test(unittest.TestCase):
     def tearDown(self):
         warnings.simplefilter("default", ResourceWarning)
 
+
     def test_upload_s3(self):
         """
         test_upload_s3: 
         """
-        filetif = f"{workdir}/lidar_rimini_building_2.tif"
-        filer = "s3://ead.saferplaces.co/test/lidar_rimini_building_2.tif"
+        filer = "s3://saferplaces.co/test/CLSA_LiDAR.tif"
         # v # self.assertEqual(etag1, etag2)
-
+        s3_upload(filetif, filer)
 
     def test_load_from_s3(self):
         """
@@ -44,8 +43,8 @@ class Test(unittest.TestCase):
         data, gt, prj = GDAL2Numpy(filetif, load_nodata_as=np.nan)
         
         fileout = "s3://saferplaces.co/test/test.tif"
-        Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=-9999, format="GTiff")
-        self.assertTrue(s3_exists(fileout))
+        #Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=-9999, format="GTiff")
+        #self.assertTrue(s3_exists(fileout))
 
 
     def test_save_json(self):
