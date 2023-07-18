@@ -23,13 +23,15 @@
 # Created:     28/02/2022
 # -------------------------------------------------------------------------------
 import numpy as np
-from osgeo import gdal, gdalconst
-from osgeo import ogr
+from osgeo import gdal
+from osgeo import ogr, osr
 from .module_features import GetNumericFieldNames, Transform
 from .module_s3 import copy, iss3
 from .module_open import OpenRaster
 from .module_open import OpenShape
 from .module_log import Logger
+from .module_ogr import GetSpatialRef, SameSpatialRef
+from .module_Numpy2GTiff import Numpy2GTiff
 
 dtypeOf = {
     'Float32': np.float32,
@@ -48,20 +50,21 @@ dtypeOf = {
     np.float64: gdal.GDT_Float64,
 }
 
-def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
-                  z_value=None, factor=1.0, nodata=None):
+def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None, \
+                  z_value=None, factor=1.0, nodata=None, buf=0.0, all_touched=False):
     """
     RasterizeLike - Rasterize a shapefile like a raster file
     """
     gdal.SetConfigOption("SHAPE_RESTORE_SHX", "YES")
     gdal.SetConfigOption("SHAPE_ENCODING", "UTF-8")
+    burn_fieldname = burn_fieldname if burn_fieldname  else "FID"
 
     #filedem = copy(filedem) if iss3(filedem) else filedem
     fileshp = copy(fileshp) if iss3(fileshp) else fileshp
     fileshp = Transform(fileshp, filedem)
 
     ds = OpenRaster(filedem)
-    vector = ogr.OpenShared(fileshp)
+    vector = OpenShape(fileshp)
     if ds and vector:
         band = ds.GetRasterBand(1)
         m, n = ds.RasterYSize, ds.RasterXSize
@@ -70,12 +73,50 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
         dtype = dtypeOf[dtype] if dtype else band.DataType
 
         # Open the data source and read in the extent
-        layer = vector.GetLayer()
+        # layer = vector.GetLayer()
+        # Instead of just get the layer we copy the layer on memory
+        # and we add a buffer and we transform each geometry
+        # if needed
+        vlayer = vector.GetLayer()
+        s_srs = GetSpatialRef(vlayer.GetSpatialRef().ExportToWkt())
+        t_srs = GetSpatialRef(prj)
+        driver = ogr.GetDriverByName("MEMORY")
+        source = driver.CreateDataSource("memData")
+        layer = source.CreateLayer(vlayer.GetName(), t_srs, geom_type=vlayer.GetGeomType())
+        # Copy the fields from the source layer to the memory layer
+        layer_defn = vlayer.GetLayerDefn()
+        for j in range(layer_defn.GetFieldCount()):
+            layer.CreateField(layer_defn.GetFieldDefn(j))
+            layer.CreateField(ogr.FieldDefn("FID", ogr.OFTInteger))
+        # Copy the features from the source layer to the memory layer
+        for feature in vlayer:
+
+            # f is the feature in the memory layer & it has FID field
+            f = ogr.Feature(layer.GetLayerDefn())
+            geom = feature.GetGeometryRef()
+
+            # # Transform the geometry if it is not in the same projection as the raster
+            if not SameSpatialRef(s_srs, t_srs):
+                transform = osr.CoordinateTransformation(s_srs, t_srs)
+                geom.Transform(transform)
+
+            # add buffer
+            buffer = geom.Buffer(buf)
+
+            f.SetFrom(feature)
+            f.SetGeometry(buffer)
+            f.SetField("FID", feature.GetFID())
+            layer.CreateFeature(f)
+        #-----------------------------------------------------------------------
 
         # Create the destination data source
-        options = ["BIGTIFF=YES", "TILED=YES",
-              "BLOCKXSIZE=256", "BLOCKYSIZE=256", 
-              "COMPRESS=LZW"] if fileout else []
+        options = [
+            "BIGTIFF=YES", 
+            "TILED=YES",
+            "BLOCKXSIZE=256", 
+            "BLOCKYSIZE=256", 
+            "COMPRESS=LZW"
+        ] if fileout else []
         format = "GTiff" if fileout else "MEM"
         driver = gdal.GetDriverByName(format)
         target_ds = driver.Create(fileout, n, m, 1, dtype, options)
@@ -91,10 +132,10 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
         # Rasterize
         if factor == 0.0:
             # if factor is 0 then burn 0, may be this does not have much sense
-            gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[0.0])
+            gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[0.0], options=[f"ALL_TOUCHED={all_touched}"])
         elif burn_fieldname and burn_fieldname in fieldnames and factor==1.0:
             # if factor is 1 then burn the field value
-            gdal.RasterizeLayer(target_ds, [1], layer, options=[f"ATTRIBUTE={burn_fieldname.upper()}"])
+            gdal.RasterizeLayer(target_ds, [1], layer, options=[f"ATTRIBUTE={burn_fieldname.upper()}", f"ALL_TOUCHED={all_touched}"])
         elif burn_fieldname and burn_fieldname in fieldnames and factor!=1.0:
             # if factor is not 1 then burn the field value multiplied by factor
             # in case of fieldname we have to pre multiply the each feature value by factor
@@ -104,17 +145,18 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname="", \
             for feature in layercpy:
                 feature.SetField(burn_fieldname, feature.GetField(burn_fieldname) * factor)
                 layercpy.SetFeature(feature)
-            gdal.RasterizeLayer(target_ds, [1], layercpy, options=["ATTRIBUTE=%s" % (burn_fieldname.upper())])
+            gdal.RasterizeLayer(target_ds, [1], layercpy, options=["ATTRIBUTE=%s" % (burn_fieldname.upper()), f"ALL_TOUCHED={all_touched}"])
             memds, layercpy = None, None
         elif z_value is not None:
             # in case we hav not fieldname we burn the z_value
-            gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[z_value*factor])
+            gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[z_value*factor], options=[f"ALL_TOUCHED={all_touched}"])
         else:
             # in all other cases we burn 1
-            gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[1])
+            gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[1], options=[f"ALL_TOUCHED={all_touched}"])
 
         data = band.ReadAsArray(0, 0, n, m)
-
+        if fileout:
+            Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=nodata)
         ds, vector, target_ds = None, None, None
         return data, gt, prj
 

@@ -28,7 +28,6 @@ from osgeo import ogr, osr
 from .filesystem import isshape, isshape, md5sum
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_log import Logger
-from .module_s3 import iss3, copy
 from .module_open import OpenShape
 
 
@@ -236,7 +235,7 @@ def Transform(fileshp, t_srs, fileout=None):
     fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
 
     if isshape(fileout):
-        Logger.debug(f"Using cached file:<{fileout}>...")
+        Logger.debug("Using cached file:<%s>..."%fileout)
         return fileout
 
     ds = OpenShape(fileshp)
