@@ -45,7 +45,9 @@ dtypeOf = {
     np.int16: gdal.GDT_Int16,
     np.uint16: gdal.GDT_UInt16,
     np.int32: gdal.GDT_Int32,
+    np.int64: gdal.GDT_Int32,  # It is not an error gdal.GDT_Int64 does not exits!
     np.uint32: gdal.GDT_UInt32,
+    np.uint64: gdal.GDT_UInt32,  # It is not an error gdal.GDT_Int64 does not exits!
     np.float32: gdal.GDT_Float32,
     np.float64: gdal.GDT_Float64,
 }
