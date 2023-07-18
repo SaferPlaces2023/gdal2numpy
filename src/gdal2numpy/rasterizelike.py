@@ -121,8 +121,6 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
         ] if fileout else []
         format = "GTiff" if fileout else "MEM"
         driver = gdal.GetDriverByName(format)
-        print(fileout, n,m,1,   dtype, options)
-        print("======================================")
         target_ds = driver.Create(fileout if fileout else "", n, m, 1, dtype, options)
         if gt is not None:
             target_ds.SetGeoTransform(gt)
@@ -132,7 +130,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
         band.SetNoDataValue(nodata)
         band.Fill(nodata)
 
-        fieldnames = GetNumericFieldNames(fileshp)
+        fieldnames = GetNumericFieldNames(fileshp)+["FID"]
         # Rasterize
         if factor == 0.0:
             # if factor is 0 then burn 0, may be this does not have much sense
