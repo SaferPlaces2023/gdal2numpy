@@ -80,7 +80,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
         # and we add a buffer and we transform each geometry
         # if needed
         vlayer = vector.GetLayer()
-        s_srs = GetSpatialRef(vlayer.GetSpatialRef().ExportToWkt())
+        s_srs = GetSpatialRef(vlayer.GetSpatialRef())
         t_srs = GetSpatialRef(prj)
         driver = ogr.GetDriverByName("MEMORY")
         source = driver.CreateDataSource("memData")
