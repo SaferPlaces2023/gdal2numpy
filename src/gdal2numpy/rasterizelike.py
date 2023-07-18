@@ -121,6 +121,8 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
         ] if fileout else []
         format = "GTiff" if fileout else "MEM"
         driver = gdal.GetDriverByName(format)
+        print(fileout, n,m,1,   dtype, options)
+        print("======================================")
         target_ds = driver.Create(fileout, n, m, 1, dtype, options)
         if gt is not None:
             target_ds.SetGeoTransform(gt)
