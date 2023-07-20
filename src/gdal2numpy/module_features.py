@@ -229,8 +229,9 @@ def Transform(fileshp, t_srs, fileout=None):
     if SameSpatialRef(fileshp, t_srs):
         Logger.debug("Nothing to do. The srs is the same.")
         return fileshp
-
+    
     t_srs = GetSpatialRef(t_srs)
+
     t_code = f"{t_srs.GetAuthorityName(None)}_{t_srs.GetAuthorityCode(None)}"
     fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
 

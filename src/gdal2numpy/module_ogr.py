@@ -29,9 +29,10 @@ import shutil
 import site
 from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
-from .filesystem import justext, juststem, forceext, justpath, isshape, israster, strtofile
+from .filesystem import justext, juststem, forceext, justpath,  strtofile
 from .module_open import OpenRaster
 from .module_open import OpenShape
+from .module_s3 import isfile
 
 def create_cpg(fileshp):
     """
@@ -182,19 +183,18 @@ def GetSpatialRef(filename):
         srs = osr.SpatialReference()
         srs.ImportFromWkt(wkt)
 
-    elif isinstance(filename, str) and isshape(filename):
+    elif isinstance(filename, str) and isfile(filename) and filename.lower().endswith(".shp"):
         ds = OpenShape(filename)
         if ds:
             srs = ds.GetLayer().GetSpatialRef()
-        ds = None
 
-    elif isinstance(filename, str) and israster(filename):
+    elif isinstance(filename, str) and isfile(filename) and filename.lower().endswith(".tif"):
         ds = OpenRaster(filename)
         if ds:
             wkt = ds.GetProjection()
             srs = osr.SpatialReference()
             srs.ImportFromWkt(wkt)
-        ds = None
+
     else:
         srs = osr.SpatialReference()
 
