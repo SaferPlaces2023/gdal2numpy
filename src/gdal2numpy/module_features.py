@@ -18,7 +18,7 @@
 # Name:        module_features.py
 # Purpose:
 #
-# Author:      Luzzi Valerio
+# Author:      Luzzi Valerio, Marco Renzi
 #
 # Created:     31/12/2022
 # -------------------------------------------------------------------------------
@@ -29,7 +29,6 @@ from .filesystem import isshape, isshape, md5sum
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_log import Logger
 from .module_open import OpenShape
-
 
 
 def GetFeatures(fileshp):
@@ -229,14 +228,14 @@ def Transform(fileshp, t_srs, fileout=None):
     if SameSpatialRef(fileshp, t_srs):
         Logger.debug("Nothing to do. The srs is the same.")
         return fileshp
-    
+
     t_srs = GetSpatialRef(t_srs)
 
     t_code = f"{t_srs.GetAuthorityName(None)}_{t_srs.GetAuthorityCode(None)}"
     fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
 
     if isshape(fileout):
-        Logger.debug("Using cached file:<%s>..."%fileout)
+        Logger.debug("Using cached file:<%s>..." % fileout)
         return fileout
 
     ds = OpenShape(fileshp)
@@ -274,3 +273,45 @@ def Transform(fileshp, t_srs, fileout=None):
         ds, dw = None, None
         return fileout
     return False
+
+
+def QueryByPoint(file_shp, point):
+    """
+    QueryByPoint - Search the closest geometry to the point
+    fileshp: shapefile path
+    point: [lon, lat] in EPSG:4326
+    """
+    closest_geometry_id = None
+
+    lon, lat  = point
+    point = ogr.Geometry(ogr.wkbPoint)
+    point.AddPoint(lon, lat)  # Replace 'x' and 'y' with your point coordinates
+    # Open the shapefile
+    ds = OpenShape(file_shp, 0)
+    if ds:
+        layer = ds.GetLayer(0)
+        t_srs = layer.GetSpatialRef()
+
+        s_srs = osr.SpatialReference()
+        s_srs.ImportFromEPSG(4326)
+
+        # Transform the point into the same projection system as the layer
+        if not SameSpatialRef(t_srs, s_srs):
+            transform = osr.CoordinateTransformation(s_srs, t_srs)
+            point.Transform(transform)
+
+        closest_distance = float('inf')
+
+        layer.ResetReading()
+        for feature in layer:
+            geometry = feature.GetGeometryRef()
+            # Corto citcuito if the point is inside the geometry
+            if point.Intersects(geometry):
+                return feature.GetFID()
+
+            distance = point.Distance(geometry)
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_geometry_id = feature.GetFID()
+
+    return closest_geometry_id
