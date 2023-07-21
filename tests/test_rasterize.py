@@ -1,4 +1,4 @@
-import os
+import os,warnings
 import unittest
 from gdal2numpy import *
 
@@ -9,6 +9,12 @@ class Test(unittest.TestCase):
     """
     Tests
     """
+    def setUp(self):
+        warnings.simplefilter("ignore", ResourceWarning)
+
+    def tearDown(self):
+        warnings.simplefilter("default", ResourceWarning)
+
     def test_rasterize_like1(self):
         """
         test_raster: 
@@ -39,15 +45,15 @@ class Test(unittest.TestCase):
         print(np.unique(data))
     
 
-    def test_rasterlike(self):
+    def test_gdalwarp(self):
         """
         test_rasterlike  
         """
-        filetif = f"{workdir}/OSM_BUILDINGS_091244R.tif"
-        filetpl = f"{workdir}/COPERNICUS.30.tif"
-        fileout = forceext(filetif, "30.tif")
-        #RasterLike(filetif, filetpl, fileout, resampleAlg="near", format="GTiff")
-        #self.assertEqual(GetPixelSize(fileout), GetPixelSize(filetpl))
+        filetif = f"s3://saferplaces.co/test/valerio.luzzi@gecosistema.com/test_landuse_1689924689.tif"
+        fileout = f"s3://saferplaces.co/test/valerio.luzzi@gecosistema.com/test_landuse.tif"
+        gdalwarp(filetif, fileout, dstSRS="EPSG:4326")
+        self.assertTrue(isfile(fileout))
+
 
 if __name__ == '__main__':
     unittest.main()

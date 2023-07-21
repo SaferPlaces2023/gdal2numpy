@@ -24,9 +24,10 @@
 # -------------------------------------------------------------------------------
 import os
 from osgeo import gdal, gdalconst
-from .filesystem import juststem, tempfilename
+from .filesystem import juststem, tempfilename, listify
 from .module_ogr import SetGDALEnv, RestoreGDALEnv
 from .module_open import OpenRaster
+from .module_s3 import *
 
 def reasampling_method(method):
     """
@@ -62,7 +63,21 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
 
     gdal.SetConfigOption('CPLErrorHandling', 'silent')
 
+    # In case of s3 fileout must be a s3 path
     fileout = fileout if fileout else tempfilename(suffix=".tif")
+    _, fileout1 = get_bucket_name_key(fileout) # s3://saferplaces.co/test.tif -> saferplaces.co, test.tif
+    if iss3(fileout):
+        fileout1 = tempname4S3(fileout1)
+        os.makedirs(justpath(fileout1), exist_ok=True)
+
+    #  copy s3 file to local
+    filelist_tmp = []
+    filelist = listify(filelist)
+    for filename in filelist:
+        if iss3(filename):
+            filename = copy(filename, tempfilename(suffix=".tif"))
+        filelist_tmp.append(filename)
+    # ----------------------------------------------------------------------
 
     if format.lower() == "gtiff":
         co = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"]
@@ -87,7 +102,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     if dstSRS:
         kwargs["dstSRS"] = dstSRS
 
-    if os.path.isfile(cutline):
+    if isfile(cutline):
         kwargs["cropToCutline"] = cropToCutline
         kwargs["cutlineDSName"] = cutline
         kwargs["cutlineLayer"] = juststem(cutline)
@@ -95,9 +110,13 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     SetGDALEnv()
     # inplace gdalwarp
     if fileout == filelist:
-        fileout = OpenRaster(fileout, update=True)
-    # ----
-    gdal.Warp(fileout, filelist, **kwargs)
+        fileout1 = OpenRaster(fileout, update=True)
+
+    gdal.Warp(fileout1, filelist_tmp, **kwargs)
+
+    if iss3(fileout):
+        move(fileout1, fileout)
+
     RestoreGDALEnv()
     gdal.SetConfigOption('CPLErrorHandling', 'once')
     # ----------------------------------------------------------------------
