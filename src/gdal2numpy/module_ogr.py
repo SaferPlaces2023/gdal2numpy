@@ -281,13 +281,16 @@ def GetExtent(filename, t_srs=None):
             ds = None
 
     if t_srs and not SameSpatialRef(s_srs, t_srs):
-        transform = osr.CoordinateTransformation(s_srs, GetSpatialRef(t_srs))
+        t_srs = GetSpatialRef(t_srs)
+        #s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        transform = osr.CoordinateTransformation(s_srs, t_srs)
         rect = Rectangle(minx, miny, maxx, maxy)
         rect.Transform(transform)
-        if f"{t_srs}" == "4326":
-            miny, maxy, minx, maxx = rect.GetEnvelope()
-        else:
-            minx, miny, maxx, maxy = rect.GetEnvelope()
+        # if f"{t_srs}" == "4326":
+        #     miny, maxy, minx, maxx = rect.GetEnvelope()
+        # else:
+        minx, miny, maxx, maxy = rect.GetEnvelope()
 
         miny, maxy = min(miny, maxy), max(miny, maxy)
 

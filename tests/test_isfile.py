@@ -19,15 +19,24 @@ class Test(unittest.TestCase):
     def tearDown(self):
         warnings.simplefilter("default", ResourceWarning)
 
-    def test_isfile(self):
+
+    def test_isfile_s3(self):
         """
         test_upload_s3: 
         """
-        filer = "s3://ead.saferplaces.co/test/lidar_rimini_building_2.tif"
+        filetif = "s3://ead.saferplaces.co/test/lidar_rimini_building_2.tif"
         self.assertTrue(isfile(filetif))
 
 
-   
+    def test_isfile_http(self):
+        """
+        test_upload_s3: 
+        """
+        filetif = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Ambiental_Italy_FloodMap_Fluvial_20yr_v1_0.cog.tif"
+        self.assertTrue(isfile(filetif))
+
+
+    
 
 
 if __name__ == '__main__':

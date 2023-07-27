@@ -40,6 +40,9 @@ def OpenShape(fileshp, exclusive=False):
     elif isinstance(fileshp, str) and iss3(fileshp) and fileshp.endswith(".shp"):
         Logger.debug(f"Downloading file from s3...")
         ds = ogr.Open(copy(fileshp), exclusive)
+    elif isinstance(fileshp, str) and fileshp.startswith("http") and fileshp.endswith(".shp"):
+        Logger.debug(f"Inspect file from https...")
+        ds = ogr.Open(f"/vsicurl/{fileshp}", exclusive)
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
         Logger.debug(f"Dataset already open...")
         ds = fileshp

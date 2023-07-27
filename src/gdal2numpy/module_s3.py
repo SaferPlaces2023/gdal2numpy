@@ -26,6 +26,7 @@ import os
 import hashlib
 import boto3
 import shutil
+import requests
 import datetime
 from botocore.exceptions import ClientError
 from .filesystem import *
@@ -50,6 +51,14 @@ def isfile(filename):
         return True
     elif iss3(filename) and s3_exists(filename):
         return True
+    #test if is a http url 
+    elif isinstance(filename, str) and filename.startswith("http"):
+        try:
+            r = requests.head(filename)
+            return r.status_code == requests.codes.ok
+        except Exception as ex:
+            Logger.error(ex)
+
     return False
 
 

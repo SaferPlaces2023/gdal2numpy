@@ -294,6 +294,7 @@ def QueryByPoint(file_shp, point):
 
         s_srs = osr.SpatialReference()
         s_srs.ImportFromEPSG(4326)
+        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)  
 
         # Transform the point into the same projection system as the layer
         if not SameSpatialRef(t_srs, s_srs):
