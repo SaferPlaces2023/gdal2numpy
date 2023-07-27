@@ -6,7 +6,7 @@ from gdal2numpy import *
 workdir = justpath(__file__)
 
 filetif = f"{workdir}/CLSA_LiDAR.tif"
-fileshp = f"{workdir}/OSM_BUILDINGS_091244.shp"
+fileshp = f"s3://saferplaces.co/test/barrier.shp"
 
 
 class Test(unittest.TestCase):

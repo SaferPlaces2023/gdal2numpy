@@ -40,7 +40,7 @@ def OpenShape(fileshp, exclusive=False):
     elif isinstance(fileshp, str) and iss3(fileshp) and fileshp.endswith(".shp"):
         Logger.debug(f"Downloading file from s3...")
         #ds = ogr.Open(copy(fileshp), exclusive)
-        fileshp = fileshp.replace("s3://", "/viss3/")
+        fileshp = fileshp.replace("s3://", "/vsis3/")
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, str) and fileshp.startswith("http") and fileshp.endswith(".shp"):
         Logger.debug(f"Inspect file from https...")
