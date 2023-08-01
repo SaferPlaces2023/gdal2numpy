@@ -29,6 +29,25 @@ from .module_open import OpenRaster
 from .module_s3 import *
 
 
+def GetValue(filename, x, y):
+    """
+    GetValue
+    """
+    value = None
+    ds = OpenRaster(filename)
+    if ds:
+        gt = ds.GetGeoTransform()
+        m,n = ds.RasterYSize, ds.RasterXSize
+        x0, px, _, y0, _, py = gt
+        j = (x-x0) // px
+        i = (y-y0) // py
+        band = ds.GetRasterBand(1)
+        if 0<= i < m and 0<=j <n:
+            value = band.ReadAsArray(j,i, 1, 1).item()
+        ds = None 
+    return value
+
+
 def GDALEuclideanDistance(fileline, fileout=""):
     """
     GDALEuclideanDistance - compute the euclidean distance from a line/point/polygon
