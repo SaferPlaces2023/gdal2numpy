@@ -24,11 +24,24 @@
 # -------------------------------------------------------------------------------
 import os
 import json
-
+import numpy as np
 from osgeo import ogr
 from .filesystem import justpath
 from .module_ogr import GetSpatialRef
 from .module_s3 import *
+
+def isInteger(value):
+    """
+    isInteger
+    """
+    return isinstance(value, (int, np.int8, np.int16, np.int32, np.int64, np.uint8, np.uint16, np.uint32, np.uint64))
+
+def isFloat(value):
+    """
+    isFloat
+    """
+    return isinstance(value, (float, np.float32, np.float64))
+
 
 def infer_geometry_type(features):
     """
@@ -74,9 +87,9 @@ def infer_layerDefn(features):
             width, precision = infer_width(features, fieldname)
 
             # infer field type from value
-            if isinstance(fieldvalue, int):
+            if isInteger(fieldvalue):
                 fieldtype = ogr.OFTInteger
-            elif isinstance(fieldvalue, float):
+            elif isFloat(fieldvalue):
                 fieldtype = ogr.OFTReal
             else:
                 fieldtype = ogr.OFTString
@@ -154,7 +167,8 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
             ogr_feature.SetGeometry(geom)
             for field in fields:
                 fieldname = field.GetName()
-                ogr_feature.SetField(fieldname, feature["properties"][fieldname])
+                fieldvalue = feature["properties"][fieldname]
+                ogr_feature.SetField(fieldname, fieldvalue)
 
             layer.CreateFeature(ogr_feature)
             ogr_feature = None
