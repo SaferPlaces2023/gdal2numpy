@@ -81,9 +81,16 @@ def infer_layerDefn(features):
     """
     fields = []
     if features:
+
         first = features[0]
+
         for fieldname in first["properties"]:
-            fieldvalue = first["properties"][fieldname]
+            fid = 0
+            fieldvalue = features[fid]["properties"][fieldname]
+            while fieldvalue is None and fid < len(features)-1:
+                fid += 1
+                fieldvalue = features[fid]["properties"][fieldname]
+
             width, precision = infer_width(features, fieldname)
 
             # infer field type from value
