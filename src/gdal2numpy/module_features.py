@@ -31,13 +31,16 @@ from .module_log import Logger
 from .module_open import OpenShape
 
 
-def GetFeatures(fileshp):
+def GetFeatures(fileshp, format=None):
     """
     GetFeatures - get all features from file
     """
     ds = OpenShape(fileshp)
     if ds:
-        return list(ds.GetLayer())
+        if format is None:
+            return list(ds.GetLayer())
+        else:
+            return [feature.ExportToJson() for feature in ds.GetLayer()]
     return []
 
 
