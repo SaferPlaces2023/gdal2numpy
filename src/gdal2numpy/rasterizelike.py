@@ -103,7 +103,11 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
                 geom.Transform(transform)
 
             # add buffer
-            buffer = geom.Buffer(buf)
+            # sel il tipo della geoemtria non è un punto o un multipoint
+            if geom.GetGeometryType() != ogr.wkbPoint and geom.GetGeometryType() != ogr.wkbMultiPoint:
+                buffer = geom.Buffer(buf)
+            else:
+                buffer = geom
 
             f.SetFrom(feature)
             f.SetGeometry(buffer)
