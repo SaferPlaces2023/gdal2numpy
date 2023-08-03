@@ -135,7 +135,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
         if factor == 0.0:
             # if factor is 0 then burn 0, may be this does not have much sense
             gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[0.0], options=[f"ALL_TOUCHED={all_touched}"])
-        elif burn_fieldname and burn_fieldname in fieldnames and factor==1.0:
+        elif burn_fieldname and burn_fieldname in fieldnames and factor==1.0 and z_value is None:
             # if factor is 1 then burn the field value
             gdal.RasterizeLayer(target_ds, [1], layer, options=[f"ATTRIBUTE={burn_fieldname.upper()}", f"ALL_TOUCHED={all_touched}"])
         elif burn_fieldname and burn_fieldname in fieldnames and factor!=1.0:
