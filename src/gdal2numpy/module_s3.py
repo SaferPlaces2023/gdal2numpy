@@ -28,7 +28,7 @@ import boto3
 import shutil
 import requests
 import datetime
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
 from .module_log import Logger
 
@@ -122,7 +122,10 @@ def etag(filename, client=None, chunk_size=8 * 1024 * 1024):
                 ETag = client.head_object(Bucket=bucket_name, Key=key_name)[
                     'ETag'][1:-1]
         except ClientError as ex:
-            #Logger.error(ex)
+            Logger.error(ex)
+            ETag = ""
+        except NoCredentialsError as ex:
+            Logger.error(ex)
             ETag = ""
         return ETag
     else:
@@ -190,6 +193,8 @@ def s3_upload(filename, uri, remove_src=False, client=None):
 
     except ClientError as ex:
         Logger.error(ex)
+    except NoCredentialsError as ex:
+        Logger.error(ex)
 
     return False
 
@@ -235,6 +240,9 @@ def s3_download(uri, fileout=None, remove_src=False, client=None):
 
         except ClientError as ex:
             #Logger.error(ex)
+            return None
+        except NoCredentialsError as ex:
+            Logger.error(ex)
             return None
 
     return fileout if os.path.isfile(fileout) else None

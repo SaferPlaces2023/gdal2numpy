@@ -246,6 +246,21 @@ def Rectangle(minx, miny, maxx, maxy):
     return poly
 
 
+def TransformBBOX(bbox, s_srs=None, t_srs=None):
+    if SameSpatialRef(s_srs,t_srs):
+        return bbox
+    s_minx,s_miny,s_maxx,s_maxy = bbox
+    
+    s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+    transform = osr.CoordinateTransformation(s_srs, t_srs)
+    rect = Rectangle(s_minx,s_miny,s_maxx,s_maxy)
+    rect.Transform(transform)
+    t_minx, t_maxx, t_miny, t_maxy = rect.GetEnvelope()
+    transformed_bbox = (t_minx,t_miny,t_maxx,t_maxy)
+    return transformed_bbox
+
 def GetExtent(filename, t_srs=None):
     """
     GetExtent
