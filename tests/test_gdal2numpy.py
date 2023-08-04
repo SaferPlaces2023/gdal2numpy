@@ -6,8 +6,8 @@ from gdal2numpy import *
 workdir = justpath(__file__)
 
 
-filedem = f"{workdir}/MINAMBIENTE_ITALY.tif"
-fileout = f"{workdir}/test.tif"
+filedem = f"{workdir}/data/CLSA_LiDAR.tif"
+fileout = f"{workdir}/test_out.tif"
 
 
 class Test(unittest.TestCase):
@@ -30,6 +30,7 @@ class Test(unittest.TestCase):
         data, _, _ = GDAL2Numpy(filedem, load_nodata_as=np.nan)
         print(f"Memory read:{data.size*4 / 1024**2:.2f} MB")
         mem_usage()
+        self.assertTrue(data.size>0)
 
 
     def test_s3(self):
