@@ -94,8 +94,12 @@ def OpenRaster(filename, update=0):
         
         if os.path.isfile(filename):
             pass
+        elif filename.lower().startswith("/vsis3/"):
+            pass
         elif filename.lower().startswith("http"):
             filename = f"/vsicurl/{filename}"
+        elif filename.lower().startswith("s3://"):
+            filename = filename.replace("s3://", "/vsis3/")
         elif ".zip/" in filename.lower():
             filename = f"/vsizip/{filename}"
         elif ".gz/" in filename.lower():
@@ -110,8 +114,6 @@ def OpenRaster(filename, update=0):
             filename = f"/vsi7z/{filename}"
         elif ".rar/" in filename.lower():
             filename = f"/vsirar/{filename}"
-        elif iss3(filename):
-            filename = copy(filename)
     else:
         return None
     

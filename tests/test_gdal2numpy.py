@@ -42,6 +42,18 @@ class Test(unittest.TestCase):
         print(prj)
         self.assertTrue(data.size>0)
 
+
+    def test_vsi(self):
+        """
+        test_save: 
+        """
+        filedem = "s3://saferplaces.co/Ambiental/Fluvial/Ambiental_Italy_FloodMap_Fluvial_100yr_v1_0.cog.tif"
+        bbox = (4523904.479738138, 2325781.4713545926, 4530348.323133135, 2337527.589964536)
+        data, gt, prj = GDAL2Numpy(filedem, bbox=bbox, load_nodata_as=np.nan)
+        print(data.shape)
+        print(prj)
+        self.assertTrue(data.size>0)
+
    
     def test_vsicurl(self):
         """
