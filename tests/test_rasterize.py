@@ -23,8 +23,9 @@ class Test(unittest.TestCase):
         #          z_value=None, factor=1.0, nodata=None):
         fileshp = f"{workdir}/OSM_BUILDINGS_091244.shp"
         filedem = f"{workdir}/COPERNICUS.30.tif"
+        fileout = f"{workdir}/OSM_BUILDINGS_091244R.tif"
         dem, _, _   = GDAL2Numpy(filedem, load_nodata_as=np.nan)
-        data, _, _  = RasterizeLike(fileshp, filedem, burn_fieldname="height", nodata=0)
+        data, _, _  = RasterizeLike(fileshp, filedem, fileout=fileout, burn_fieldname="height", nodata=0)
     
         self.assertTrue(np.size(data) > 0)
         self.assertEqual(data.shape, dem.shape)

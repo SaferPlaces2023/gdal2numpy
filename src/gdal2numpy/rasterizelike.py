@@ -90,7 +90,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
         layer_defn = vlayer.GetLayerDefn()
         for j in range(layer_defn.GetFieldCount()):
             layer.CreateField(layer_defn.GetFieldDefn(j))
-            layer.CreateField(ogr.FieldDefn("FID", ogr.OFTInteger))
+        layer.CreateField(ogr.FieldDefn("FID", ogr.OFTInteger))
         # Copy the features from the source layer to the memory layer
         for feature in vlayer:
 
@@ -113,6 +113,8 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
             f.SetFrom(feature)
             f.SetGeometry(buffer)
             f.SetField("FID", feature.GetFID())
+            for j in range(layer_defn.GetFieldCount()):
+                f.SetField(layer_defn.GetFieldDefn(j).GetNameRef(), feature.GetField(j))
             layer.CreateFeature(f)
         #-----------------------------------------------------------------------
 
