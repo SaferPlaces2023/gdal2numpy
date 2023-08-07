@@ -178,7 +178,7 @@ def GetSpatialRef(filename):
         srs = osr.SpatialReference()
         srs.ImportFromProj4(proj4text)
 
-    elif isinstance(filename, str) and filename.upper().startswith("PROJCS["):
+    elif isinstance(filename, str) and ( filename.upper().startswith("PROJCS[") or filename.upper().startswith("GEOGCS[") ):
         wkt = filename
         srs = osr.SpatialReference()
         srs.ImportFromWkt(wkt)

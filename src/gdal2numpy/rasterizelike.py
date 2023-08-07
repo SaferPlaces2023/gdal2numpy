@@ -79,6 +79,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
         # Instead of just get the layer we copy the layer on memory
         # and we add a buffer and we transform each geometry
         # if needed
+
         vlayer = vector.GetLayer()
         s_srs = GetSpatialRef(vlayer.GetSpatialRef())
         t_srs = GetSpatialRef(prj)
