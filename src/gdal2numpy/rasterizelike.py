@@ -62,8 +62,8 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
     burn_fieldname = burn_fieldname if burn_fieldname  else "FID"
 
     #filedem = copy(filedem) if iss3(filedem) else filedem
-    fileshp = copy(fileshp) if iss3(fileshp) else fileshp
-    fileshp = Transform(fileshp, filedem)
+    #fileshp = copy(fileshp) if iss3(fileshp) else fileshp
+    #fileshp = Transform(fileshp, filedem)
 
     ds = OpenRaster(filedem)
     vector = OpenShape(fileshp)
@@ -92,6 +92,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
             layer.CreateField(layer_defn.GetFieldDefn(j))
         layer.CreateField(ogr.FieldDefn("FID", ogr.OFTInteger))
         # Copy the features from the source layer to the memory layer
+
         for feature in vlayer:
 
             # f is the feature in the memory layer & it has FID field
@@ -100,12 +101,13 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
 
             # # Transform the geometry if it is not in the same projection as the raster
             if not SameSpatialRef(s_srs, t_srs):
+                # Logger.debug(f"Transforming geometry from {s_srs} to {t_srs}")
                 transform = osr.CoordinateTransformation(s_srs, t_srs)
                 geom.Transform(transform)
 
             # add buffer
-            # sel il tipo della geoemtria non è un punto o un multipoint
-            if geom.GetGeometryType() != ogr.wkbPoint and geom.GetGeometryType() != ogr.wkbMultiPoint:
+            # solo per i poligoni
+            if geom.GetGeometryType() == ogr.wkbPolygon or geom.GetGeometryType() == ogr.wkbMultiPolygon:
                 buffer = geom.Buffer(buf)
             else:
                 buffer = geom
@@ -117,7 +119,6 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
                 f.SetField(layer_defn.GetFieldDefn(j).GetNameRef(), feature.GetField(j))
             layer.CreateFeature(f)
         #-----------------------------------------------------------------------
-
         # Create the destination data source
         options = [
             "BIGTIFF=YES", 
@@ -164,8 +165,10 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
             gdal.RasterizeLayer(target_ds, [1], layer, burn_values=[1], options=[f"ALL_TOUCHED={all_touched}"])
 
         data = band.ReadAsArray(0, 0, n, m)
+
         if fileout:
             Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=nodata)
+
         ds, vector, target_ds = None, None, None
         return data, gt, prj
 

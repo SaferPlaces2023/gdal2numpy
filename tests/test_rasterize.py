@@ -21,12 +21,14 @@ class Test(unittest.TestCase):
         """
         #def RasterizeLike(fileshp, filedem, file_tif="", dtype=None, burn_fieldname="", \
         #          z_value=None, factor=1.0, nodata=None):
-        fileshp = f"{workdir}/OSM_BUILDINGS_091244.shp"
-        filedem = f"{workdir}/COPERNICUS.30.tif"
-        fileout = f"{workdir}/OSM_BUILDINGS_091244R.tif"
+        fileshp = f"{workdir}/data/Rimini/barrier.shp"
+        filedem = f"{workdir}/data/Rimini/MINAMBIENTE_ITALY_173447.bld.tif"
+        fileout = f"{workdir}/data/Rimini/barrier1.tif"
         dem, _, _   = GDAL2Numpy(filedem, load_nodata_as=np.nan)
-        data, _, _  = RasterizeLike(fileshp, filedem, fileout=fileout, burn_fieldname="height", nodata=0)
+        data, _, _  = RasterizeLike(fileshp, filedem, fileout=None, burn_fieldname="height", nodata=0)
     
+        print(np.unique(data))
+
         self.assertTrue(np.size(data) > 0)
         self.assertEqual(data.shape, dem.shape)
 

@@ -140,11 +140,9 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             drivername = "GTiff" if not cog else "MEM"
             MEM_CO = CO if not cog else []
 
-
             # Check if fileout is a S3 path
             filetif = tempname4S3(fileout) if iss3(fileout) else fileout
             # ----
-
             # Create the path to fileout if not exists
             mkdirs(justpath(filetif))
 
