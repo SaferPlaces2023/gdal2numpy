@@ -62,8 +62,9 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
     burn_fieldname = burn_fieldname if burn_fieldname  else "FID"
 
     #filedem = copy(filedem) if iss3(filedem) else filedem
-    #fileshp = copy(fileshp) if iss3(fileshp) else fileshp
-    #fileshp = Transform(fileshp, filedem)
+    fileshp = copy(fileshp) if iss3(fileshp) else fileshp
+    fileshp = Transform(fileshp, filedem)
+    print(">>>",fileshp)
 
     ds = OpenRaster(filedem)
     vector = OpenShape(fileshp)
@@ -107,10 +108,10 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
 
             # add buffer
             # solo per i poligoni
-            if geom.GetGeometryType() == ogr.wkbPolygon or geom.GetGeometryType() == ogr.wkbMultiPolygon:
-                buffer = geom.Buffer(buf)
-            else:
-                buffer = geom
+            # if geom.GetGeometryType() == ogr.wkbPolygon or geom.GetGeometryType() == ogr.wkbMultiPolygon:
+            #     buffer = geom.Buffer(buf)
+            # else:
+            buffer = geom
 
             f.SetFrom(feature)
             f.SetGeometry(buffer)

@@ -236,6 +236,7 @@ def Transform(fileshp, t_srs, fileout=None):
 
     t_code = f"{t_srs.GetAuthorityName(None)}_{t_srs.GetAuthorityCode(None)}"
     fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
+    print("Transform:",fileout)
 
     if isshape(fileout):
         Logger.debug("Using cached file:<%s>..." % fileout)
@@ -248,6 +249,8 @@ def Transform(fileshp, t_srs, fileout=None):
         # set spatial reference and transformation
         defn = layer.GetLayerDefn()
         s_srs = layer.GetSpatialRef()
+        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
         transform = osr.CoordinateTransformation(s_srs, t_srs)
 
         driver = ogr.GetDriverByName("Esri Shapefile")
