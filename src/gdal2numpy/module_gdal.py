@@ -24,6 +24,7 @@
 # -----------------------------------------------------------------------------
 
 from osgeo import gdal
+from .module_ogr import GetExtent
 from .module_log import Logger
 from .module_open import OpenRaster
 from .module_s3 import *
@@ -57,12 +58,7 @@ def IsValid(filename):
             if not srs:
                 Logger.error(f"Invalid projection for {filename}")
                 return False
-            
-            # Check that ds has a valid extent
-            if not ds.GetExtent():
-                Logger.error(f"Invalid extent for {filename}")
-                return False
-        
+       
             ds = None
             return True
     return False
