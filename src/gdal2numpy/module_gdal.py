@@ -29,6 +29,45 @@ from .module_open import OpenRaster
 from .module_s3 import *
 
 
+def IsValid(filename):
+    """
+    IsValid
+    """
+    if filename:
+        ds = OpenRaster(filename)
+        if ds:
+            #check that ds has at least one band
+            if ds.RasterCount == 0:
+                Logger.error(f"Invalid raster: {filename} has no bands")
+                return False
+            
+            # Check that ds has at least one pixel
+            if ds.RasterXSize == 0 or ds.RasterYSize == 0:
+                Logger.error(f"Invalid raster {filename} has no pixels")
+                return False
+            
+            # Check that ds has a valid geotransform
+            gt = ds.GetGeoTransform()
+            if not gt or gt == (0,1,0,0,0,1):
+                Logger.error(f"Invalid geotransform for {filename}")
+                return False
+            
+            # Check that ds has a valid projection
+            srs = ds.GetProjection()
+            if not srs:
+                Logger.error(f"Invalid projection for {filename}")
+                return False
+            
+            # Check that ds has a valid extent
+            if not ds.GetExtent():
+                Logger.error(f"Invalid extent for {filename}")
+                return False
+        
+            ds = None
+            return True
+    return False
+
+
 def GetValue(filename, x, y):
     """
     GetValue
