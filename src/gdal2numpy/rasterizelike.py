@@ -57,7 +57,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
     """
     RasterizeLike - Rasterize a shapefile like a raster file
     """
-    gdal.SetConfigOption("SHAPE_RESTORE_SHX", "YES")
+    #gdal.SetConfigOption("SHAPE_RESTORE_SHX", "YES")
     gdal.SetConfigOption("SHAPE_ENCODING", "UTF-8")
     burn_fieldname = burn_fieldname if burn_fieldname  else "FID"
 
