@@ -168,26 +168,31 @@ def GetSpatialRef(filename):
     elif isinstance(filename, int):
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(filename)
+        srs.AutoIdentifyEPSG()
 
     elif isinstance(filename, str) and filename.lower().startswith("epsg:"):
         code = int(filename.split(":")[1])
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(code)
+        srs.AutoIdentifyEPSG()
 
     elif isinstance(filename, str) and filename.upper().startswith("+proj"):
         proj4text = filename
         srs = osr.SpatialReference()
         srs.ImportFromProj4(proj4text)
+        srs.AutoIdentifyEPSG()
 
     elif isinstance(filename, str) and ( filename.upper().startswith("PROJCS[") or filename.upper().startswith("GEOGCS[") ):
         wkt = filename
         srs = osr.SpatialReference()
         srs.ImportFromWkt(wkt)
+        srs.AutoIdentifyEPSG()
 
     elif isinstance(filename, str) and isfile(filename) and filename.lower().endswith(".shp"):
         ds = OpenShape(filename)
         if ds:
             srs = ds.GetLayer().GetSpatialRef()
+            srs.AutoIdentifyEPSG()
 
     elif isinstance(filename, str) and isfile(filename) and filename.lower().endswith(".tif"):
         ds = OpenRaster(filename)
@@ -195,7 +200,7 @@ def GetSpatialRef(filename):
             wkt = ds.GetProjection()
             srs = osr.SpatialReference()
             srs.ImportFromWkt(wkt)
-
+            srs.AutoIdentifyEPSG()
     else:
         srs = osr.SpatialReference()
 
