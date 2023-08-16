@@ -47,7 +47,7 @@ def CalculateOverviews(ds):
     return overviews
 
 
-def GTiff2Cog(filetif, fileout, algo="NEAREST", verbose=False):
+def GTiff2Cog(filetif, fileout=None, algo="NEAREST", verbose=False):
     """
     GTiff2Cog - Convert a GTiff to COG
     algo = one of "AVERAGE", "AVERAGE_MAGPHASE", "RMS", "BILINEAR", "CUBIC", "CUBICSPLINE", "GAUSS", "LANCZOS", "MODE", "NEAREST", or "NONE"
@@ -55,6 +55,10 @@ def GTiff2Cog(filetif, fileout, algo="NEAREST", verbose=False):
     ds = OpenRaster(filetif, gdalconst.GA_Update) # open the file in write mode to build overviews
     if not ds:
         return None
+    
+    # Inplace conversion if fileout is None
+    fileout = fileout if fileout else filetif    
+
     # Set the statistics
     dtype = ds.GetRasterBand(1).DataType
     arr = ds.GetRasterBand(1).ReadAsArray()
