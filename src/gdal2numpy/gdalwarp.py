@@ -101,7 +101,9 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
 
     if dstSRS:
         dstSRS = GetSpatialRef(dstSRS)
-        kwargs["dstSRS"] = dstSRS.ExportToProj4()
+        authid = dstSRS.GetAuthorityName("PROJCS") if dstSRS.IsProjected() else dstSRS.GetAuthorityName("GEOGCS")
+        srid = dstSRS.GetAuthorityCode("PROJCS") if dstSRS.IsProjected() else dstSRS.GetAuthorityCode("GEOGCS")
+        kwargs["dstSRS"] = f"{authid}:{srid}"
 
     if isfile(cutline):
         kwargs["cropToCutline"] = cropToCutline
