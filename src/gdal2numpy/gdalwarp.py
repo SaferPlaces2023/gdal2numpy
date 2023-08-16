@@ -25,7 +25,7 @@
 import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
-from .module_ogr import SetGDALEnv, RestoreGDALEnv, GetSpatialRef
+from .module_ogr import SetGDALEnv, RestoreGDALEnv, GetEPSG
 from .module_open import OpenRaster
 from .module_s3 import *
 
@@ -100,9 +100,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         kwargs["yRes"] = abs(pixelsize[1])
 
     if dstSRS:
-        #dstSRS = GetSpatialRef(dstSRS)
-        #authid = dstSRS.GetAuthorityName("PROJCS") if dstSRS.IsProjected() else dstSRS.GetAuthorityName("GEOGCS")
-        #srid = dstSRS.GetAuthorityCode("PROJCS") if dstSRS.IsProjected() else dstSRS.GetAuthorityCode("GEOGCS")
+        dstSRS = GetEPSG(dstSRS)
         kwargs["dstSRS"] = dstSRS
 
     if isfile(cutline):

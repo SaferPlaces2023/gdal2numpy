@@ -26,7 +26,7 @@ import numpy as np
 import tempfile
 from osgeo import ogr, osr
 from .filesystem import isshape, isshape, md5sum
-from .module_ogr import SameSpatialRef, GetSpatialRef
+from .module_ogr import SameSpatialRef, GetSpatialRef, GetEPSG
 from .module_log import Logger
 from .module_open import OpenShape
 
@@ -234,7 +234,7 @@ def Transform(fileshp, t_srs, fileout=None):
 
     t_srs = GetSpatialRef(t_srs)
 
-    t_code = f"{t_srs.GetAuthorityName(None)}_{t_srs.GetAuthorityCode(None)}"
+    t_code = GetEPSG(t_srs)
     fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
     print("Transform:",fileout)
 

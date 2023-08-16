@@ -34,6 +34,7 @@ from .module_open import OpenRaster
 from .module_open import OpenShape
 from .module_s3 import isfile
 
+
 def create_cpg(fileshp):
     """
     create_file_cpg - add a file.cpg
@@ -41,6 +42,7 @@ def create_cpg(fileshp):
     :return:
     """
     strtofile("UFT-8", forceext(fileshp, "cpg"))
+
 
 def ogr_move(src, dst):
     """
@@ -107,7 +109,8 @@ def Haversine(lat1, lon1, lat2, lon2):
     dLon = math.radians(lon2 - lon1)
     lat1 = math.radians(lat1)
     lat2 = math.radians(lat2)
-    a = math.sin(dLat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dLon / 2) ** 2
+    a = math.sin(dLat / 2) ** 2 + math.cos(lat1) * \
+        math.cos(lat2) * math.sin(dLon / 2) ** 2
     c = 2 * math.asin(math.sqrt(a))
     return R * c
 
@@ -123,8 +126,8 @@ def GetPixelSize(filename, um="m"):
         prj = ds.GetProjection()
         ds = None
 
-        #srs = osr.SpatialReference()
-        #srs.ImportFromProj4(prj)
+        # srs = osr.SpatialReference()
+        # srs.ImportFromProj4(prj)
         srs = GetSpatialRef(prj)
 
         if srs.IsGeographic() and um == "m":
@@ -157,6 +160,20 @@ def SamePixelSize(filename1, filename2, decimals=-1):
     return size1 == size2
 
 
+def GetEPSG(srs):
+    """
+    GetEPSG
+    """
+    srs = GetSpatialRef(srs)
+    if srs:
+        authid = srs.GetAuthorityName(
+            "PROJCS") if srs.IsProjected() else srs.GetAuthorityName("GEOGCS")
+        srid = srs.GetAuthorityCode("PROJCS") if srs.IsProjected(
+        ) else srs.GetAuthorityCode("GEOGCS")
+        return f"{authid}:{srid}"
+    return None
+
+
 def GetSpatialRef(filename):
     """
     GetSpatialRef
@@ -182,7 +199,7 @@ def GetSpatialRef(filename):
         srs.ImportFromProj4(proj4text)
         srs.AutoIdentifyEPSG()
 
-    elif isinstance(filename, str) and ( filename.upper().startswith("PROJCS[") or filename.upper().startswith("GEOGCS[") ):
+    elif isinstance(filename, str) and (filename.upper().startswith("PROJCS[") or filename.upper().startswith("GEOGCS[")):
         wkt = filename
         srs = osr.SpatialReference()
         srs.ImportFromWkt(wkt)
@@ -253,19 +270,20 @@ def Rectangle(minx, miny, maxx, maxy):
 
 
 def TransformBBOX(bbox, s_srs=None, t_srs=None):
-    if SameSpatialRef(s_srs,t_srs):
+    if SameSpatialRef(s_srs, t_srs):
         return bbox
-    s_minx,s_miny,s_maxx,s_maxy = bbox
-    
+    s_minx, s_miny, s_maxx, s_maxy = bbox
+
     s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
     t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     transform = osr.CoordinateTransformation(s_srs, t_srs)
-    rect = Rectangle(s_minx,s_miny,s_maxx,s_maxy)
+    rect = Rectangle(s_minx, s_miny, s_maxx, s_maxy)
     rect.Transform(transform)
     t_minx, t_maxx, t_miny, t_maxy = rect.GetEnvelope()
-    transformed_bbox = (t_minx,t_miny,t_maxx,t_maxy)
+    transformed_bbox = (t_minx, t_miny, t_maxx, t_maxy)
     return transformed_bbox
+
 
 def GetExtent(filename, t_srs=None):
     """
@@ -292,8 +310,8 @@ def GetExtent(filename, t_srs=None):
     elif ext in ("shp", "dbf"):
 
         filename = forceext(filename, "shp")
-        #driver = ogr.GetDriverByName("ESRI Shapefile")
-        #ds = driver.Open(filename, 0)
+        # driver = ogr.GetDriverByName("ESRI Shapefile")
+        # ds = driver.Open(filename, 0)
         ds = OpenShape(filename, 0)
         if ds:
             layer = ds.GetLayer()
@@ -310,7 +328,7 @@ def GetExtent(filename, t_srs=None):
             miny, maxy, minx, maxx = rect.GetEnvelope()
         else:
             minx, miny, maxx, maxy = rect.GetEnvelope()
-        
+
     return minx, miny, maxx, maxy
 
 
@@ -416,5 +434,3 @@ def CopyShape(fileshp, fileout):
     ds = gdal.VectorTranslate(fileout, fileshp, format='ESRI Shapefile',
                               accessMode='overwrite')
     ds = None  # force flush
-
-
