@@ -101,6 +101,9 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
 
     if dstSRS:
         dstSRS = GetEPSG(dstSRS)
+        print("----------------------------------------------------------")
+        print("dstSRS===>",dstSRS)
+        print("----------------------------------------------------------")
         kwargs["dstSRS"] = dstSRS
 
     if isfile(cutline):
