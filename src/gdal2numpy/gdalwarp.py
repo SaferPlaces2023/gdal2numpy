@@ -101,7 +101,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
 
     if dstSRS:
         dstSRS = GetSpatialRef(dstSRS)
-        kwargs["dstSRS"] = dstSRS.ExportToWkt()
+        kwargs["dstSRS"] = dstSRS.ExportToProj4()
 
     if isfile(cutline):
         kwargs["cropToCutline"] = cropToCutline
