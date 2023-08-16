@@ -25,6 +25,7 @@
 import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
+from .module_Numpy2GTiff import GTiff2Cog
 from .module_ogr import SetGDALEnv, RestoreGDALEnv, GetEPSG
 from .module_open import OpenRaster
 from .module_s3 import *
@@ -79,12 +80,14 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         filelist_tmp.append(filename)
     # ----------------------------------------------------------------------
 
-    if format.lower() == "gtiff":
-        co = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"]
-    elif format.lower() == "cog":
-        co = ["BIGTIFF=YES", "COMPRESS=DEFLATE", "NUM_THREADS=ALL_CPUS"]
-    else:
-        co = []
+    co = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"]
+
+    # if format.lower() == "gtiff":
+    #     co = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"]
+    # elif format.lower() == "cog":
+    #     co = ["BIGTIFF=YES", "COMPRESS=DEFLATE", "NUM_THREADS=ALL_CPUS"]
+    # else:
+    #     co = []
 
     kwargs = {
         "format": format,
@@ -114,6 +117,9 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         fileout1 = OpenRaster(fileout, update=True)
 
     gdal.Warp(fileout1, filelist_tmp, **kwargs)
+
+    if format.lower() == "cog":
+        GTiff2Cog(fileout1)
 
     if iss3(fileout):
         move(fileout1, fileout)
