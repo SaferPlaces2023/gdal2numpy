@@ -47,14 +47,14 @@ class Test(unittest.TestCase):
         print(np.unique(data))
     
 
-    # def test_gdalwarp(self):
-    #     """
-    #     test_rasterlike  
-    #     """
-    #     filetif = f"s3://saferplaces.co/test/valerio.luzzi@gecosistema.com/test_landuse_1689924689.tif"
-    #     fileout = f"s3://saferplaces.co/test/valerio.luzzi@gecosistema.com/test_landuse.tif"
-    #     gdalwarp(filetif, fileout, dstSRS="EPSG:4326")
-    #     self.assertTrue(isfile(fileout))
+    def test_gdalwarp(self):
+        """
+        test_rasterlike  
+        """
+        filedem = f"{workdir}/test_river.tif"
+        fileout = f"{workdir}/test_gdalwarped.tif"
+        gdalwarp(filedem, fileout, dstSRS=filedem)
+        self.assertTrue(isfile(fileout))
 
 
 if __name__ == '__main__':

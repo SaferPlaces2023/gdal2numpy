@@ -25,7 +25,7 @@
 import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
-from .module_ogr import SetGDALEnv, RestoreGDALEnv
+from .module_ogr import SetGDALEnv, RestoreGDALEnv, GetSpatialRef
 from .module_open import OpenRaster
 from .module_s3 import *
 
@@ -100,7 +100,8 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         kwargs["yRes"] = abs(pixelsize[1])
 
     if dstSRS:
-        kwargs["dstSRS"] = dstSRS
+        dstSRS = GetSpatialRef(dstSRS)
+        kwargs["dstSRS"] = dstSRS.ExportToWkt()
 
     if isfile(cutline):
         kwargs["cropToCutline"] = cropToCutline
