@@ -22,6 +22,7 @@
 #
 # Created:     31/12/2022
 # -------------------------------------------------------------------------------
+import json
 import numpy as np
 import tempfile
 from osgeo import ogr, osr
@@ -39,6 +40,8 @@ def GetFeatures(fileshp, format=None):
     if ds:
         if format is None:
             return list(ds.GetLayer())
+        elif format in ("json", "geojson"):
+            return [json.loads(feature.ExportToJson()) for feature in ds.GetLayer()]
         else:
             return [feature.ExportToJson() for feature in ds.GetLayer()]
     return []
