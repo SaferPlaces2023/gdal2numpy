@@ -161,6 +161,10 @@ def ShapeFileFromGeoJSON(features, fileout="", t_srs=4326):
         ds = driver.CreateDataSource(fileshp)
         layer = ds.CreateLayer(fileshp, geom_type=geom_type, srs=t_srs)
 
+        # Create the cpg file
+        with open(forceext(fileshp," cpg"), "w") as fp:
+            fp.write("UTF-8")
+        
         # create fields from first feature
         fields = infer_layerDefn(features)
         for field in fields:
