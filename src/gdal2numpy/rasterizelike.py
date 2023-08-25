@@ -34,14 +34,25 @@ from .module_ogr import GetSpatialRef, SameSpatialRef
 from .module_Numpy2GTiff import Numpy2GTiff
 
 dtypeOf = {
-    'Float32': np.float32,
-    'Float64': np.float64,
-    'Byte': np.uint8,
-    'Int16': np.int16,
-    'Int32': np.int32,
-    'UInt16': np.uint16,
-    'UInt32': np.uint32,
+    "byte": gdal.GDT_Byte,
+    "int16": gdal.GDT_Int16,
+    "uint16": gdal.GDT_UInt16,
+    "int32": gdal.GDT_Int32,
+    "int64": gdal.GDT_Int32,  # It is not an error gdal.GDT_Int64 does not exits!
+    "uint32": gdal.GDT_UInt32,
+    "uint64": gdal.GDT_UInt32,  # It is not an error gdal.GDT_Int64 does not exits!
+    "float32": gdal.GDT_Float32,
+    "float64": gdal.GDT_Float64,
+    # --- numpy types ---
+    gdal.GDT_Byte: gdal.GDT_Byte,
+    gdal.GDT_Int16: gdal.GDT_Int16,
+    gdal.GDT_UInt16: gdal.GDT_UInt16,
+    gdal.GDT_Int32: gdal.GDT_Int32,
+    gdal.GDT_UInt32: gdal.GDT_UInt32,
+    gdal.GDT_Float32: gdal.GDT_Float32,
+    gdal.GDT_Float64: gdal.GDT_Float64,
     # ---
+    np.uint8: gdal.GDT_Byte,
     np.int16: gdal.GDT_Int16,
     np.uint16: gdal.GDT_UInt16,
     np.int32: gdal.GDT_Int32,
