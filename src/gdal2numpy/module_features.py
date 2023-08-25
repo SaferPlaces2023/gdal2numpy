@@ -26,24 +26,31 @@ import json
 import numpy as np
 import tempfile
 from osgeo import ogr, osr
-from .filesystem import isshape, isshape, md5sum
+from .filesystem import listify, md5sum
 from .module_ogr import SameSpatialRef, GetSpatialRef, GetEPSG
 from .module_log import Logger
 from .module_open import OpenShape
 
 
-def GetFeatures(fileshp, format=None):
+def GetFeatures(fileshp, filter=[], format=None):
     """
     GetFeatures - get all features from file
     """
+    res = []
     ds = OpenShape(fileshp)
     if ds:
-        if format is None:
-            return list(ds.GetLayer())
-        elif format in ("json", "geojson"):
-            return [json.loads(feature.ExportToJson()) for feature in ds.GetLayer()]
+        # filter features by fid
+        if len(filter) > 0:
+            res = [ds.GetLayer().GetFeature(fid) for fid in listify(filter)]
         else:
-            return [feature.ExportToJson() for feature in ds.GetLayer()]
+            res = ds.GetLayer()    
+
+        if format is None:
+            res = list(res)
+        elif format in ("json", "geojson"):
+            res = [json.loads(feature.ExportToJson()) for feature in res]
+        else:
+            res = [feature.ExportToJson() for feature in res]
     return []
 
 
