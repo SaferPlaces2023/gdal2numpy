@@ -51,7 +51,7 @@ def GetFeatures(fileshp, filter=None, format=None):
             res = [json.loads(feature.ExportToJson()) for feature in res]
         else:
             res = [feature.ExportToJson() for feature in res]
-    return []
+    return res
 
 
 def GetFeatureCount(fileshp):
