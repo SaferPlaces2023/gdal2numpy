@@ -32,7 +32,7 @@ from .module_log import Logger
 from .module_open import OpenShape
 
 
-def GetFeatures(fileshp, filter=[], format=None):
+def GetFeatures(fileshp, filter=None, format=None):
     """
     GetFeatures - get all features from file
     """
@@ -40,10 +40,10 @@ def GetFeatures(fileshp, filter=[], format=None):
     ds = OpenShape(fileshp)
     if ds:
         # filter features by fid
-        if len(filter) > 0:
+        if filter and len(filter) > 0:
             res = [ds.GetLayer().GetFeature(fid) for fid in listify(filter)]
         else:
-            res = ds.GetLayer()    
+            res = ds.GetLayer()
 
         if format is None:
             res = list(res)
