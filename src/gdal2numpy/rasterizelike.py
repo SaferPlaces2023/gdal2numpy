@@ -118,7 +118,7 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
 
             # add buffer
             # solo per i poligoni
-            if buffer > 0 and geom.GetGeometryType() == ogr.wkbPolygon or geom.GetGeometryType() == ogr.wkbMultiPolygon:
+            if buf > 0 and geom.GetGeometryType() == ogr.wkbPolygon or geom.GetGeometryType() == ogr.wkbMultiPolygon:
                 buffer = geom.Buffer(buf)
             else:
                 buffer = geom
