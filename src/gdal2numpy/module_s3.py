@@ -260,7 +260,8 @@ def s3_exists(uri, client=None):
             client.head_object(Bucket=bucket_name, Key=filepath)
             res = True
     except ClientError as ex:
-        Logger.error(ex)
+        pass
+        #Logger.error(ex)
     return res
 
 
@@ -290,10 +291,12 @@ def s3_copy(src, dst, client=None):
         dst_bucket_name, dst_filepath = get_bucket_name_key(dst)
         if src_bucket_name and src_filepath and dst_bucket_name and dst_filepath:
             client = get_client(client)
-            client.copy_object(Bucket=dst_bucket_name, Key=dst_filepath,
+            if s3_exists(src, client):
+                client.copy_object(Bucket=dst_bucket_name, Key=dst_filepath,
                                CopySource={'Bucket': src_bucket_name, 'Key': src_filepath})
             res = True
     except ClientError as ex:
+        Logger.error("!!!")
         Logger.error(ex)
     return res
 
@@ -329,8 +332,15 @@ def copy(src, dst=None, client=None):
         s3_download(src, dst, client=client)
     elif iss3(src) and iss3(dst):
         s3_copy(src, dst, client=client)
-    elif os.path.isfile(src) and os.path.isfile(dst):
+    elif os.path.isfile(src) and not iss3(dst):
         shutil.copy2(src, dst)
+    elif os.path.isdir(src):
+        if not iss3(dst):
+            os.makedirs(dst, exist_ok=True)
+        # copy all files in src folder recursively
+        for root, dirs, files in os.walk(src):
+            for file in files:
+                copy(f"{root}/{file}", f"{dst}/{file}", client=client)
     
     exts = []
     if src.endswith(".shp"):
@@ -355,7 +365,7 @@ def move(src, dst, client=None):
         s3_download(src, dst, remove_src=True, client=client)
     elif iss3(src) and iss3(dst):
         s3_move(src, dst, client=client)
-    elif os.path.isfile(src) and os.path.isfile(dst):
+    elif os.path.isfile(src) and not iss3(dst):
         shutil.move(src, dst)
     
     exts = []

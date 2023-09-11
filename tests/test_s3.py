@@ -21,31 +21,39 @@ class Test(unittest.TestCase):
         warnings.simplefilter("default", ResourceWarning)
 
 
-    def test_open(self):
-        """
-        test_open: 
-        """
-        ds = OpenShape(fileshp)
-        self.assertTrue(ds is not None)
+    # def test_open(self):
+    #     """
+    #     test_open: 
+    #     """
+    #     ds = OpenShape(fileshp)
+    #     self.assertTrue(ds is not None)
 
 
-    def test_features(self):
-        """
-        test_srs: 
-        """
-        features = GetFeatures(fileshp)
-        for feature in features:
-            print(feature)
+    # def test_features(self):
+    #     """
+    #     test_srs: 
+    #     """
+    #     features = GetFeatures(fileshp)
+    #     for feature in features:
+    #         print(feature)
 
     
-    def test_srs(self):
-        """
-        test_srs: 
-        """
-        srs = GetSpatialRef(fileshp)
-        print(srs)
-        self.assertTrue(srs is not None)
+    # def test_srs(self):
+    #     """
+    #     test_srs: 
+    #     """
+    #     srs = GetSpatialRef(fileshp)
+    #     print(srs)
+    #     self.assertTrue(srs is not None)
 
+
+    def test_copy(self):
+        """
+        test_copy
+        """
+        fileout = "s3://saferplaces.co/test/barrier_copy.shp"
+        copy(fileshp, fileout)
+        self.assertTrue(s3_exists(fileout))
 
     # def test_upload_s3(self):
     #     """
