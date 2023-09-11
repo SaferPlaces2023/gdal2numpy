@@ -122,7 +122,7 @@ def etag(filename, client=None, chunk_size=8 * 1024 * 1024):
                 ETag = client.head_object(Bucket=bucket_name, Key=key_name)[
                     'ETag'][1:-1]
         except ClientError as ex:
-            Logger.error("etag:"+ex)
+            Logger.error(ex)
             ETag = ""
         except NoCredentialsError as ex:
             Logger.error(ex)
