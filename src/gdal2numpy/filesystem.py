@@ -53,7 +53,9 @@ def normpath(pathname):
     """
     if not pathname:
         return ""
-    return os.path.normpath(pathname.replace("\\", "/")).replace("\\", "/")
+    pathname = os.path.normpath(pathname.replace("\\", "/")).replace("\\", "/")
+    pathname = pathname.replace(":/", "://") #patch for s3:// and http:// https://
+    return pathname
 
 
 def juststem(pathname):
