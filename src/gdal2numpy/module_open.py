@@ -33,6 +33,7 @@ def OpenShape(fileshp, exclusive=False):
     OpenDataset
     """
     if not fileshp:
+        print(f"0)") 
         ds = None
     elif isinstance(fileshp, str) and isshape(fileshp):
         print(f"1) Opening {fileshp}...")
@@ -52,6 +53,7 @@ def OpenShape(fileshp, exclusive=False):
         print(f"5) Change the open mode: Open({exclusive})")
         ds = ogr.Open(fileshp.GetName(), exclusive)
     else:
+        print(f"999) {fileshp} is not a valid shapefile") 
         ds = None
     return ds
 
