@@ -27,7 +27,7 @@ import hashlib
 import boto3
 import shutil
 import requests
-import datetime
+import re
 from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
 from .module_log import Logger
@@ -265,16 +265,25 @@ def s3_exists(uri, client=None):
     return res
 
 
-def s3_remove(uri, client=None):
+def s3_remove(uri, filter=None, client=None):
     """
     s3_remove
     """
     res = False
     try:
         bucket_name, filepath = get_bucket_name_key(uri)
-        if bucket_name and filepath:
+        if bucket_name and filepath and filter is None:
             client = get_client(client)
             client.delete_object(Bucket=bucket_name, Key=filepath)
+            res = True
+        elif bucket_name and filepath and filter:
+            client = get_client(client)
+            files = s3_list(uri, filter, client)
+            Objects =[]
+            for f in files:
+                _ , key = get_bucket_name_key(f)
+                Objects.append({'Key': key})
+            client.delete_objects(Bucket=bucket_name, Delete={'Objects': Objects, 'Quiet': True})
             res = True
     except ClientError as ex:
         Logger.error(ex)
@@ -318,6 +327,26 @@ def s3_move(src, dst, client=None):
     except ClientError as ex:
         Logger.error(ex)
     return res
+
+
+def s3_list(uri, filter=None, client=None):
+    """
+    s3_list
+    regexp: s3://saferplaces.co/tests/rimini
+    """
+    res = []
+    try:
+        bucket_name, key_name = get_bucket_name_key(uri)
+        if bucket_name and key_name:
+            client = get_client(client)
+            response = client.list_objects_v2(Bucket=bucket_name, Prefix=key_name)
+            for obj in response['Contents']:
+                if filter is None or re.match(filter, obj['Key']):
+                    res.append(f"s3://{bucket_name}/{obj['Key']}")
+    except ClientError as ex:
+        Logger.error(ex)
+    return res
+
 
 
 def copy(src, dst=None, client=None):

@@ -270,6 +270,9 @@ def Rectangle(minx, miny, maxx, maxy):
 
 
 def TransformBBOX(bbox, s_srs=None, t_srs=None):
+    """
+    TransformBBOX
+    """
     if SameSpatialRef(s_srs, t_srs):
         return bbox
     s_minx, s_miny, s_maxx, s_maxy = bbox

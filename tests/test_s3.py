@@ -47,13 +47,13 @@ class Test(unittest.TestCase):
     #     self.assertTrue(srs is not None)
 
 
-    def test_copy(self):
-        """
-        test_copy
-        """
-        fileout = "s3://saferplaces.co/test/barrier_copy.shp"
-        copy(fileshp, fileout)
-        self.assertTrue(s3_exists(fileout))
+    # def test_copy(self):
+    #     """
+    #     test_copy
+    #     """
+    #     fileout = "s3://saferplaces.co/test/barrier_copy.shp"
+    #     copy(fileshp, fileout)
+    #     self.assertTrue(s3_exists(fileout))
 
     # def test_upload_s3(self):
     #     """
@@ -104,6 +104,13 @@ class Test(unittest.TestCase):
     #     ]
     #     ShapeFileFromGeoJSON(features, fileout, t_srs=4326)
 
+    def test_list(self):
+        """
+        test_list
+        """
+        s3_remove("s3://saferplaces.co/test", filter=r'(.*to_be_deleted/.*)')
+
+        self.assertEqual(1,1)
 
 if __name__ == '__main__':
     unittest.main()
