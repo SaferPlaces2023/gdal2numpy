@@ -108,8 +108,9 @@ class Test(unittest.TestCase):
         """
         test_list
         """
-        s3_remove("s3://saferplaces.co/test", filter=r'(.*to_be_deleted/.*)')
-
+        files = s3_list("s3://saferplaces.co/test/*/rain/*.shp")
+        for file in files:
+            print(file)
         self.assertEqual(1,1)
 
 if __name__ == '__main__':

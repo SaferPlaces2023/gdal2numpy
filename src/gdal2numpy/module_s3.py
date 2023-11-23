@@ -27,7 +27,7 @@ import hashlib
 import boto3
 import shutil
 import requests
-import re
+import fnmatch
 from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
 from .module_log import Logger
@@ -329,19 +329,21 @@ def s3_move(src, dst, client=None):
     return res
 
 
-def s3_list(uri, filter=None, client=None):
+def s3_list(uri, client=None):
     """
     s3_list
     regexp: s3://saferplaces.co/tests/rimini
     """
     res = []
     try:
-        bucket_name, key_name = get_bucket_name_key(uri)
+        bucket_name, pattern = get_bucket_name_key(uri)
+        key_name, _ = pattern.split("/*", 1)
+        print(bucket_name, key_name)
         if bucket_name and key_name:
             client = get_client(client)
             response = client.list_objects_v2(Bucket=bucket_name, Prefix=key_name)
             for obj in response['Contents']:
-                if filter is None or re.match(filter, obj['Key']):
+                if fnmatch.fnmatch(obj['Key'], pattern):
                     res.append(f"s3://{bucket_name}/{obj['Key']}")
     except ClientError as ex:
         Logger.error(ex)
