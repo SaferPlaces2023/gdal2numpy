@@ -33,26 +33,27 @@ def OpenShape(fileshp, exclusive=False):
     OpenDataset
     """
     if not fileshp:
+        print(f"0) {fileshp}...")
         ds = None
     elif isinstance(fileshp, str) and isshape(fileshp):
-        Logger.debug(f"1) Opening {fileshp}...")
+        print(f"1) Opening {fileshp}...")
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, str) and iss3(fileshp) and fileshp.endswith(".shp"):
-        Logger.debug(f"2) Downloading file from s3...")
+        print(f"2) Downloading file from s3...")
         #ds = ogr.Open(copy(fileshp), exclusive)
         fileshp = fileshp.replace("s3://", "/vsis3/")
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, str) and fileshp.startswith("http") and fileshp.endswith(".shp"):
-        Logger.debug(f"3) Inspect file from https...")
+        print(f"3) Inspect file from https...")
         ds = ogr.Open(f"/vsicurl/{fileshp}", exclusive)
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
-        Logger.debug(f"4) Dataset already open...")
+        print(f"4) Dataset already open...")
         ds = fileshp
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) < exclusive:
-        Logger.debug(f"5) Change the open mode: Open({exclusive})")
+        print(f"5) Change the open mode: Open({exclusive})")
         ds = ogr.Open(fileshp.GetName(), exclusive)
     else:
-        Logger.debug(f"999) {fileshp} is not a valid shapefile") 
+        print(f"999) {fileshp} is not a valid shapefile") 
         ds = None
     return ds
 
