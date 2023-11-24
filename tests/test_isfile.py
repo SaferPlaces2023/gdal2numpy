@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         """
         test_upload_s3: 
         """
-        filetif = "s3://ead.saferplaces.co/test/lidar_rimini_building_2.tif"
+        filetif = "s3://saferplaces.co/ead-api/12.4888776/43.9788354/12.6488776/44.1388354/rain/ssps1.2.6/2/damage_rt2.shp"
         self.assertTrue(isfile(filetif))
 
 
