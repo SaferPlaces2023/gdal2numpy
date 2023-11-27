@@ -89,7 +89,7 @@ def get_client(client=None):
     """
     get_client
     """
-    return client if client else boto3.client('s3')
+    return client if client else boto3.client('s3', region_name='us-east-1')
 
 
 def etag(filename, client=None, chunk_size=8 * 1024 * 1024):
