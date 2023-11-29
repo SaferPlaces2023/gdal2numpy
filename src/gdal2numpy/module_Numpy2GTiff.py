@@ -69,7 +69,7 @@ def GTiff2Cog(filetif, fileout=None, algo="NEAREST", verbose=False):
         maxValue = float(np.nanmax(arr))
         meanValue = float(np.nanmean(arr))
         stdValue = float(np.nanstd(arr))
-        #print(f"minValue={minValue}, maxValue={maxValue}, meanValue={meanValue}, stdValue={stdValue}")
+        #(f"minValue={minValue}, maxValue={maxValue}, meanValue={meanValue}, stdValue={stdValue}")
         ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
 
     driver = gdal.GetDriverByName("COG")

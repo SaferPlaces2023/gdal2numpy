@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         bbox = Rectangle(*bbox)
         bbox.Transform(transform)
         bbox = list(bbox.GetEnvelope())
-        print(bbox)
+        #print(bbox)
 
 
 

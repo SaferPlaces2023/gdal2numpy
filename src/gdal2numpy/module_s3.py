@@ -138,9 +138,6 @@ def s3_equals(file1, file2, client=None):
     """
     etag1 = etag(file1, client)
     etag2 = etag(file2, client)
-    # print(file1, etag1) 
-    # print(file2, etag2)
-    # print("====================================")
     if etag1 and etag2:
         return etag1 == etag2
     return False
@@ -338,7 +335,7 @@ def s3_list(uri, client=None):
     try:
         bucket_name, pattern = get_bucket_name_key(uri)
         key_name, _ = pattern.split("/*", 1)
-        print(bucket_name, key_name)
+        Logger.debug(bucket_name, key_name)
         if bucket_name and key_name:
             client = get_client(client)
             response = client.list_objects_v2(Bucket=bucket_name, Prefix=key_name)
