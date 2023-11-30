@@ -294,8 +294,19 @@ def GetExtent(filename, t_srs=None):
     """
     s_srs = None
     minx, miny, maxx, maxy = 0, 0, 0, 0
-    ext = justext(filename).lower()
-    if ext == "tif":
+    ext = justext(f"{filename}").lower()
+    if isinstance(filename, (list, tuple)):
+        minx, miny, maxx, maxy = filename
+        print("minx, miny, maxx, maxy", minx, miny, maxx, maxy)
+        s_srs = GetSpatialRef(4326)
+        t_srs = GetSpatialRef(t_srs)
+        transform = osr.CoordinateTransformation(s_srs, t_srs)
+        rect = Rectangle( minx, miny, maxx, maxy)
+        print("***")
+        rect.Transform(transform)
+        minx, miny, maxx, maxy = rect.GetEnvelope()
+
+    elif ext == "tif":
         ds = OpenRaster(filename)
         if ds:
             "{xmin} {ymin} {xmax} {ymax}"
