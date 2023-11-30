@@ -23,6 +23,7 @@
 # Created:
 #-------------------------------------------------------------------------------
 from .filesystem import *
+from .module_geolocate import *
 from .module_GDAL2Numpy import *
 from .module_Numpy2GTiff import *
 from .module_MetaData import *
@@ -35,3 +36,4 @@ from .rasterlike import RasterLike
 from .rasterizelike import RasterizeLike
 from .module_gdal import *
 from .gdalwarp import gdalwarp
+
