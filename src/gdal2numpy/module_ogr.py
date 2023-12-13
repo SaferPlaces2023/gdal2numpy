@@ -297,12 +297,10 @@ def GetExtent(filename, t_srs=None):
     ext = justext(f"{filename}").lower()
     if isinstance(filename, (list, tuple)):
         minx, miny, maxx, maxy = filename
-        print("minx, miny, maxx, maxy", minx, miny, maxx, maxy)
         s_srs = GetSpatialRef(4326)
         t_srs = GetSpatialRef(t_srs)
         transform = osr.CoordinateTransformation(s_srs, t_srs)
         rect = Rectangle( minx, miny, maxx, maxy)
-        print("***")
         rect.Transform(transform)
         minx, miny, maxx, maxy = rect.GetEnvelope()
 

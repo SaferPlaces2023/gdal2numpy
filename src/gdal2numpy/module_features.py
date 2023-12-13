@@ -22,11 +22,13 @@
 #
 # Created:     31/12/2022
 # -------------------------------------------------------------------------------
+import os
+import math
 import json
 import numpy as np
 import tempfile
 from osgeo import ogr, osr
-from .filesystem import listify, md5sum
+from .filesystem import listify, md5sum, juststem
 from .module_ogr import SameSpatialRef, GetSpatialRef, GetEPSG
 from .module_log import Logger
 from .module_open import OpenShape
@@ -246,7 +248,7 @@ def Transform(fileshp, t_srs, fileout=None):
 
     t_code = GetEPSG(t_srs)
     fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
-    
+
     # if isshape(fileout):
     #     Logger.debug("Using cached file:<%s>..." % fileout)
     #     return fileout
@@ -298,7 +300,7 @@ def QueryByPoint(file_shp, point):
     """
     closest_geometry_id = None
 
-    lon, lat  = point
+    lon, lat = point
     point = ogr.Geometry(ogr.wkbPoint)
     point.AddPoint(lon, lat)  # Replace 'x' and 'y' with your point coordinates
     # Open the shapefile
@@ -309,7 +311,7 @@ def QueryByPoint(file_shp, point):
 
         s_srs = osr.SpatialReference()
         s_srs.ImportFromEPSG(4326)
-        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)  
+        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
         # Transform the point into the same projection system as the layer
         if not SameSpatialRef(t_srs, s_srs):
@@ -331,3 +333,93 @@ def QueryByPoint(file_shp, point):
                 closest_geometry_id = feature.GetFID()
 
     return closest_geometry_id
+
+
+def CreateGeometryFromJson(geojson):
+    """
+    CreateGeometryFromJson
+    :param json:
+    :return:
+    """
+    if not isinstance(geojson, str):
+        geojson = json.dumps(geojson)
+    return ogr.CreateGeometryFromJson(geojson)
+
+
+def SaveFeatures(features, fileshp):
+    """
+    SaveFeature
+
+        {
+            'type': 'FeatureCollection',
+            "crs": { "type": "name", "properties": { "name": 3857 } },
+            "features":[ {
+                            'type': 'Feature',
+                            'geometry': {'type': 'Polygon', 
+                                'coordinates': [[[306305.6026338241, 4882527.4138626065], 
+                                ... [306305.6026338241, 4882527.4138626065]]]},
+                            'properties': None
+                       }]
+        }
+    """
+    if features and features["crs"]:
+        crs = GetSpatialRef(features["crs"]["properties"]["name"])
+    else:
+        crs = 4326
+
+    DATATYPE = {
+        "Point": ogr.wkbPoint,
+        "LineString": ogr.wkbLineString,
+        "Polygon": ogr.wkbPolygon,
+        "MultiPoint": ogr.wkbMultiPoint,
+        "MultiLineString": ogr.wkbMultiLineString,
+        "MultiPolygon": ogr.wkbMultiPolygon,
+        "int": ogr.OFTInteger,
+        "float": ogr.OFTReal,
+        "str": ogr.OFTString,
+        "text": ogr.OFTString
+    }
+    layername = juststem(fileshp)
+
+    if not os.path.isfile(fileshp):
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        ds = driver.CreateDataSource(fileshp)
+        feature = features["features"][0] if features["features"] else None
+        if feature:
+            dtype = feature["geometry"]["type"]
+            layer = ds.CreateLayer(layername, crs, DATATYPE[dtype])
+            properties = listify(feature["properties"])
+            for name in properties:
+                dtype, dwidth = (properties[name] + ":0").split(":")
+                p, w = math.modf(float(dwidth))
+                p, w = int(p), int(w)
+                field_name = ogr.FieldDefn(name, DATATYPE[dtype])
+                p = 255 if p == 0 and dtype == "str" else p
+                if w:
+                    field_name.SetWidth(w)
+                if p:
+                    field_name.SetPrecision(p)
+                layer.CreateField(field_name)
+                # Save and close the data source
+            ds = None
+
+    ds = ogr.Open(fileshp, 1)
+    if ds:
+        layer = ds.GetLayer()
+        crs = layer.GetSpatialRef()
+
+        layer_definition = layer.GetLayerDefn()
+        fieldnames = [layer_definition.GetFieldDefn(
+            j).GetName() for j in range(layer_definition.GetFieldCount())]
+
+        for feature in features["features"]:
+            f = ogr.Feature(layer_definition)
+            geom = CreateGeometryFromJson(feature["geometry"])
+            f.SetGeometry(geom)
+
+            for name in listify(feature["properties"]):
+                if name in fieldnames:
+                    f.SetField(name, properties[name])
+
+            layer.CreateFeature(f)
+        ds = None

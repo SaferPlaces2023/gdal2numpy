@@ -63,7 +63,7 @@ def juststem(pathname):
     juststem
     """
     pathname = os.path.basename(pathname)
-    (root, ext) = os.path.splitext(pathname)
+    root, _ = os.path.splitext(pathname)
     return root
 
 
@@ -71,8 +71,8 @@ def justpath(pathname, n=1):
     """
     justpath
     """
-    for j in range(n):
-        (pathname, _) = os.path.split(normpath(pathname))
+    for _ in range(n):
+        pathname, _ = os.path.split(normpath(pathname))
     if pathname == "":
         return "."
     return normpath(pathname)
@@ -90,7 +90,7 @@ def justext(pathname):
     justext
     """
     pathname = os.path.basename(normpath(pathname))
-    (_, ext) = os.path.splitext(pathname)
+    _, ext = os.path.splitext(pathname)
     return ext.lstrip(".")
 
 
@@ -98,7 +98,7 @@ def forceext(pathname, newext):
     """
     forceext
     """
-    (root, _) = os.path.splitext(normpath(pathname))
+    root, _ = os.path.splitext(normpath(pathname))
     pathname = root + ("." + newext if len(newext.strip()) > 0 else "")
     return normpath(pathname)
 
@@ -117,6 +117,27 @@ def isshape(pathname):
     return pathname and os.path.isfile(pathname) and justext(pathname).lower() in ("shp",)
 
 
+def filesize(filename):
+    """
+    filesize
+    """
+    if os.path.isfile(filename):
+        return os.path.getsize(filename)
+    else:
+        return -1
+
+
+def filectime(filename):
+    """
+    filectime - get the creation date
+    """
+    if os.path.exists(filename):
+        unixtimestamp = os.path.getctime(filename)
+        return datetime.datetime.fromtimestamp(unixtimestamp).strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        return None
+
+
 def mkdirs(pathname):
     """
     mkdirs - create a folder
@@ -125,8 +146,8 @@ def mkdirs(pathname):
         if os.path.isfile(pathname):
             pathname = justpath(pathname)
         os.makedirs(pathname, exist_ok=True)
-    except:
-        pass
+    except OSError:
+        Logger.error(ex)
     return os.path.isdir(pathname)
 
 
@@ -144,7 +165,7 @@ def tempfilename(prefix="", suffix=""):
     """
     return a temporary filename
     """
-    return tempfile.gettempdir() + "/" + datetime.datetime.strftime(now(), f"{prefix}%Y%m%d%H%M%S%f{suffix}")
+    return tempfile.gettempdir() + "/" + now().strftime(f"{prefix}%Y%m%d%H%M%S%f{suffix}")
 
 
 def strtofile(text, filename, append=False):
@@ -158,10 +179,10 @@ def strtofile(text, filename, append=False):
         if isinstance(text, (bytes,)):
             flag += 'b'
         mkdirs(justpath(filename))
-        with open(filename, flag) as stream:
+        with open(filename, flag, encoding="utf-8") as stream:
             if text:
                 stream.write(text)
-    except Exception as ex:
+    except OSError as ex:
         Logger.error(ex)
         return ""
     return filename
@@ -181,7 +202,8 @@ def filetostr(filename):
     try:
         with open(filename, "r", encoding="utf-8") as stream:
             return stream.read()
-    except:
+    except OSError as ex:
+        Logger.error(ex)
         return None
 
 
@@ -192,7 +214,7 @@ def filetojson(filename):
     try:
         with open(filename, "r", encoding="utf-8") as stream:
             return json.load(stream)
-    except Exception as ex:
+    except OSError as ex:
         Logger.error(ex)
         return None
 
