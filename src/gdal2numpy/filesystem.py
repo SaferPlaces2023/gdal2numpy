@@ -179,7 +179,7 @@ def strtofile(text, filename, append=False):
         if isinstance(text, (bytes,)):
             flag += 'b'
         mkdirs(justpath(filename))
-        with open(filename, flag, encoding="utf-8") as stream:
+        with open(filename, flag) as stream:
             if text:
                 stream.write(text)
     except OSError as ex:
