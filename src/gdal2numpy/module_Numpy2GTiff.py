@@ -57,7 +57,7 @@ def GTiff2Cog(filetif, fileout=None, algo="NEAREST", verbose=False):
         return None
     
     # Inplace conversion if fileout is None
-    fileout = fileout if fileout else filetif    
+    filetmp = fileout if fileout else tempfilename(prefix="cog_", suffix=".tif") 
 
     # Set the statistics
     dtype = ds.GetRasterBand(1).DataType
@@ -79,7 +79,7 @@ def GTiff2Cog(filetif, fileout=None, algo="NEAREST", verbose=False):
         Logger.debug(f"Creating a COG..{CO}")
         #ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
         ds.BuildOverviews(algo, CalculateOverviews(ds))
-        dst_ds = driver.CreateCopy(fileout, ds, False, CO)
+        dst_ds = driver.CreateCopy(filetmp, ds, False, CO)
         dst_ds = None
     else:
         BLOCKSIZE = 512
@@ -90,10 +90,16 @@ def GTiff2Cog(filetif, fileout=None, algo="NEAREST", verbose=False):
               f"BLOCKXSIZE={BLOCKSIZE}",
               f"COMPRESS={COMPRESSION}", "-ro"]
         driver = gdal.GetDriverByName("GTiff")  # GTiff or MEM
-        dst_ds = driver.CreateCopy(fileout, ds, False, CO)
+        dst_ds = driver.CreateCopy(filetmp, ds, False, CO)
         dst_ds = None
     
     ds = None
+
+    #Inplace conversion if fileout is None
+    if fileout is None:
+        fileout = filetif
+        
+    move(filetmp, fileout)
 
     return fileout if os.path.isfile(fileout) else None
 

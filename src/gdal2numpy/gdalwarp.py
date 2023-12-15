@@ -30,6 +30,7 @@ from .module_ogr import SetGDALEnv, RestoreGDALEnv, GetEPSG
 from .module_open import OpenRaster
 from .module_s3 import *
 
+
 def reasampling_method(method):
     """
     reasampling_method translation form text to gdalconst
@@ -61,36 +62,38 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     """
     gdalwarp
     """
-
     gdal.SetConfigOption('CPLErrorHandling', 'silent')
 
     # In case of s3 fileout must be a s3 path
-    fileout = fileout if fileout else tempfilename(suffix=".tif")
-    _, fileout1 = get_bucket_name_key(fileout) # s3://saferplaces.co/test.tif -> saferplaces.co, test.tif
+    # fileout = fileout if fileout else tempfilename(suffix=".tif")
+    # s3://saferplaces.co/test.tif -> saferplaces.co, test.tif
     if iss3(fileout):
-        fileout1 = tempname4S3(fileout1)
-        os.makedirs(justpath(fileout1), exist_ok=True)
+        _, filetmp = get_bucket_name_key(fileout)
+        filetmp = tempname4S3(filetmp)
+    else:
+        filetmp = tempfilename(prefix="gdalwarp_", suffix=".tif")
+
+    # assert that the folder exists
+    os.makedirs(justpath(filetmp), exist_ok=True)
 
     #  copy s3 file to local
     filelist_tmp = []
     filelist = listify(filelist)
     for filename in filelist:
         if iss3(filename):
-            filename = copy(filename, tempfilename(suffix=".tif"))
+            filename = copy(filename, tempfilename(
+                prefix="s3_", suffix=".tif"))
         filelist_tmp.append(filename)
     # ----------------------------------------------------------------------
 
-    co = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"]
-
-    # if format.lower() == "gtiff":
-    #     co = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256", "COMPRESS=LZW"]
-    # elif format.lower() == "cog":
-    #     co = ["BIGTIFF=YES", "COMPRESS=DEFLATE", "NUM_THREADS=ALL_CPUS"]
-    # else:
-    #     co = []
+    co = ["BIGTIFF=YES",
+          "TILED=YES",
+          "BLOCKXSIZE=256",
+          "BLOCKYSIZE=256",
+          "COMPRESS=LZW"]
 
     kwargs = {
-        "format": format,
+        "format": "GTiff",
         "outputType": gdalconst.GDT_Float32,
         "creationOptions": co,
         "dstNodata": -9999,
@@ -111,20 +114,25 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         kwargs["cutlineDSName"] = cutline
         kwargs["cutlineLayer"] = juststem(cutline)
 
-    SetGDALEnv()
+    # SetGDALEnv()
     # inplace gdalwarp
-    if fileout == filelist:
-        fileout1 = OpenRaster(fileout, update=True)
+    if fileout is None and len(filelist) > 0:
+        fileout = filelist[0]
+        # ds = OpenRaster(filetmp, update=True)
+        # filetmp = ds
 
-    gdal.Warp(fileout1, filelist_tmp, **kwargs)
+    gdal.Warp(filetmp, filelist_tmp, **kwargs)
+
+    Logger.debug(f"gdalwarp: converting to {filetmp}")
 
     if format.lower() == "cog":
-        GTiff2Cog(fileout1)
+        # inplace conversion
+        GTiff2Cog(filetmp)
 
-    if iss3(fileout):
-        move(fileout1, fileout)
+    Logger.debug(f"gdalwarp: move {filetmp} to {fileout}")
+    move(filetmp, fileout)
 
-    RestoreGDALEnv()
+    #RestoreGDALEnv()
     gdal.SetConfigOption('CPLErrorHandling', 'once')
     # ----------------------------------------------------------------------
     return fileout

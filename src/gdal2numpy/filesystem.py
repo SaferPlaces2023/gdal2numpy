@@ -165,7 +165,7 @@ def tempfilename(prefix="", suffix=""):
     """
     return a temporary filename
     """
-    return tempfile.gettempdir() + "/" + now().strftime(f"{prefix}%Y%m%d%H%M%S%f{suffix}")
+    return normpath(tempfile.gettempdir() + "/" + now().strftime(f"{prefix}%Y%m%d%H%M%S%f{suffix}"))
 
 
 def strtofile(text, filename, append=False):
