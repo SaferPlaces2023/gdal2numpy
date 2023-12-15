@@ -32,6 +32,21 @@ from .module_s3 import *
 from .module_log import Logger
 
 
+def is_cog(filename):
+    """
+    is_cog - Check if a file is a COG
+    :param filename:
+    :return:
+    """
+    ds = OpenRaster(filename)
+    if ds:
+        metadata = ds.GetMetadata('IMAGE_STRUCTURE')
+        layout = metadata["LAYOUT"] if "LAYOUT" in metadata else ""
+        ds = None
+        return layout.upper() == "COG"
+    return False
+
+
 def CalculateOverviews(ds):
     """
     CalculateOverviews - Calculate overviews
