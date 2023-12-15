@@ -1,6 +1,14 @@
 import socket
 import requests
 
+
+def hostname():
+    """
+    hostname
+    """
+    return socket.gethostname()
+
+
 def local_ip():
     """
     get_ip -
@@ -32,7 +40,6 @@ def whatsmyip():
     for uri in uris:
         try:
             return requests.get(uri).text.strip()
-        except Exception as ex:
+        except requests.exceptions.RequestException:
             continue
     return None
-
