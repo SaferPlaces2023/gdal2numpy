@@ -1,6 +1,6 @@
 import socket
 import requests
-
+from .module_log import Logger
 
 def hostname():
     """
@@ -43,3 +43,26 @@ def whatsmyip():
         except requests.exceptions.RequestException:
             continue
     return None
+
+
+def http_get(url, mode=""):
+    """
+    http_get use requests
+    """
+    if url and isinstance(url, str) and url.startswith("http"):
+        try:
+            print(url)
+            with requests.get(url) as response:
+                if response.status_code == 200:
+                    if mode == "json":
+                        return response.json()
+                    elif mode == "text":
+                        return response.text
+                    return response.content
+        except requests.exceptions.RequestException as ex:
+            Logger.error(ex)
+    return None
+
+
+
+

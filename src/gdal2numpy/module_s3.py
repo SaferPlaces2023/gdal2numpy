@@ -51,7 +51,7 @@ def isfile(filename):
         return True
     elif iss3(filename) and s3_exists(filename):
         return True
-    #test if is a http url 
+    #test if is a http url
     elif isinstance(filename, str) and filename.startswith("http"):
         try:
             r = requests.head(filename)
@@ -90,6 +90,20 @@ def get_client(client=None):
     get_client
     """
     return client if client else boto3.client('s3', region_name='us-east-1')
+
+
+def s3_get(uri, client=None):
+    """
+    s3_get
+    """
+    bucket_name, key_name = get_bucket_name_key(uri)
+    if bucket_name and key_name:
+        try:
+            client = get_client(client)
+            return client.get_object(Bucket=bucket_name, Key=key_name)['Body'].read().decode('utf-8')
+        except ClientError as ex:
+            Logger.error(ex)
+    return None
 
 
 def etag(filename, client=None, chunk_size=8 * 1024 * 1024):

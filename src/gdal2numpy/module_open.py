@@ -24,9 +24,24 @@
 # -------------------------------------------------------------------------------
 import os
 from osgeo import ogr, gdal
-from .filesystem import isshape, isshape
+
+from .filesystem import isshape, isshape, filetostr
 from .module_log import Logger
-from .module_s3 import iss3
+from .module_s3 import iss3, s3_get
+from .module_http import http_get
+
+def get(uri):
+    """
+    OpenText
+    """
+    if isinstance(uri, str):
+        if os.path.isfile(uri):
+            return filetostr(uri)
+        elif uri.startswith("http"):
+            return http_get(uri, mode="text")
+        elif uri.startswith("s3://"):
+            return s3_get(uri)
+    return None
 
 def OpenShape(fileshp, exclusive=False):
     """
@@ -79,21 +94,14 @@ def GetAccess(ds):
     return res
 
 
-def isstring(s):
-    """
-    isstring
-    """
-    return isinstance(s, str)
-
-
 def OpenRaster(filename, update=0):
     """
     OpenRaster
     """
     if not filename:
         return None
-    elif isstring(filename) and filename.lower().endswith(".tif"):
-        
+    elif isinstance(filename, str) and filename.lower().endswith(".tif"):
+       
         if os.path.isfile(filename):
             pass
         elif filename.lower().startswith("/vsis3/"):

@@ -30,15 +30,18 @@ class Test(unittest.TestCase):
         #self.assertTrue(ds is not None)
 
 
-    def test_copy_schema(self):
+    def test_opentext(self):
         """
-        test_copy_schema: 
+        test_opentext: 
         """
-        fileshp = "s3://saferplaces.co/test/barrier.shp"
-        fileout = "tests/barrier_schema.shp"
+        filetxt = f"{workdir}/geojson.prj"
+        filetxt = f"https://s3.amazonaws.com/saferplaces.co/fdamage/common/residential.csv"
+        filetxt = f"s3://saferplaces.co/fdamage/common/residential.csv"
         
-        FeatureSelection(fileshp, fileout, fids=[1])
-        #self.assertTrue(GetFeatureCount(fileout) == 1)
+        text = get(filetxt)
+        print(f"<{text}>")
+        
+        self.assertTrue(text is not None)
 
 
 if __name__ == '__main__':

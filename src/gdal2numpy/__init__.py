@@ -33,6 +33,7 @@ from .module_esri_shape import *
 from .module_geojson import ShapeFileFromGeoJSON
 from .module_s3 import *
 from .module_http import *
+from .module_open import get
 from .rasterlike import RasterLike
 from .rasterizelike import RasterizeLike
 from .module_gdal import *
