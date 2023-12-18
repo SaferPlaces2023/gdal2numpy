@@ -26,8 +26,8 @@ class Test(unittest.TestCase):
         """
         fileshp = "s3://saferplaces.co/test/barrier.shp"
         
-        #ds = OpenShape(fileshp)
-        #self.assertTrue(ds is not None)
+        ds = OpenShape(fileshp)
+        self.assertTrue(ds is not None)
 
 
     def test_opentext(self):
@@ -35,8 +35,8 @@ class Test(unittest.TestCase):
         test_opentext: 
         """
         filetxt = f"{workdir}/geojson.prj"
-        filetxt = f"https://s3.amazonaws.com/saferplaces.co/fdamage/common/residential.csv"
-        filetxt = f"s3://saferplaces.co/fdamage/common/residential.csv"
+        filetxt = f"https://s3.amazonaws.com/saferplaces.co/fdamage/shared/residential.csv"
+        filetxt = f"s3://saferplaces.co/fdamage/shared/residential.csv"
         
         text = get(filetxt)
         print(f"text is <{text}>")

@@ -22,9 +22,9 @@ class Test(unittest.TestCase):
 
     def test_isfile_s3(self):
         """
-        test_upload_s3: 
+        test_isfile_s3: 
         """
-        filetif = "s3://saferplaces.co/ead-api/12.4888776/43.9788354/12.6488776/44.1388354/rain/ssps1.2.6/2/damage_rt2.shp"
+        filetif = "s3://saferplaces.co/fdamage/shared/residential.csv"
         self.assertTrue(isfile(filetif))
 
 

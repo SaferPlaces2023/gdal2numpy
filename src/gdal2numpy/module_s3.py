@@ -46,7 +46,7 @@ def isfile(filename):
     isfile
     """
     if not filename:
-        return False    
+        return False
     elif isinstance(filename, str) and os.path.isfile(filename):
         return True
     elif isinstance(filename, str) and filename.startswith("http"):
