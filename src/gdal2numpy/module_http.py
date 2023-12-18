@@ -45,6 +45,19 @@ def whatsmyip():
     return None
 
 
+def http_exists(url):
+    """
+    http_exists use requests
+    """
+    if isinstance(url, str) and url.startswith("http"):
+        try:
+            r = requests.head(url)
+            return r.status_code == requests.codes.ok
+        except Exception as ex:
+            Logger.warn(ex)
+    return False
+
+
 def http_get(url, mode=""):
     """
     http_get use requests

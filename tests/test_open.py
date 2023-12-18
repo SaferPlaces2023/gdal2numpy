@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         filetxt = f"s3://saferplaces.co/fdamage/common/residential.csv"
         
         text = get(filetxt)
-        print(f"<{text}>")
+        print(f"text is <{text}>")
         
         self.assertTrue(text is not None)
 

@@ -26,10 +26,10 @@ import os
 import hashlib
 import boto3
 import shutil
-import requests
 import fnmatch
 from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
+from .module_http import http_exists
 from .module_log import Logger
 
 
@@ -49,16 +49,10 @@ def isfile(filename):
         return False    
     elif isinstance(filename, str) and os.path.isfile(filename):
         return True
-    elif iss3(filename) and s3_exists(filename):
-        return True
-    #test if is a http url
     elif isinstance(filename, str) and filename.startswith("http"):
-        try:
-            r = requests.head(filename)
-            return r.status_code == requests.codes.ok
-        except Exception as ex:
-            Logger.error(ex)
-
+        return http_exists(filename)
+    elif isinstance(filename, str) and iss3(filename):
+        return s3_exists(filename)
     return False
 
 
