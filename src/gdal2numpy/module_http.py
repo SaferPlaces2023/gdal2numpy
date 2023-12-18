@@ -51,7 +51,6 @@ def http_get(url, mode=""):
     """
     if url and isinstance(url, str) and url.startswith("http"):
         try:
-            print(url)
             with requests.get(url) as response:
                 if response.status_code == 200:
                     if mode == "json":
