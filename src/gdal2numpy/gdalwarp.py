@@ -87,15 +87,20 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         filelist_tmp.append(filename)
     # ----------------------------------------------------------------------
 
-    co = ["BIGTIFF=YES",
-        "TILED=YES",
-        "BLOCKXSIZE=256",
-        "BLOCKYSIZE=256",
-        "COMPRESS=LZW",
-        "NUM_THREADS=ALL_CPUS"]
+    
+    if format.lower() == "cog":
+        co = ["BIGTIFF=YES", "NUM_THREADS=ALL_CPUS"]
+    else:
+        co = ["BIGTIFF=YES",
+            "TILED=YES",
+            "BLOCKXSIZE=256",
+            "BLOCKYSIZE=256",
+            "STATISTICS=YES",
+            "COMPRESS=LZW",
+            "NUM_THREADS=ALL_CPUS"]
 
     kwargs = {
-        "format": "GTiff",
+        "format": format,
         "outputType": gdalconst.GDT_Float32,
         "creationOptions": co,
         "warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
@@ -129,7 +134,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     Logger.debug(
         f"gdalwarp: converted to {filetmp}  in {total_seconds_from(t0)} s.")
     
-    if format.lower() == "cog":
+    if False and format.lower() == "cog":
         # inplace conversion
         t1 = now()
         GTiff2Cog(filetmp)

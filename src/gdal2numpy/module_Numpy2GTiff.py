@@ -62,61 +62,64 @@ def CalculateOverviews(ds):
     return overviews
 
 
-def GTiff2Cog(filetif, fileout=None, algo="NEAREST"):
+def CalculateStats(ds):
     """
-    GTiff2Cog - Convert a GTiff to COG
-    algo = one of "AVERAGE", "AVERAGE_MAGPHASE", "RMS", "BILINEAR", "CUBIC", "CUBICSPLINE", "GAUSS", "LANCZOS", "MODE", "NEAREST", or "NONE"
+    CalculateStats - Calculate statistics
+    :param ds:
+    :return:
     """
-    ds = OpenRaster(filetif, gdalconst.GA_Update) # open the file in write mode to build overviews
-    if not ds:
-        return None
-    
-    # Inplace conversion if fileout is None
-    filetmp = fileout if fileout else tempfilename(prefix="cog_", suffix=".tif") 
-
     # Set the statistics
     dtype = ds.GetRasterBand(1).DataType
     arr = ds.GetRasterBand(1).ReadAsArray()
-    nodata = ds.GetRasterBand(1).GetNoDataValue()
     if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
         arr[arr <= -9999] = np.nan
         minValue = float(np.nanmin(arr))
         maxValue = float(np.nanmax(arr))
         meanValue = float(np.nanmean(arr))
         stdValue = float(np.nanstd(arr))
-        #(f"minValue={minValue}, maxValue={maxValue}, meanValue={meanValue}, stdValue={stdValue}")
         ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
 
-    driver = gdal.GetDriverByName("COG")
-    if driver:
-        COMPRESSION = "DEFLATE"
-        CO = [f"COMPRESS={COMPRESSION}", "NUM_THREADS=ALL_CPUS"]
-        Logger.debug(f"Creating a COG..{CO}")
-        gdal.SetConfigOption("COMPRESS_OVERVIEW", "DEFLATE")
-        gdal.SetConfigOption("GDAL_CACHEMAX", "512")
-        #ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
-        ds.BuildOverviews(algo, CalculateOverviews(ds))
-        dst_ds = driver.CreateCopy(filetmp, ds, False, CO)
-        dst_ds = None
-    else:
-        BLOCKSIZE = 512
-        COMPRESSION = "DEFLATE"
-        CO = ["BIGTIFF=YES",
-              "TILED=YES",
-              f"BLOCKXSIZE={BLOCKSIZE}",
-              f"BLOCKXSIZE={BLOCKSIZE}",
-              f"COMPRESS={COMPRESSION}", "-ro"]
-        driver = gdal.GetDriverByName("GTiff")  # GTiff or MEM
-        dst_ds = driver.CreateCopy(filetmp, ds, False, CO)
-        dst_ds = None
-    
-    ds = None
 
-    #Inplace conversion if fileout is None
-    if fileout is None:
-        fileout = filetif
-        
-    move(filetmp, fileout)
+def GTiff2Cog(filetif, fileout=None, algo="NEAREST"):
+    """
+    GTiff2Cog - Convert a GTiff to COG
+    algo = one of "AVERAGE", "AVERAGE_MAGPHASE", "RMS", "BILINEAR", "CUBIC", "CUBICSPLINE", "GAUSS", "LANCZOS", "MODE", "NEAREST", or "NONE"
+    """
+    ds = OpenRaster(filetif, gdalconst.GA_Update) # open the file in write mode to build overviews
+    if ds:
+        # Inplace conversion if fileout is None
+        filetmp = fileout if fileout else tempfilename(prefix="cog_", suffix=".tif")
+
+        CalculateStats(ds)
+
+        driver = gdal.GetDriverByName("COG")
+        if driver:
+            COMPRESSION = "DEFLATE"
+            CO = [f"COMPRESS={COMPRESSION}", "NUM_THREADS=ALL_CPUS"]
+            Logger.debug(f"Creating a COG..{CO}")
+            gdal.SetConfigOption("COMPRESS_OVERVIEW", "DEFLATE")
+            gdal.SetConfigOption("GDAL_CACHEMAX", "512")
+            #ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
+            ds.BuildOverviews(algo, CalculateOverviews(ds))
+            driver.CreateCopy(filetmp, ds, False, CO)
+        else:
+            BLOCKSIZE = 512
+            COMPRESSION = "DEFLATE"
+            CO = [  "BIGTIFF=YES",
+                    "TILED=YES",
+                    f"BLOCKXSIZE={BLOCKSIZE}",
+                    f"BLOCKXSIZE={BLOCKSIZE}",
+                    f"COMPRESS={COMPRESSION}", "-ro"]
+            driver = gdal.GetDriverByName("GTiff")
+            driver.CreateCopy(filetmp, ds, False, CO)
+            
+        ds = None
+
+        #Inplace conversion if fileout is None
+        if fileout is None:
+            fileout = filetif
+            
+        move(filetmp, fileout)
 
     return fileout if os.path.isfile(fileout) else None
 
