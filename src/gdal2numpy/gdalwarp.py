@@ -132,7 +132,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     gdal.Warp(filetmp, filelist_tmp, **kwargs)
     Logger.debug(
         f"gdalwarp: converted to {filetmp}  in {total_seconds_from(t0)} s.")
-    
+   
     if format.lower() == "cog":
         # inplace conversion
         t1 = now()

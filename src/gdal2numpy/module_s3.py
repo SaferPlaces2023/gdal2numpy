@@ -156,6 +156,7 @@ def tempname4S3(uri):
     tempname4S3
     """
     dest_folder = tempdir("s3")
+    uri = uri if uri else ""
     if uri.startswith("s3://"):
         tmp = uri.replace("s3://", dest_folder + "/")
     if uri.startswith("s3:/"):
