@@ -59,16 +59,25 @@ class Test(unittest.TestCase):
     #     gdalwarp(filedem, fileout, format="COG")
     #     self.assertTrue(isfile(fileout))
 
+    def test_gdalwarp(self):
+        """
+        test_gdalwarp: 
+        """
+        t0 = now()
+        filedem = r"G:\\Drive condivisi\\GECOsDRIVE_2023\\Parma_safer\\dtm\\parma_dtm_2m_merge-25832.tif"
+        fileout = f"{workdir}/parma_dtm_2m_merge-25832.tif"
+        gdalwarp(filedem, fileout, dstSRS=filedem, format="COG")
+        print("test_gdalwarp", total_seconds_from(t0),"s.")
+        self.assertTrue(isfile(fileout))
 
-    def test_if_is_cog(self):
-        """
-        test_if_is_cog
-        """
-        print("test_if_is_cog")
-        filedem = f"{workdir}/lidar-rer-100m.warp.tif"
-        
-        
-        self.assertTrue(is_cog(filedem))
+
+    # def test_if_is_cog(self):
+    #     """
+    #     test_if_is_cog
+    #     """
+    #     print("test_if_is_cog")
+    #     filedem = f"{workdir}/lidar-rer-100m.warp.tif"
+    #     self.assertTrue(is_cog(filedem))
 
 
 if __name__ == '__main__':
