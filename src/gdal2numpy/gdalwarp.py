@@ -23,15 +23,15 @@
 # Created:     16/06/2021
 # -------------------------------------------------------------------------------
 import os
+import psutil
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
 from .module_Numpy2GTiff import GTiff2Cog
-from .module_ogr import SetGDALEnv, RestoreGDALEnv, GetEPSG
-from .module_open import OpenRaster
+from .module_ogr import GetEPSG, SameSpatialRef
 from .module_s3 import *
 
 
-def reasampling_method(method):
+def resampling_method(method):
     """
     reasampling_method translation form text to gdalconst
     """
@@ -62,6 +62,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     """
     gdalwarp
     """
+
     gdal.SetConfigOption('CPLErrorHandling', 'silent')
 
     # In case of s3 fileout must be a s3 path
@@ -86,18 +87,21 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         filelist_tmp.append(filename)
     # ----------------------------------------------------------------------
 
-    co = ["BIGTIFF=YES",
-          "TILED=YES",
-          "BLOCKXSIZE=256",
-          "BLOCKYSIZE=256",
-          "COMPRESS=LZW"]
+    if format.lower() == "cog":
+        co = []
+    else:
+        co = ["BIGTIFF=YES",
+            "TILED=YES",
+            "BLOCKXSIZE=256",
+            "BLOCKYSIZE=256",
+            "COMPRESS=LZW"]
 
     kwargs = {
-        "format": "GTiff",
+        "format": format,
         "outputType": gdalconst.GDT_Float32,
         "creationOptions": co,
         "dstNodata": -9999,
-        "resampleAlg": reasampling_method(resampleAlg),
+        "resampleAlg": resampling_method(resampleAlg),
         "multithread": True
     }
 
@@ -105,7 +109,9 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         kwargs["xRes"] = pixelsize[0]
         kwargs["yRes"] = abs(pixelsize[1])
 
-    if dstSRS:
+    if len(filelist) == 1 and SameSpatialRef(filelist[0], dstSRS):
+        Logger.debug(f"Avoid reprojecting {filelist[0]}")
+    elif dstSRS:
         dstSRS = GetEPSG(dstSRS)
         kwargs["dstSRS"] = dstSRS
 
@@ -118,21 +124,24 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
     # inplace gdalwarp
     if fileout is None and len(filelist) > 0:
         fileout = filelist[0]
-        # ds = OpenRaster(filetmp, update=True)
-        # filetmp = ds
 
+    t0 = now()
     gdal.Warp(filetmp, filelist_tmp, **kwargs)
-
-    Logger.debug(f"gdalwarp: converting to {filetmp}")
-
-    if format.lower() == "cog":
+    Logger.debug(
+        f"gdalwarp: converted to {filetmp}  in {total_seconds_from(t0)} s.")
+    
+    if False and format.lower() == "cog":
         # inplace conversion
+        t1 = now()
         GTiff2Cog(filetmp)
+        Logger.debug(
+            f"GTiff2Cog: converted {filetmp}  in {total_seconds_from(t1)} s.")
 
     Logger.debug(f"gdalwarp: move {filetmp} to {fileout}")
     move(filetmp, fileout)
 
-    #RestoreGDALEnv()
+    # RestoreGDALEnv()
     gdal.SetConfigOption('CPLErrorHandling', 'once')
+    Logger.debug(f"gdalwarp: completed in {total_seconds_from(t0)} s.")
     # ----------------------------------------------------------------------
     return fileout

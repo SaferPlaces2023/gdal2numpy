@@ -63,11 +63,11 @@ class Test(unittest.TestCase):
         """
         test_gdalwarp: 
         """
-        t0 = now()
+        set_log_level(verbose=True,debug=True)
         filedem = r"G:\\Drive condivisi\\GECOsDRIVE_2023\\Parma_safer\\dtm\\parma_dtm_2m_merge-25832.tif"
         fileout = f"{workdir}/parma_dtm_2m_merge-25832.tif"
         gdalwarp(filedem, fileout, dstSRS=filedem, format="COG")
-        print("test_gdalwarp", total_seconds_from(t0),"s.")
+        
         self.assertTrue(isfile(fileout))
 
 

@@ -38,4 +38,5 @@ from .rasterlike import RasterLike
 from .rasterizelike import RasterizeLike
 from .module_gdal import *
 from .gdalwarp import gdalwarp
+from .module_log import *
 
