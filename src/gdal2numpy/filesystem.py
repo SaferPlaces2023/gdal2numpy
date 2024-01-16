@@ -28,6 +28,7 @@ import json
 import os
 import tempfile
 import hashlib
+import shutil
 from .module_log import Logger
 
 def now():
@@ -146,9 +147,27 @@ def mkdirs(pathname):
         if os.path.isfile(pathname):
             pathname = justpath(pathname)
         os.makedirs(pathname, exist_ok=True)
-    except OSError:
+    except OSError as ex:
         Logger.error(ex)
     return os.path.isdir(pathname)
+
+def remove(pathname):
+    """
+    remove - remove a file
+    """
+    if os.path.isfile(pathname):
+        try:
+            os.remove(pathname)
+        except OSError as ex:
+            Logger.error(ex)
+    elif os.path.isdir(pathname):
+        try:
+            shutil.rmtree(pathname)
+        except OSError as ex:
+            Logger.error(ex)
+    elif isinstance(pathname, (list, tuple)):
+        for filename in pathname:
+            remove(filename)
 
 
 def tempdir(name=""):
