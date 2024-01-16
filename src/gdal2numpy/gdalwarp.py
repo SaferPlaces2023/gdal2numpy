@@ -57,7 +57,15 @@ def resampling_method(method):
         return gdalconst.GRIORA_Bilinear
 
 
-def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False, pixelsize=(0, 0), resampleAlg="near", format="GTiff"):
+def gdalwarp(filelist,
+             fileout=None,
+             dstSRS="",
+             cutline="",
+             cropToCutline=False,
+             pixelsize=(0, 0),
+             resampleAlg="near",
+             format="GTiff",
+             dstNodata=-9999):
     """
     gdalwarp
     """
@@ -102,7 +110,7 @@ def gdalwarp(filelist, fileout=None, dstSRS="", cutline="", cropToCutline=False,
         "outputType": gdalconst.GDT_Float32,
         "creationOptions": co,
         "warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
-        "dstNodata": -9999,
+        "dstNodata": dstNodata,
         "resampleAlg": resampling_method(resampleAlg),
         "multithread": True
     }
