@@ -29,11 +29,12 @@ import shutil
 import site
 from osgeo import gdal, gdalconst
 from osgeo import osr, ogr
-from .filesystem import justext, juststem, forceext, justpath,  strtofile
+from .filesystem import justext, juststem, forceext, justpath, strtofile
 from .module_open import OpenRaster
 from .module_open import OpenShape
 from .module_s3 import isfile
-
+from .module_esri_shape import AutoIdentify
+ 
 
 def create_cpg(fileshp):
     """
@@ -201,6 +202,8 @@ def GetSpatialRef(filename):
 
     elif isinstance(filename, str) and (filename.upper().startswith("PROJCS[") or filename.upper().startswith("GEOGCS[")):
         wkt = filename
+        code = AutoIdentify(wkt)
+
         srs = osr.SpatialReference()
         srs.ImportFromWkt(wkt)
         srs.AutoIdentifyEPSG()

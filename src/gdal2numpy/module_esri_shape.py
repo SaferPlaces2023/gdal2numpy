@@ -23,11 +23,41 @@
 # Created:     31/12/2022
 # -------------------------------------------------------------------------------
 import os
-from osgeo import ogr
-from .filesystem import justpath, listify, tempfilename
+import json
+import pkgutil
+from osgeo import ogr, osr
+from .filesystem import justpath, listify, tempfilename, filetostr, forceext, md5text
 from .module_open import OpenShape
-from .module_s3 import iss3, move, tempname4S3
+from .module_s3 import iss3, move, tempname4S3, isfile
 from .module_log import Logger
+
+
+def AutoIdentify(wkt):
+    """
+    AutoIdentify
+    """
+    #get the file pe_hash_list.json from package data
+    if isfile(wkt):
+        wkt = filetostr(forceext(wkt, "prj"))
+    elif isinstance(wkt, osr.SpatialReference):
+        wkt = wkt.ExportToWkt()
+    elif isinstance(wkt, ogr.DataSource):
+        layer = wkt.GetLayer()
+        wkt = layer.GetSpatialRef().ExportToWkt()
+    elif isinstance(wkt, ogr.Layer):
+        wkt = wkt.GetSpatialRef().ExportToWkt()
+    elif isinstance(wkt, ogr.Feature):
+        wkt = wkt.GetGeometryRef().GetSpatialReference().ExportToWkt()
+    elif isinstance(wkt, ogr.Geometry):
+        wkt = wkt.GetSpatialReference().ExportToWkt()
+    elif isinstance(wkt, str) and wkt.startswith("GEOGCS") or wkt.startswith("PROJCS"):
+        pass
+    else:
+        return None
+
+    pe_hash_list = json.loads(pkgutil.get_data(__name__, "data/pe_hash_list.json").decode("utf-8"))
+    pe_hash_list  = pe_hash_list["CoordinateSystems"] if "CoordinateSystems" in pe_hash_list else {}
+    return pe_hash_list.get(md5text(wkt), None)
 
 
 def CopySchema(fileshp, fileout=None):
