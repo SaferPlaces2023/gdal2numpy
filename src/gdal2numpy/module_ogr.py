@@ -203,10 +203,12 @@ def GetSpatialRef(filename):
     elif isinstance(filename, str) and (filename.upper().startswith("PROJCS[") or filename.upper().startswith("GEOGCS[")):
         wkt = filename
         code = AutoIdentify(wkt)
-
         srs = osr.SpatialReference()
-        srs.ImportFromWkt(wkt)
-        srs.AutoIdentifyEPSG()
+        if code:
+            srs.ImportFromEPSG(code)
+        else:
+            srs.ImportFromWkt(wkt)
+            srs.AutoIdentifyEPSG()
 
     elif isinstance(filename, str) and isfile(filename) and filename.lower().endswith(".shp"):
         ds = OpenShape(filename)

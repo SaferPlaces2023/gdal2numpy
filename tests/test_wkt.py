@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
         """
         test_read 
         """
-        code = AutoIdentify(fileshp)
+        code = GetSpatialRef(fileshp)
         print(code)
 
 
