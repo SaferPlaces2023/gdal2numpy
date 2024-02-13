@@ -32,6 +32,7 @@ from .filesystem import listify, md5sum, juststem
 from .module_ogr import SameSpatialRef, GetSpatialRef, GetEPSG
 from .module_log import Logger
 from .module_open import OpenShape
+from .module_esri_shape import AutoIdentify
 
 
 def GetFeatures(fileshp, filter=None, format=None):
@@ -246,7 +247,7 @@ def Transform(fileshp, t_srs, fileout=None):
 
     t_srs = GetSpatialRef(t_srs)
 
-    t_code = GetEPSG(t_srs)
+    t_code = AutoIdentify(t_srs)
     fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
 
     # if isshape(fileout):
