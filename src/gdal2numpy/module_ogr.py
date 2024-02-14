@@ -205,6 +205,7 @@ def GetSpatialRef(filename):
         code = AutoIdentify(wkt)
         srs = osr.SpatialReference()
         if code:
+            code = int(code.split(":")[1])
             srs.ImportFromEPSG(code)
         else:
             srs.ImportFromWkt(wkt)
