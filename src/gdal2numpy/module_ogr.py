@@ -38,7 +38,7 @@ from .module_open import OpenShape
 from .module_s3 import isfile
 from .module_log import Logger
 from Levenshtein import distance
- 
+
 
 def create_cpg(fileshp):
     """
@@ -240,6 +240,27 @@ def AutoIdentify(wkt):
     return code
 
 
+def isEPSG(epsg):
+    """
+    isEPSG - check if the string is a epsg
+    """
+    return isinstance(epsg, str) and epsg.lower().startswith("epsg")
+
+
+def isProj4(proj4):
+    """
+    isProj4 - check if the string is a proj4
+    """
+    return isinstance(proj4, str) and proj4.lower().startswith("+proj")
+
+
+def isWkt(wkt):
+    """
+    isWkt - check if the string is a wkt
+    """
+    return isinstance(wkt, str) and (wkt.upper().startswith("GEOGCS") or wkt.upper().startswith("PROJCS"))
+
+
 def GetSpatialRef(filename):
     """
     GetSpatialRef
@@ -253,19 +274,19 @@ def GetSpatialRef(filename):
         srs.ImportFromEPSG(filename)
         srs.AutoIdentifyEPSG()
 
-    elif isinstance(filename, str) and filename.lower().startswith("epsg:"):
+    elif isEPSG(filename):
         code = int(filename.split(":")[1])
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(code)
         srs.AutoIdentifyEPSG()
 
-    elif isinstance(filename, str) and filename.upper().startswith("+proj"):
+    elif isProj4(filename):
         proj4text = filename
         srs = osr.SpatialReference()
         srs.ImportFromProj4(proj4text)
         srs.AutoIdentifyEPSG()
 
-    elif isinstance(filename, str) and (filename.upper().startswith("PROJCS[") or filename.upper().startswith("GEOGCS[")):
+    elif isWkt(filename):
         wkt = filename
         code = AutoIdentify(wkt)
         srs = osr.SpatialReference()
