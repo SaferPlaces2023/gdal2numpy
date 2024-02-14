@@ -29,7 +29,7 @@ import numpy as np
 import tempfile
 from osgeo import ogr, osr
 from .filesystem import listify, md5sum, juststem
-from .module_ogr import SameSpatialRef, GetSpatialRef, GetEPSG
+from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_log import Logger
 from .module_open import OpenShape
 from .module_esri_shape import AutoIdentify

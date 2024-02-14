@@ -23,10 +23,11 @@ class Test(unittest.TestCase):
         """
         test_read 
         """
-        code = GetSpatialRef(fileshp)
-        print(code)
+        #code = GetSpatialRef(fileshp)
+        #print(code)
 
-        code = AutoIdentify("EPSG:32633")
+        filename = r"D:\Users\vlr20\Projects\GitHub\saferplaces\saferplaces-4.0\mnt\efs\projects\valluzzi@gmail.com\DigitalTwin_20240214\catania.tif"
+        code = AutoIdentify(filename)
         print(code)
 
 
