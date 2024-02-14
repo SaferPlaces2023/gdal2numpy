@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         code = GetSpatialRef(fileshp)
         print(code)
 
-        code = AutoIdentify("EPSG:4326")
+        code = AutoIdentify("EPSG:32633")
         print(code)
 
 
