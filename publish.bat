@@ -16,7 +16,13 @@ echo import setuptools>setup.bkp
 echo.>>setup.bkp
 echo VERSION = "%version%">>setup.bkp
 :: copy the file from line 3 to the end of the file avoid last line
-type setup.py | more +3 >>setup.bkp
+type setup.py | more +3>>setup.bkp
+
+:: replace the file
+copy setup.bkp setup.py
+
+:: remove the backup file
+del setup.bkp
 
 :: write the version number to the file
 echo v %version%
