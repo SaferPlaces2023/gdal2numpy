@@ -124,7 +124,9 @@ def gdalwarp(filelist,
         Logger.debug(f"Avoid reprojecting {filelist[0]}")
     elif dstSRS:
         dstSRS = GetEPSG(dstSRS)
-        #dstSRS = AutoIdentify(dstSRS)
+        print(dstSRS)
+        dstSRS = AutoIdentify(dstSRS)
+        print(dstSRS)
         kwargs["dstSRS"] = dstSRS
 
     if isfile(cutline):
@@ -132,7 +134,6 @@ def gdalwarp(filelist,
         kwargs["cutlineDSName"] = cutline
         kwargs["cutlineLayer"] = juststem(cutline)
     elif isinstance(cutline, (tuple, list)) and len(cutline) == 4:
-        print("cutline:",cutline)
         kwargs["outputBounds"] = listify(cutline)
 
     # SetGDALEnv()
