@@ -8,25 +8,26 @@ for /F "tokens=2 delims==, " %%t in ('findstr /C:"VERSION " setup.py') do (
         set /A v+=1
     )
 )
-set version="0.0.%v%"
+set version=0.0.%v%
 
 
 :: replace the version number in package.json
 echo import setuptools>setup.bkp
 echo.>>setup.bkp
-echo VERSION = %version%>>setup.bkp
+echo VERSION = "%version%">>setup.bkp
 :: copy the file from line 3 to the end of the file avoid last line
 type setup.py | more +3 >>setup.bkp
 
-
-:: write the version file
+:: write the version number to the file
+echo v %version%
 
 ::commit and push the changes
 set comment=%version%
 cmd /c git add .
-cmd /c git commit -m %comment%
+cmd /c git commit -m "v %comment%"
 cmd /c git push
-::finally publish the package on npm
-cmd /c npm run build 
-cmd /c npm publish 
-
+::finally publish the package on github
+cmd /c rmdir /Q /S build
+cmd /c rmdir /Q /S dist
+cmd /c python setup.py sdist
+cmd /c twine upload dist/*
