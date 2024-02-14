@@ -26,8 +26,7 @@ import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
 from .module_Numpy2GTiff import GTiff2Cog
-from .module_ogr import GetEPSG, SameSpatialRef
-from .module_esri_shape import AutoIdentify
+from .module_ogr import SameSpatialRef, AutoIdentify
 from .module_s3 import *
 
 
@@ -123,10 +122,7 @@ def gdalwarp(filelist,
     if len(filelist) == 1 and SameSpatialRef(filelist[0], dstSRS):
         Logger.debug(f"Avoid reprojecting {filelist[0]}")
     elif dstSRS:
-        wkt = dstSRS
-        #dstSRS = GetEPSG(wkt)
-        dstSRS = AutoIdentify(wkt)
-        kwargs["dstSRS"] = dstSRS
+        kwargs["dstSRS"] = AutoIdentify(dstSRS)
 
     if isfile(cutline):
         kwargs["cropToCutline"] = cropToCutline

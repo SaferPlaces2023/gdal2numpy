@@ -32,7 +32,6 @@ from .filesystem import listify, md5sum, juststem
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_log import Logger
 from .module_open import OpenShape
-from .module_esri_shape import AutoIdentify
 
 
 def GetFeatures(fileshp, filter=None, format=None):
@@ -247,8 +246,7 @@ def Transform(fileshp, t_srs, fileout=None):
 
     t_srs = GetSpatialRef(t_srs)
 
-    t_code = AutoIdentify(t_srs)
-    fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_code}.shp"
+    fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_srs.GetName()}.shp"
 
     # if isshape(fileout):
     #     Logger.debug("Using cached file:<%s>..." % fileout)

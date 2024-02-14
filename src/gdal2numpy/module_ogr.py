@@ -25,15 +25,19 @@
 import glob
 import math
 import os
+import re
+import json
+import pkgutil
 import shutil
 import site
-from osgeo import gdal, gdalconst
+from osgeo import gdal
 from osgeo import osr, ogr
-from .filesystem import justext, juststem, forceext, justpath, strtofile
+from .filesystem import justext, juststem, forceext, justpath, strtofile, filetostr, md5text
 from .module_open import OpenRaster
 from .module_open import OpenShape
 from .module_s3 import isfile
-from .module_esri_shape import AutoIdentify
+from .module_log import Logger
+from Levenshtein import distance
  
 
 def create_cpg(fileshp):
@@ -161,22 +165,79 @@ def SamePixelSize(filename1, filename2, decimals=-1):
     return size1 == size2
 
 
-def GetEPSG(srs):
+# def GetEPSG(srs):
+#     """
+#     GetEPSG
+#     """
+#     srs = GetSpatialRef(srs)
+#     if srs:
+#         authid = srs.GetAuthorityName(
+#             "PROJCS") if srs.IsProjected() else srs.GetAuthorityName("GEOGCS")
+#         srid = srs.GetAuthorityCode("PROJCS") if srs.IsProjected(
+#         ) else srs.GetAuthorityCode("GEOGCS")
+#         return f"{authid}:{srid}"
+#     return None
+
+
+def AutoIdentify(wkt):
     """
-    GetEPSG
+    AutoIdentify
     """
-    srs = GetSpatialRef(srs)
-    if srs:
-        authid = srs.GetAuthorityName(
-            "PROJCS") if srs.IsProjected() else srs.GetAuthorityName("GEOGCS")
-        srid = srs.GetAuthorityCode("PROJCS") if srs.IsProjected(
-        ) else srs.GetAuthorityCode("GEOGCS")
-        return f"{authid}:{srid}"
-    return None
+    # get the file pe_hash_list.json from package data
 
+    if isfile(wkt) and wkt.endswith(".tif"):
+        wkt = OpenRaster(wkt).GetProjection()
+    elif isfile(wkt) and isfile(forceext(wkt, "prj")):
+        wkt = filetostr(forceext(wkt, "prj"))
+    elif isinstance(wkt, osr.SpatialReference):
+        wkt = wkt.ExportToWkt()
+    elif isinstance(wkt, ogr.DataSource):
+        layer = wkt.GetLayer()
+        wkt = layer.GetSpatialRef().ExportToWkt()
+    elif isinstance(wkt, ogr.Layer):
+        wkt = wkt.GetSpatialRef().ExportToWkt()
+    elif isinstance(wkt, ogr.Feature):
+        wkt = wkt.GetGeometryRef().GetSpatialReference().ExportToWkt()
+    elif isinstance(wkt, ogr.Geometry):
+        wkt = wkt.GetSpatialReference().ExportToWkt()
+    elif isinstance(wkt, str) and re.match(r'^.*?\:\d{4,5}$', wkt):
+        return wkt
+    elif isinstance(wkt, str) and wkt.startswith("GEOGCS") or wkt.startswith("PROJCS"):
+        pass
+    else:
+        Logger.warning("The wkt is not a valid string or object")
+        return None
 
+    pe_hash_list = json.loads(pkgutil.get_data(
+        __name__, "data/pe_hash_list.json").decode("utf-8"))
+    pe_hash_list = pe_hash_list["CoordinateSystems"] if "CoordinateSystems" in pe_hash_list else {
+    }
+    code = pe_hash_list.get(md5text(wkt), None)
 
+    # last chance to identify the wkt
+    if not code:
+        Logger.debug("2) Second chance to identify the wkt")
+        spatial_res_sys_all = json.loads(pkgutil.get_data(
+            __name__, "data/spatial_ref_sys_all.json").decode("utf-8"))
+        spatial_res_sys_all = spatial_res_sys_all["CoordinateSystems"] if "CoordinateSystems" in spatial_res_sys_all else {
+        }
+        for authid, srs in spatial_res_sys_all.items():
+            if srs["wkt"] == wkt or srs["proj4"] == wkt:
+                code = authid
+                break
 
+    if not code:
+        Logger.debug("2) Third chance to identify the wkt by the name")
+        candidates = []
+        for authid, srs in spatial_res_sys_all.items():
+            if srs["name"] == osr.SpatialReference(wkt).GetName():
+                candidates.append((authid, distance(srs["wkt"], wkt)))
+
+        #  sort by distance
+        candidates = sorted(candidates, key=lambda x: x[1])
+        code = candidates[0][0] if len(candidates) > 1 else None
+
+    return code
 
 
 def GetSpatialRef(filename):
@@ -396,7 +457,7 @@ def find_PROJ_LIB():
         pathnames += glob.glob(root + "/**/proj.db", recursive=True)
         if len(pathnames):
             break
-    return justpath(pathnames[0]) if len(pathnames) else ""
+    return justpath(pathnames[0]) if len(pathnames)>0 else ""
 
 
 def find_GDAL_DATA():
@@ -409,7 +470,7 @@ def find_GDAL_DATA():
         pathnames += glob.glob(root + "/**/gt_datum.csv", recursive=True)
         if len(pathnames):
             break
-    return justpath(pathnames[0]) if len(pathnames) else ""
+    return justpath(pathnames[0]) if len(pathnames)>0 else ""
 
 
 def CreateRectangleShape(minx, miny, maxx, maxy, srs, fileshp="tempxy...."):
