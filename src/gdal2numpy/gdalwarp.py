@@ -124,6 +124,7 @@ def gdalwarp(filelist,
         Logger.debug(f"Avoid reprojecting {filelist[0]}")
     elif dstSRS:
         wkt = dstSRS
+        print("wkt:",wkt)
         dstSRS = GetEPSG(wkt)
         print("GetEPSG:",dstSRS)
         dstSRS2 = AutoIdentify(wkt)
