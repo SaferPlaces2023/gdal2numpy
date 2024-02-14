@@ -23,6 +23,7 @@
 # Created:     31/12/2022
 # -------------------------------------------------------------------------------
 import os
+import re
 import json
 import pkgutil
 from osgeo import ogr, osr
@@ -37,6 +38,8 @@ def AutoIdentify(wkt):
     AutoIdentify
     """
     #get the file pe_hash_list.json from package data
+    
+
     if isfile(wkt):
         wkt = filetostr(forceext(wkt, "prj"))
     elif isinstance(wkt, osr.SpatialReference):
@@ -50,6 +53,8 @@ def AutoIdentify(wkt):
         wkt = wkt.GetGeometryRef().GetSpatialReference().ExportToWkt()
     elif isinstance(wkt, ogr.Geometry):
         wkt = wkt.GetSpatialReference().ExportToWkt()
+    elif isinstance(wkt, str) and re.match( r'^.*?\:\d{4,5}$', wkt):
+        return wkt
     elif isinstance(wkt, str) and wkt.startswith("GEOGCS") or wkt.startswith("PROJCS"):
         pass
     else:

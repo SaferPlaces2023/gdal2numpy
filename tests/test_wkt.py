@@ -26,6 +26,9 @@ class Test(unittest.TestCase):
         code = GetSpatialRef(fileshp)
         print(code)
 
+        code = AutoIdentify("EPSG:4326")
+        print(code)
+
 
 if __name__ == '__main__':
     unittest.main()
