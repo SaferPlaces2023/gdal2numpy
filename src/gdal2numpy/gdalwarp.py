@@ -132,6 +132,7 @@ def gdalwarp(filelist,
         kwargs["cutlineDSName"] = cutline
         kwargs["cutlineLayer"] = juststem(cutline)
     elif isinstance(cutline, (tuple, list)) and len(cutline) == 4:
+        print("cutline:",cutline)
         kwargs["outputBounds"] = listify(cutline)
 
     # SetGDALEnv()
