@@ -123,10 +123,11 @@ def gdalwarp(filelist,
     if len(filelist) == 1 and SameSpatialRef(filelist[0], dstSRS):
         Logger.debug(f"Avoid reprojecting {filelist[0]}")
     elif dstSRS:
-        dstSRS = GetEPSG(dstSRS)
-        print(dstSRS)
-        dstSRS = AutoIdentify(dstSRS)
-        print(dstSRS)
+        wkt = dstSRS
+        dstSRS = GetEPSG(wkt)
+        print("GetEPSG:",dstSRS)
+        dstSRS2 = AutoIdentify(wkt)
+        print("AutoIdentify",dstSRS2)
         kwargs["dstSRS"] = dstSRS
 
     if isfile(cutline):
