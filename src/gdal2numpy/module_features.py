@@ -28,7 +28,7 @@ import json
 import numpy as np
 import tempfile
 from osgeo import ogr, osr
-from .filesystem import listify, md5sum, juststem
+from .filesystem import listify, md5sum, md5text, juststem
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_log import Logger
 from .module_open import OpenShape
@@ -246,7 +246,7 @@ def Transform(fileshp, t_srs, fileout=None):
 
     t_srs = GetSpatialRef(t_srs)
 
-    fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{t_srs.GetName()}.shp"
+    fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{md5text(t_srs.GetName())}.shp"
 
     # if isshape(fileout):
     #     Logger.debug("Using cached file:<%s>..." % fileout)
