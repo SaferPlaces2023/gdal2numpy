@@ -189,6 +189,9 @@ def AutoIdentify(wkt):
         wkt = OpenRaster(wkt).GetProjection()
     elif isfile(wkt) and isfile(forceext(wkt, "prj")):
         wkt = filetostr(forceext(wkt, "prj"))
+    elif isinstance(wkt, int):
+        wkt = f"EPSG:{wkt}"
+        return wkt
     elif isinstance(wkt, osr.SpatialReference):
         wkt = wkt.ExportToWkt()
     elif isinstance(wkt, ogr.DataSource):

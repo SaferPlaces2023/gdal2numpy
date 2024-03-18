@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.284"
+VERSION = "0.0.285"
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi, Marco Renzi"
 EMAIL = "valerio.luzzi@gecosistema.com, marco.renzi@gecosistema.com"
@@ -28,5 +28,6 @@ setuptools.setup(
     ],
     install_requires=["psutil", "requests", "gdal", "numpy", "boto3", "levenshtein" ]
 )
+
 
 
