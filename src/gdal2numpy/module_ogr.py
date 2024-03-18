@@ -202,7 +202,7 @@ def AutoIdentify(wkt):
         wkt = wkt.GetSpatialReference().ExportToWkt()
     elif isinstance(wkt, str) and re.match(r'^.*?\:\d{4,5}$', wkt):
         return wkt
-    elif isinstance(wkt, str) and wkt.startswith("GEOGCS") or wkt.startswith("PROJCS"):
+    elif isinstance(wkt, str) and (wkt.startswith("GEOGCS") or wkt.startswith("PROJCS")):
         pass
     else:
         Logger.warning("The wkt is not a valid string or object")
