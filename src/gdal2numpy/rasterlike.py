@@ -80,5 +80,6 @@ def RasterLike(filetif, filetpl, fileout=None, resampleAlg="near", format="GTiff
 
     Logger.debug(f"!!!!!!!!!!!!!! remove file_warp1 {file_warp1}  !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     os.unlink(file_warp1)
-
+    print("End RasterLike")
+    print("====================================")
     return fileout if os.path.exists(fileout) else None
