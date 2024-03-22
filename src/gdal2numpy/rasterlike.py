@@ -78,6 +78,7 @@ def RasterLike(filetif, filetpl, fileout=None, resampleAlg="near", format="GTiff
         wdata.fill(np.nan)
         Numpy2GTiff(wdata, gt, prj, fileout, format=format)
 
+    Logger.debug(f"!!!!!!!!!!!!!! remove file_warp1 {file_warp1}  !!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     os.unlink(file_warp1)
 
     return fileout if os.path.exists(fileout) else None
