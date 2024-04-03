@@ -210,7 +210,7 @@ def AddField(fileshp, fieldname, dtype=np.float32, width=-1, precision=-1, defau
                 and fielddef.GetPrecision() == precision:
             res = False
         # Stesso tipo o verso strighe
-        elif fielddef and fielddef.GetType() == field["dtype"] or field["dtype"] == ogr.OFTString:
+        elif fielddef and (fielddef.GetType() == field["dtype"] or field["dtype"] == ogr.OFTString):
             Logger.info(
                 f"Altering field definition of {fieldname}({width}:{precision})")
             layer.AlterFieldDefn(
