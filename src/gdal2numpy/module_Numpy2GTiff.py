@@ -30,7 +30,7 @@ from .module_open import OpenRaster
 from .module_ogr import GetSpatialRef
 from .module_s3 import *
 from .module_log import Logger
-from .module_ogr import isWKT
+from .module_ogr import isWkt
 
 
 def is_cog(filename):
@@ -181,7 +181,7 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             if gt is not None:
                 ds.SetGeoTransform(gt)
             if prj is not None:
-                if not isWKT(prj):
+                if not isWkt(prj):
                     srs = GetSpatialRef(prj)
                     prj = srs.ExportToWkt()
                 ds.SetProjection(prj)
