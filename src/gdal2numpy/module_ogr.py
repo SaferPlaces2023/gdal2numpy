@@ -261,7 +261,11 @@ def isWkt(wkt):
     """
     isWkt - check if the string is a wkt
     """
-    return isinstance(wkt, str) and (wkt.upper().startswith("GEOGCS") or wkt.upper().startswith("PROJCS"))
+    if isinstance(wkt, str):
+        for word in ("GEOGCS", "PROJCS", "COMPD_CS"):
+            if wkt.upper().startswith(word):
+                return True
+    return False
 
 
 def GetSpatialRef(filename):
