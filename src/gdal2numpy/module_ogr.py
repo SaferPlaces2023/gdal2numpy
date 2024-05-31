@@ -32,6 +32,7 @@ import shutil
 import site
 from osgeo import gdal
 from osgeo import osr, ogr
+from pyproj import CRS
 from .filesystem import justext, juststem, forceext, justpath, strtofile, filetostr, md5text
 from .module_open import OpenRaster
 from .module_open import OpenShape
@@ -165,25 +166,12 @@ def SamePixelSize(filename1, filename2, decimals=-1):
     return size1 == size2
 
 
-# def GetEPSG(srs):
-#     """
-#     GetEPSG
-#     """
-#     srs = GetSpatialRef(srs)
-#     if srs:
-#         authid = srs.GetAuthorityName(
-#             "PROJCS") if srs.IsProjected() else srs.GetAuthorityName("GEOGCS")
-#         srid = srs.GetAuthorityCode("PROJCS") if srs.IsProjected(
-#         ) else srs.GetAuthorityCode("GEOGCS")
-#         return f"{authid}:{srid}"
-#     return None
-
-
 def AutoIdentify(wkt):
     """
     AutoIdentify
     """
     # get the file pe_hash_list.json from package data
+    code = None
 
     if isfile(wkt) and wkt.endswith(".tif"):
         wkt = OpenRaster(wkt).GetProjection()
@@ -211,11 +199,19 @@ def AutoIdentify(wkt):
         Logger.warning("The wkt is not a valid string or object")
         return None
 
-    pe_hash_list = json.loads(pkgutil.get_data(
-        __name__, "data/pe_hash_list.json").decode("utf-8"))
-    pe_hash_list = pe_hash_list["CoordinateSystems"] if "CoordinateSystems" in pe_hash_list else {
-    }
-    code = pe_hash_list.get(md5text(wkt), None)
+    if not code:
+        Logger.debug("1a) First chance to identify the wkt")
+        srs = CRS.from_wkt(wkt)
+        code = srs.to_epsg()
+        code = f"EPSG:{code}" if code else None
+
+    if not code:
+        Logger.debug("1) First chance to identify the wkt")
+        pe_hash_list = json.loads(pkgutil.get_data(
+            __name__, "data/pe_hash_list.json").decode("utf-8"))
+        pe_hash_list = pe_hash_list["CoordinateSystems"] if "CoordinateSystems" in pe_hash_list else {
+        }
+        code = pe_hash_list.get(md5text(wkt), None)
 
     # last chance to identify the wkt
     if not code:
@@ -230,7 +226,7 @@ def AutoIdentify(wkt):
                 break
 
     if not code:
-        Logger.debug("2) Third chance to identify the wkt by the name")
+        Logger.debug("3) Third chance to identify the wkt by the name")
         candidates = []
         for authid, srs in spatial_res_sys_all.items():
             if srs["name"] == osr.SpatialReference(wkt).GetName():
