@@ -342,6 +342,7 @@ def s3_list(uri, client=None):
     """
     res = []
     try:
+        uri = f"{uri}/*" if not "*" in uri else uri
         bucket_name, pattern = get_bucket_name_key(uri)
         key_name, _ = pattern.split("/*", 1)
         Logger.debug(bucket_name, key_name)
