@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.296"
+VERSION = "0.0.298"
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi, Marco Renzi"
 EMAIL = "valerio.luzzi@gecosistema.com, marco.renzi@gecosistema.com"
@@ -26,8 +26,19 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["psutil", "requests", "gdal", "numpy", "boto3", "pyproj", "levenshtein", "xmltodict" ]
+    install_requires=[
+        "setuptools",
+        "psutil", 
+        "requests", 
+        "gdal", 
+        "numpy", 
+        "boto3", 
+        "pyproj", 
+        "levenshtein", 
+        "xmltodict" 
+    ]
 )
+
 
 
 
