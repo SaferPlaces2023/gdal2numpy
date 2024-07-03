@@ -108,7 +108,8 @@ class Test(unittest.TestCase):
         """
         test_list
         """
-        files = s3_list("s3://saferplaces.co/test/*/rain/*.shp")
+        #files = s3_list("s3://saferplaces.co/test/*/rain/*.shp")
+        files = s3_list("s3://saferplaces.co/eedem/catalog/*.db", etag=True)
         for file in files:
             print(file)
         self.assertEqual(1,1)

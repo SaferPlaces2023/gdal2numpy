@@ -284,11 +284,12 @@ def s3_remove(uri, filter=None, client=None):
             res = True
         elif bucket_name and filepath and filter:
             client = get_client(client)
-            files = s3_list(uri, filter, client)
+            files = s3_list(uri, client=client)
             Objects =[]
             for f in files:
                 _ , key = get_bucket_name_key(f)
-                Objects.append({'Key': key})
+                if fnmatch.fnmatch(key, filter):
+                    Objects.append({'Key': key})
             client.delete_objects(Bucket=bucket_name, Delete={'Objects': Objects, 'Quiet': True})
             res = True
     except ClientError as ex:
@@ -335,7 +336,7 @@ def s3_move(src, dst, client=None):
     return res
 
 
-def s3_list(uri, client=None):
+def s3_list(uri, etag=False, client=None):
     """
     s3_list
     regexp: s3://saferplaces.co/tests/rimini
@@ -351,7 +352,12 @@ def s3_list(uri, client=None):
             response = client.list_objects_v2(Bucket=bucket_name, Prefix=key_name)
             for obj in response['Contents']:
                 if fnmatch.fnmatch(obj['Key'], pattern):
-                    res.append(f"s3://{bucket_name}/{obj['Key']}")
+                    item = f"s3://{bucket_name}/{obj['Key']}"
+                    checksum = obj['ETag'].strip('"') if etag else None
+                    if etag:
+                        res.append((item, checksum))
+                    else:
+                        res.append(item)
     except ClientError as ex:
         Logger.error(ex)
     return res
