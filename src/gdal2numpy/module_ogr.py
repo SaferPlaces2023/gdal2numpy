@@ -433,6 +433,10 @@ def GetExtent(filename, t_srs=None):
             t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
         transform = osr.CoordinateTransformation(s_srs, t_srs)
         minx, miny, maxx, maxy = transform.TransformBounds(minx, miny, maxx, maxy, 0)
+        
+        # patch for EPSG:6876
+        if SameSpatialRef(t_srs, GetSpatialRef(6876)):
+            minx, miny, maxx, maxy = miny, minx, maxy, maxx
 
     return minx, miny, maxx, maxy
 
