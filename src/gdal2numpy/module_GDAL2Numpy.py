@@ -62,6 +62,8 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
             x0, px, r0, y0, r1, py = gt
             X0, Y0, X1, Y1 = bbox
             print("bbox", bbox)
+            print(X0, x0, (X0 - x0), "==>", (X0 - x0) / px)
+            print("=================    =================")
             # calcutate starting indices
             j0, i0 = int((X0 - x0) / px), int((Y1 - y0) / py)
             cols, rows = math.ceil((X1 - X0) / px), math.ceil(abs(Y1 - Y0) / abs(py))
