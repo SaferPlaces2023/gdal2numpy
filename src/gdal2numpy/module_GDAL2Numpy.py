@@ -76,6 +76,8 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
             h = math.floor((Y1 - y0) / py)
             gt = x0 + k * px, px, r0, y0 + h * py, r1, py
 
+            print("ReadAsArray(%d,%d,%d,%d)" % (j0, i0, cols, rows))
+
             data = band.ReadAsArray(j0, i0, cols, rows)
 
         # translate no-data as Nan
