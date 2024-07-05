@@ -396,8 +396,7 @@ def GetExtent(filename, t_srs=None):
     if isinstance(filename, (list, tuple)):
         minx, miny, maxx, maxy = filename
         s_srs = GetSpatialRef(4326)
-        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-        
+                
     elif ext == "tif":
         ds = OpenRaster(filename)
         if ds:
@@ -428,6 +427,10 @@ def GetExtent(filename, t_srs=None):
     if t_srs and not SameSpatialRef(s_srs, t_srs):
         s_srs = GetSpatialRef(s_srs)
         t_srs = GetSpatialRef(t_srs)
+        if s_srs.IsGeographic():
+            s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        if t_srs.IsGeographic():
+            t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
         transform = osr.CoordinateTransformation(s_srs, t_srs)
         minx, miny, maxx, maxy = transform.TransformBounds(minx, miny, maxx, maxy, 0)
 
