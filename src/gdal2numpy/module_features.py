@@ -259,8 +259,10 @@ def Transform(fileshp, t_srs, fileout=None):
         # set spatial reference and transformation
         defn = layer.GetLayerDefn()
         s_srs = layer.GetSpatialRef()
-        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-        t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        if s_srs and s_srs.IsGeographic():
+            s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        if t_srs and t_srs.IsGeographic():
+            t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
         transform = osr.CoordinateTransformation(s_srs, t_srs)
 
         driver = ogr.GetDriverByName("Esri Shapefile")

@@ -28,8 +28,14 @@ class Test(unittest.TestCase):
         
         filer = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Ambiental_Italy_FloodMap_Fluvial_20yr_v1_0.cog.tif"
         #filer = "lidar_rimini_building_2.cog.tif"
-        ext = GetExtent([44, 12, 44.5,12.5], t_srs="EPSG:32633")
+        #ext = GetExtent([44, 12, 44.5,12.5], t_srs="EPSG:32633")
+        #ext = GetExtent([12,44,12.5,44.5], t_srs="EPSG:32633")
+        bbox = [12.1183605, 46.0362704, 12.3067003, 46.2335995]
+        ext = GetExtent(bbox, t_srs="EPSG:32633")
         print(ext)
+
+        
+
 
     
     # def test_extent_s3(self):

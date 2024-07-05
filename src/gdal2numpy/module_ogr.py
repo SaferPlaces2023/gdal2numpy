@@ -372,14 +372,17 @@ def TransformBBOX(bbox, s_srs=None, t_srs=None):
         return bbox
     s_minx, s_miny, s_maxx, s_maxy = bbox
 
-    s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    if s_srs and s_srs.IsGeographic():
+        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    if t_srs and t_srs.IsGeographic():
+        t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     transform = osr.CoordinateTransformation(s_srs, t_srs)
-    rect = Rectangle(s_minx, s_miny, s_maxx, s_maxy)
-    rect.Transform(transform)
-    t_minx, t_maxx, t_miny, t_maxy = rect.GetEnvelope()
-    transformed_bbox = (t_minx, t_miny, t_maxx, t_maxy)
+    # rect = Rectangle(s_minx, s_miny, s_maxx, s_maxy)
+    # rect.Transform(transform)
+    # t_minx, t_maxx, t_miny, t_maxy = rect.GetEnvelope()
+    # transformed_bbox = (t_minx, t_miny, t_maxx, t_maxy)
+    transformed_bbox = transform.TransformBounds(s_minx, s_miny, s_maxx, s_maxy, 0)
     return transformed_bbox
 
 
@@ -393,12 +396,8 @@ def GetExtent(filename, t_srs=None):
     if isinstance(filename, (list, tuple)):
         minx, miny, maxx, maxy = filename
         s_srs = GetSpatialRef(4326)
-        t_srs = GetSpatialRef(t_srs)
-        transform = osr.CoordinateTransformation(s_srs, t_srs)
-        rect = Rectangle( minx, miny, maxx, maxy)
-        rect.Transform(transform)
-        minx, miny, maxx, maxy = rect.GetEnvelope()
-
+        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        
     elif ext == "tif":
         ds = OpenRaster(filename)
         if ds:
@@ -427,14 +426,10 @@ def GetExtent(filename, t_srs=None):
             ds = None
 
     if t_srs and not SameSpatialRef(s_srs, t_srs):
+        s_srs = GetSpatialRef(s_srs)
         t_srs = GetSpatialRef(t_srs)
         transform = osr.CoordinateTransformation(s_srs, t_srs)
-        rect = Rectangle(minx, miny, maxx, maxy)
-        rect.Transform(transform)
-        if t_srs.IsGeographic():
-            miny, maxy, minx, maxx = rect.GetEnvelope()
-        else:
-            minx, miny, maxx, maxy = rect.GetEnvelope()
+        minx, miny, maxx, maxy = transform.TransformBounds(minx, miny, maxx, maxy, 0)
 
     return minx, miny, maxx, maxy
 
