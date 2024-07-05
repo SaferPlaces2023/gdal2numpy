@@ -65,14 +65,21 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
             # calcutate starting indices
             j0, i0 = int((X0 - x0) / px), int((Y1 - y0) / py)
             cols, rows = math.ceil((X1 - X0) / px), math.ceil(abs(Y1 - Y0) / abs(py))
+            # assert cols > 0 and rows > 0,
+            cols = max(1, cols)
+            rows = max(1, rows)
+
 
             print("mxn", m,"x", n)
             print("cols, rows", cols, "x", rows)    
 
             # index-safe
             j0, i0 = min(max(j0, 0), n - 1), min(max(i0, 0), m - 1)
-            cols = min(max(cols, 0), n)
-            rows = min(max(rows, 0), m)
+            
+            # index-safe
+            j1, i1 = min(j0 + cols, n), min(i0 + rows, m)
+            # Re-calculate cols and rows
+            cols, rows = j1 - j0, i1 - i0
 
             # re-arrange gt
             k = math.floor((X0 - x0) / px)
