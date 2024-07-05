@@ -71,7 +71,8 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
 
 
             print("mxn", m,"x", n)
-            print("cols, rows", cols, "x", rows)    
+            print("cols, rows", cols, "x", rows)   
+            print("j0, i0", j0, i0) 
 
             # index-safe
             j0, i0 = min(max(j0, 0), n - 1), min(max(i0, 0), m - 1)
