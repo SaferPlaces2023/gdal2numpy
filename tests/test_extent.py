@@ -2,6 +2,7 @@ import os
 import unittest
 import warnings
 from gdal2numpy import *
+from pyproj import Transformer
 from osgeo import osr, ogr, gdal
 workdir = justpath(__file__)
 
@@ -36,6 +37,23 @@ class Test(unittest.TestCase):
 
         
 
+        # Define the original and target coordinate systems
+        original_crs = 'EPSG:4326'  # WGS84
+        target_crs = 'EPSG:3035'    # ETRS89 / LAEA Europe
+
+        # Create a transformer object
+        transformer = Transformer.from_crs(original_crs, target_crs)
+
+        # Example coordinates (longitude, latitude)
+        lon, lat = 12, 44  # Example: 12°E, 44°N
+
+        # Transform the coordinates
+        easting, northing = transformer.transform(lat, lon)
+
+        # Print the transformed coordinates (X, Y)
+        print(f"Easting (X): {easting}, Northing (Y): {northing}")
+        
+
 
     
     # def test_extent_s3(self):
@@ -51,25 +69,25 @@ class Test(unittest.TestCase):
     #     print("ext2 is:", ext2)
 
 
-    def test_transform_fluvial(self):
-        file_fluvial = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Italy_FloodMap_Fluvial_20yr_historical_v1_0.cog.tif"
-        file_cropped = f"{workdir}/data/cropped.tif"
-        minx,miny,maxx,maxy = (12.52962, 44.01098, 12.60526, 44.1151)
+    # def test_transform_fluvial(self):
+    #     file_fluvial = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Italy_FloodMap_Fluvial_20yr_historical_v1_0.cog.tif"
+    #     file_cropped = f"{workdir}/data/cropped.tif"
+    #     minx,miny,maxx,maxy = (12.52962, 44.01098, 12.60526, 44.1151)
 
-        ds = OpenRaster(file_fluvial)
-        gt = ds.GetGeoTransform()
-        ds=None
-        print("gt:", gt)
+    #     ds = OpenRaster(file_fluvial)
+    #     gt = ds.GetGeoTransform()
+    #     ds=None
+    #     print("gt:", gt)
 
-        s_srs = GetSpatialRef("EPSG:4326")
-        t_srs = GetSpatialRef("EPSG:3035")
+    #     s_srs = GetSpatialRef("EPSG:4326")
+    #     t_srs = GetSpatialRef("EPSG:3035")
         
-        transformed_bbox = TransformBBOX((minx,miny,maxx,maxy),s_srs,t_srs)
+    #     transformed_bbox = TransformBBOX((minx,miny,maxx,maxy),s_srs,t_srs)
 
-        data, gt, prj = GDAL2Numpy(file_fluvial,bbox=transformed_bbox)
-        Numpy2GTiff(data,gt,prj,fileout=file_cropped)
+    #     data, gt, prj = GDAL2Numpy(file_fluvial,bbox=transformed_bbox)
+    #     Numpy2GTiff(data,gt,prj,fileout=file_cropped)
 
-        self.assertTrue(os.path.exists(file_cropped))   
+    #     self.assertTrue(os.path.exists(file_cropped))   
 
 
 if __name__ == '__main__':

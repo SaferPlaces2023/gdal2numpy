@@ -26,13 +26,14 @@ import math
 import numpy as np
 from osgeo import gdal
 from .filesystem import now, total_seconds_from, justfname
+from .module_ogr import TransformBBOX, GetSpatialRef
 from .module_s3 import *
 from .module_open import OpenRaster
 from .module_log import Logger
 from .module_memory import mem_usage
 
 
-def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[], verbose=False):
+def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[], bbox_srs=None, verbose=False):
     """
     GDAL2Numpy
     """
@@ -60,10 +61,11 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
             data = band.ReadAsArray(0, 0, n, m)
         else:
             x0, px, r0, y0, r1, py = gt
-            X0, Y0, X1, Y1 = bbox
-            # print("bbox", bbox)
-            # print(X0, x0, (X0 - x0), "==>", (X0 - x0) / px)
-            # print("=================    =================")
+            if bbox_srs:
+                X0, Y0, X1, Y1 = TransformBBOX(bbox, bbox_srs, prj)
+            else:
+                X0, Y0, X1, Y1 = bbox
+
             # calcutate starting indices
             j0, i0 = int((X0 - x0) / px), int((Y1 - y0) / py)
             cols, rows = math.ceil((X1 - X0) / px), math.ceil(abs(Y1 - Y0) / abs(py))
