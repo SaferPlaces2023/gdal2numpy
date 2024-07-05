@@ -368,8 +368,10 @@ def TransformBBOX(bbox, s_srs=None, t_srs=None):
     """
     TransformBBOX
     """
+
     if SameSpatialRef(s_srs, t_srs):
         return bbox
+    
     s_minx, s_miny, s_maxx, s_maxy = bbox
 
     if s_srs and s_srs.IsGeographic():
@@ -378,11 +380,11 @@ def TransformBBOX(bbox, s_srs=None, t_srs=None):
         t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     transform = osr.CoordinateTransformation(s_srs, t_srs)
-    # rect = Rectangle(s_minx, s_miny, s_maxx, s_maxy)
-    # rect.Transform(transform)
-    # t_minx, t_maxx, t_miny, t_maxy = rect.GetEnvelope()
-    # transformed_bbox = (t_minx, t_miny, t_maxx, t_maxy)
-    transformed_bbox = transform.TransformBounds(s_minx, s_miny, s_maxx, s_maxy, 0)
+    rect = Rectangle(s_minx, s_miny, s_maxx, s_maxy)
+    rect.Transform(transform)
+    t_minx, t_maxx, t_miny, t_maxy = rect.GetEnvelope()
+    transformed_bbox = (t_minx, t_miny, t_maxx, t_maxy)
+    #transformed_bbox = transform.TransformBounds(s_minx, s_miny, s_maxx, s_maxy, 0)
     return transformed_bbox
 
 
@@ -436,6 +438,8 @@ def GetExtent(filename, t_srs=None):
         
         # patch for EPSG:6876
         if SameSpatialRef(t_srs, GetSpatialRef(6876)):
+            minx, miny, maxx, maxy = miny, minx, maxy, maxx
+        elif SameSpatialRef(t_srs, GetSpatialRef(3035)):
             minx, miny, maxx, maxy = miny, minx, maxy, maxx
 
     return minx, miny, maxx, maxy

@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         #ext = GetExtent([44, 12, 44.5,12.5], t_srs="EPSG:32633")
         #ext = GetExtent([12,44,12.5,44.5], t_srs="EPSG:32633")
         bbox = [12.1183605, 46.0362704, 12.3067003, 46.2335995]
-        ext = GetExtent(bbox, t_srs="EPSG:6876")
+        ext = GetExtent(bbox, t_srs="EPSG:3035")
         print(ext)
 
         
@@ -52,9 +52,15 @@ class Test(unittest.TestCase):
 
 
     # def test_transform_fluvial(self):
-    #     file_fluvial = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Ambiental_Italy_FloodMap_Fluvial_20yr_v1_0.cog.tif"
+    #     file_fluvial = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Italy_FloodMap_Fluvial_20yr_historical_v1_0.cog.tif"
     #     file_cropped = f"{workdir}/data/cropped.tif"
     #     minx,miny,maxx,maxy = (12.52962, 44.01098, 12.60526, 44.1151)
+
+    #     ds = OpenRaster(file_fluvial)
+    #     gt = ds.GetGeoTransform()
+    #     ds=None
+    #     print("gt:", gt)
+
     #     s_srs = GetSpatialRef("EPSG:4326")
     #     t_srs = GetSpatialRef("EPSG:3035")
         
