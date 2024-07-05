@@ -61,9 +61,9 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
         else:
             x0, px, r0, y0, r1, py = gt
             X0, Y0, X1, Y1 = bbox
-            print("bbox", bbox)
-            print(X0, x0, (X0 - x0), "==>", (X0 - x0) / px)
-            print("=================    =================")
+            # print("bbox", bbox)
+            # print(X0, x0, (X0 - x0), "==>", (X0 - x0) / px)
+            # print("=================    =================")
             # calcutate starting indices
             j0, i0 = int((X0 - x0) / px), int((Y1 - y0) / py)
             cols, rows = math.ceil((X1 - X0) / px), math.ceil(abs(Y1 - Y0) / abs(py))
@@ -72,9 +72,9 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
             rows = max(1, rows)
 
 
-            print("mxn", m,"x", n)
-            print("cols, rows", cols, "x", rows)   
-            print("j0, i0", j0, i0) 
+            # print("mxn", m,"x", n)
+            # print("cols, rows", cols, "x", rows)   
+            # print("j0, i0", j0, i0) 
 
             # index-safe
             j0, i0 = min(max(j0, 0), n - 1), min(max(i0, 0), m - 1)
@@ -89,7 +89,7 @@ def GDAL2Numpy(filename, band=1, dtype=np.float32, load_nodata_as=np.nan, bbox=[
             h = math.floor((Y1 - y0) / py)
             gt = x0 + k * px, px, r0, y0 + h * py, r1, py
 
-            print("ReadAsArray(%d,%d,%d,%d)" % (j0, i0, cols, rows))
+            #print("ReadAsArray(%d,%d,%d,%d)" % (j0, i0, cols, rows))
 
             data = band.ReadAsArray(j0, i0, cols, rows)
 

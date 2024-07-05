@@ -51,25 +51,25 @@ class Test(unittest.TestCase):
     #     print("ext2 is:", ext2)
 
 
-    # def test_transform_fluvial(self):
-    #     file_fluvial = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Italy_FloodMap_Fluvial_20yr_historical_v1_0.cog.tif"
-    #     file_cropped = f"{workdir}/data/cropped.tif"
-    #     minx,miny,maxx,maxy = (12.52962, 44.01098, 12.60526, 44.1151)
+    def test_transform_fluvial(self):
+        file_fluvial = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Italy_FloodMap_Fluvial_20yr_historical_v1_0.cog.tif"
+        file_cropped = f"{workdir}/data/cropped.tif"
+        minx,miny,maxx,maxy = (12.52962, 44.01098, 12.60526, 44.1151)
 
-    #     ds = OpenRaster(file_fluvial)
-    #     gt = ds.GetGeoTransform()
-    #     ds=None
-    #     print("gt:", gt)
+        ds = OpenRaster(file_fluvial)
+        gt = ds.GetGeoTransform()
+        ds=None
+        print("gt:", gt)
 
-    #     s_srs = GetSpatialRef("EPSG:4326")
-    #     t_srs = GetSpatialRef("EPSG:3035")
+        s_srs = GetSpatialRef("EPSG:4326")
+        t_srs = GetSpatialRef("EPSG:3035")
         
-    #     transformed_bbox = TransformBBOX((minx,miny,maxx,maxy),s_srs,t_srs)
+        transformed_bbox = TransformBBOX((minx,miny,maxx,maxy),s_srs,t_srs)
 
-    #     data, gt, prj = GDAL2Numpy(file_fluvial,bbox=transformed_bbox)
-    #     Numpy2GTiff(data,gt,prj,fileout=file_cropped)
+        data, gt, prj = GDAL2Numpy(file_fluvial,bbox=transformed_bbox)
+        Numpy2GTiff(data,gt,prj,fileout=file_cropped)
 
-    #     self.assertTrue(os.path.exists(file_cropped))   
+        self.assertTrue(os.path.exists(file_cropped))   
 
 
 if __name__ == '__main__':
