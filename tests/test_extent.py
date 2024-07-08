@@ -21,37 +21,49 @@ class Test(unittest.TestCase):
         warnings.simplefilter("default", ResourceWarning)
 
 
-
-    def test_extent(self):
+    def test_extent_from_file(self):
         """
-        test_extent: 
+        text_extent_from_file: 
         """
-        
-        filer = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Ambiental_Italy_FloodMap_Fluvial_20yr_v1_0.cog.tif"
-        #filer = "lidar_rimini_building_2.cog.tif"
-        #ext = GetExtent([44, 12, 44.5,12.5], t_srs="EPSG:32633")
-        #ext = GetExtent([12,44,12.5,44.5], t_srs="EPSG:32633")
-        bbox = [12.1183605, 46.0362704, 12.3067003, 46.2335995]
-        ext = GetExtent(bbox, t_srs="EPSG:3035")
+        filetif = f"{workdir}/LIDAR_REGIONE-VENETO_100601.tif"
+        ext = GetExtent(filetif, "EPSG:4326")
+        print("========================================")
         print(ext)
+        self.assertTrue(True)
+
+
+
+
+    # def test_extent(self):
+    #     """
+    #     test_extent: 
+    #     """
+        
+    #     filer = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Ambiental_Italy_FloodMap_Fluvial_20yr_v1_0.cog.tif"
+    #     #filer = "lidar_rimini_building_2.cog.tif"
+    #     #ext = GetExtent([44, 12, 44.5,12.5], t_srs="EPSG:32633")
+    #     #ext = GetExtent([12,44,12.5,44.5], t_srs="EPSG:32633")
+    #     bbox = [12.1183605, 46.0362704, 12.3067003, 46.2335995]
+    #     ext = GetExtent(bbox, t_srs="EPSG:3035")
+    #     print(ext)
 
         
 
-        # Define the original and target coordinate systems
-        original_crs = 'EPSG:4326'  # WGS84
-        target_crs = 'EPSG:3035'    # ETRS89 / LAEA Europe
+    #     # Define the original and target coordinate systems
+    #     original_crs = 'EPSG:4326'  # WGS84
+    #     target_crs = 'EPSG:3035'    # ETRS89 / LAEA Europe
 
-        # Create a transformer object
-        transformer = Transformer.from_crs(original_crs, target_crs)
+    #     # Create a transformer object
+    #     transformer = Transformer.from_crs(original_crs, target_crs)
 
-        # Example coordinates (longitude, latitude)
-        lon, lat = 12, 44  # Example: 12°E, 44°N
+    #     # Example coordinates (longitude, latitude)
+    #     lon, lat = 12, 44  # Example: 12°E, 44°N
 
-        # Transform the coordinates
-        easting, northing = transformer.transform(lat, lon)
+    #     # Transform the coordinates
+    #     easting, northing = transformer.transform(lat, lon)
 
-        # Print the transformed coordinates (X, Y)
-        print(f"Easting (X): {easting}, Northing (Y): {northing}")
+    #     # Print the transformed coordinates (X, Y)
+    #     print(f"Easting (X): {easting}, Northing (Y): {northing}")
         
 
 

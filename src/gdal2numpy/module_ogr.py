@@ -385,7 +385,7 @@ def TransformBBOX(bbox, s_srs=None, t_srs=None):
     # t_minx, t_maxx, t_miny, t_maxy = rect.GetEnvelope()
     # transformed_bbox = (t_minx, t_miny, t_maxx, t_maxy)
     s_minx, s_miny, s_maxx, s_maxy = bbox
-    minx, miny, maxx, maxy = transform.TransformBounds(s_minx, s_miny, s_maxx, s_maxy, 0)
+    minx, miny, maxx, maxy = transform.TransformBounds(s_minx, s_miny, s_maxx, s_maxy, 2)
 
      # patch for EPSG:6876
     if SameSpatialRef(t_srs, GetSpatialRef(6876)):
