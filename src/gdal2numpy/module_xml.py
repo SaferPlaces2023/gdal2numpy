@@ -23,7 +23,7 @@
 # Created:     20/06/2024
 # -------------------------------------------------------------------------------
 import xmltodict
-from .filesystem import isshape, forceext
+from .filesystem import isshape, forceext, listify
 from .module_s3 import isfile
 from .module_ogr import GetSpatialRef, AutoIdentify, GetExtent
 
@@ -43,6 +43,24 @@ def parseXML(filename):
     return {}
 
 
+def parseQMD(filename):
+    """
+    parseQMD - parse a QMD file and return a Python dictionary
+    """
+    res = {"metadata": {}}
+    fileqmd = forceext(filename, "qmd")
+    metadata = parseXML(fileqmd)
+    if metadata:
+        qgis = metadata["qgis"] if "qgis" in metadata else {}
+        if qgis:
+            keywords = listify(qgis["keywords"])
+            for item in keywords:
+                key = item["@vocabulary"]
+                value = item["keyword"]
+                res["metadata"][key] = value
+    return res
+
+
 def writeXML(data, filename):
     """
     writeXML - write a Python dictionary to an XML file
@@ -60,7 +78,7 @@ def writeXML(data, filename):
         print(f"Error: {e}")
 
 
-def writeQMD(filename):
+def writeQMD(filename, metadata=None):
     """
     writeQMD - write a QMD file
     """
@@ -72,6 +90,18 @@ def writeQMD(filename):
         authid = AutoIdentify(fileshp)
         minx, miny, maxx, maxy = GetExtent(fileshp)
 
+        keywords = []
+        metadata = metadata if metadata else {}
+
+        # integrate the metadata with parsed data
+        if isfile(fileqmd):
+            qmd = parseQMD(fileshp)
+            metadata.update(qmd["metadata"])
+
+        # Convert metadata to keywords
+        for key, value in metadata.items():
+            keywords.append({"@vocabulary": key, "keyword": value})
+
         data = {
             "qgis": {
                 "@version": "3.28.0-Firenze",
@@ -81,6 +111,7 @@ def writeQMD(filename):
                 "type": "dataset",
                 "title": None,
                 "abstract": None,
+                "keywords": keywords,
                 "contact": {
                     "name": None,
                     "organization": None,

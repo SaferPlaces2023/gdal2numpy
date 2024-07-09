@@ -9,8 +9,8 @@
 	<keywords vocabulary="hello">
 		<keyword>world</keyword>
 	</keywords>
-	<keywords vocabulary="cmapname">
-		<keyword>viridis</keyword>
+	<keywords vocabulary="type">
+		<keyword>buildings</keyword>
 	</keywords>
 	<keywords vocabulary="um">
 		<keyword>$</keyword>
@@ -42,7 +42,7 @@
 		</spatialrefsys>
 	</crs>
 	<extent>
-		<spatial dimensions="2" crs="EPSG:4326" minx="491922.9277284" maxy="5216973.8383901" maxx="493225.9277284" maxz="0" miny="5215744.8383901" minz="0"></spatial>
+		<spatial dimensions="2" crs="EPSG:4326" minx="11.2090667" maxy="44.5726318" maxx="11.4568593" maxz="0" miny="44.4038024" minz="0"></spatial>
 		<temporal>
 			<period>
 				<start></start>

@@ -26,7 +26,7 @@ from .filesystem import *
 from .module_geolocate import *
 from .module_GDAL2Numpy import *
 from .module_Numpy2GTiff import *
-from .module_MetaData import *
+from .module_metadata import *
 from .module_ogr import *
 from .module_features import *
 from .module_esri_shape import *

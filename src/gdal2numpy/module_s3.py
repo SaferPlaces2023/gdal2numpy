@@ -388,7 +388,7 @@ def copy(src, dst=None, client=None):
     
     exts = []
     if src.endswith(".shp"):
-        exts = ["shx", "dbf", "prj", "cpg", "mta"]
+        exts = ["shx", "dbf", "prj", "cpg", "mta", "qmd"]
     elif src.endswith(".tif"):
         exts = [] #["tfw", "jpw", "prj", "aux.xml"]
         
@@ -414,7 +414,7 @@ def move(src, dst, client=None):
     
     exts = []
     if src.endswith(".shp"):
-        exts = ["shx", "dbf", "prj", "cpg", "mta"]
+        exts = ["shx", "dbf", "prj", "cpg", "mta", "qmd"]
     elif src.endswith(".tif"):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         

@@ -1,4 +1,3 @@
-import os
 import json
 import unittest
 import warnings
@@ -25,12 +24,13 @@ class Test(unittest.TestCase):
         """
         test_xml: 
         """
-        fileshp = "pourpoints.shp"
-        fileqmd = "pourpoints2.qmd"
-        data = parseXML(fileqmd)
-        # text  = json.dumps(data, indent=4)
-        # print(text)
-        writeQMD(fileshp)
+        fileshp = "tests/pourpoints.shp"
+        fileqmd = f"tests/OSM_BUILDINGS_091244.qmd"
+        #data = parseXML(f"tests/{fileqmd}")
+
+        writeQMD(fileqmd, {"hello": "world"})
+                
+        #writeQMD(fileshp)
         self.assertTrue(True)
 
 

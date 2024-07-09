@@ -15,7 +15,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 #
-# Name:        module_MetaData.py
+# Name:        module_metadata.py
 # Purpose:
 #
 # Author:      Luzzi Valerio, Lorenzo Borelli
@@ -24,7 +24,7 @@
 # -------------------------------------------------------------------------------
 import os
 import numpy as np
-from osgeo import gdal, gdalconst
+from osgeo import gdalconst
 from .filesystem import forceext, israster, isshape, filetojson, jsontofile
 from .module_s3 import isfile
 from .module_GDAL2Numpy import GDAL2Numpy
@@ -32,7 +32,7 @@ from .module_Numpy2GTiff import Numpy2GTiff
 from .module_features import GetRange
 from .module_ogr import GetExtent
 from .module_open import OpenRaster
-
+from .module_xml import parseQMD, writeQMD
 
 def GetRasterShape(filename):
     """
@@ -63,7 +63,7 @@ def GetNoData(filename, band=1):
     ds = OpenRaster(filename)
     if ds:
         # check if band exists
-        if band>0 and band <= ds.RasterCount:
+        if band > 0 and band <= ds.RasterCount:
             bandx = ds.GetRasterBand(band)
             return bandx.GetNoDataValue()
     return None
@@ -88,7 +88,8 @@ def GDALFixNoData(filename, format="GTiff", nodata=-9999):
     if isfile(filename):
         data, gt, prj = GDAL2Numpy(filename, load_nodata_as=nodata)
         data[abs(data) >= 1e10] = nodata
-        Numpy2GTiff(data, gt, prj, filename, format=format, save_nodata_as=nodata)
+        Numpy2GTiff(data, gt, prj, filename,
+                    format=format, save_nodata_as=nodata)
         return filename
     return False
 
@@ -107,7 +108,7 @@ def IsEmpty(filename, nodata=-9999):
             data[abs(data) >= 1e10] = nodata
             ds = None
             return np.all(data == nodata)
-    return False 
+    return False
 
 
 def GetMinMax(filename, fieldname=None):
@@ -121,6 +122,33 @@ def GetMinMax(filename, fieldname=None):
         return GetRange(filename, fieldname)
 
     return np.Inf, -np.Inf
+
+
+def read_metadata(filename):
+    """
+    read_metadata
+    """
+    filemta = forceext(filename, "mta")
+    fileqmd = forceext(filename, "qmd")
+    # legacy
+    if os.path.isfile(filemta):
+        return filetojson(filemta)
+    # standard qgis metadata = qmd
+    elif os.path.isfile(fileqmd):
+        return parseQMD(fileqmd)
+    return {"metadata": {}}
+
+
+def save_metadata(metadata, filename):
+    """
+    save_metadata
+    """
+    if filename:
+        # legacy
+        # filemeta = forceext(filename, "mta")
+        # jsontofile(metadata, filemeta)
+        # --- save to .qmd ---
+        writeQMD(filename, metadata)
 
 
 def GetMetaData(filename):
@@ -155,8 +183,7 @@ def GetMetaData(filename):
                     "metadata": meta
                 }
         elif filename.endswith(".shp"):
-            filemeta = forceext(filename, "mta")
-            return filetojson(filemeta)
+            return read_metadata(filename)
 
     return {}
 
@@ -180,8 +207,7 @@ def GetTag(filename, tagname, band=0):
                     return metadata[tagname]
                 ds = None
         elif filename.endswith(".shp"):
-            filemeta = forceext(filename, "mta")
-            meta = filetojson(filemeta)
+            meta = read_metadata(filename)
             if meta and "metadata" in meta and tagname in meta["metadata"]:
                 return meta["metadata"][tagname]
 
@@ -211,10 +237,10 @@ def SetTag(filename, tagname, tagvalue="", band=0):
         filemeta = forceext(filename, "mta")
         meta = {"metadata": {}}
         if os.path.isfile(filemeta):
-            meta = filetojson(filemeta)
+            meta = read_metadata(filename)
         if "metadata" in meta:
             meta["metadata"][tagname] = tagvalue
-            jsontofile(meta, filemeta)
+            save_metadata(meta, filename)
 
 
 def SetTags(filename, meta, band=0):
@@ -238,16 +264,13 @@ def SetTags(filename, meta, band=0):
             ds = None
 
     elif isshape(filename):
-        filemeta = forceext(filename, "mta")
-        mta = {"metadata": {}}
-        if os.path.isfile(filemeta):
-            mta = filetojson(filemeta)
+        mta = read_metadata(filename)
         # update mta from meta
         for tagname in meta:
             tagvalue = meta[tagname]
             if "metadata" in mta:
                 mta["metadata"][tagname] = tagvalue
-        jsontofile(mta, filemeta)
+        save_metadata(mta, filename)
 
 
 def setExtent(fileshp):
@@ -266,4 +289,4 @@ def setExtent(fileshp):
                 "maxx": extent[2],
                 "maxy": extent[3]
             }
-        jsontofile(mta, filemeta)
+        save_metadata(mta, fileshp)
