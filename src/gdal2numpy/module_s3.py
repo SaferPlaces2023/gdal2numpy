@@ -422,3 +422,16 @@ def move(src, dst, client=None):
         move(forceext(src,ext), forceext(dst,ext), client=client)
 
     return dst
+
+
+def remove(uri, client=None):
+    """
+    remove
+    """
+    if iss3(uri):
+        s3_remove(uri, client=client)
+    elif os.path.isfile(uri):
+        os.unlink(uri)
+    elif os.path.isdir(uri):
+        shutil.rmtree(uri)
+    return uri

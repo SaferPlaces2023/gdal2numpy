@@ -40,4 +40,5 @@ from .module_gdal import *
 from .gdalwarp import gdalwarp
 from .module_log import *
 from .module_xml import *
+from .module_extrusion import *
 

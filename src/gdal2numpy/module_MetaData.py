@@ -25,7 +25,7 @@
 import os
 import numpy as np
 from osgeo import gdalconst
-from .filesystem import forceext, israster, isshape, filetojson, jsontofile
+from .filesystem import forceext, israster, isshape, filetojson, remove
 from .module_s3 import isfile
 from .module_GDAL2Numpy import GDAL2Numpy
 from .module_Numpy2GTiff import Numpy2GTiff
@@ -149,7 +149,13 @@ def save_metadata(metadata, filename):
         # jsontofile(metadata, filemeta)
         # --- save to .qmd ---
         writeQMD(filename, metadata)
-
+        #
+        #patch
+        fileqmd = forceext(filename, "qmd")
+        if isfile(fileqmd):
+            filemeta = forceext(filename, "mta")
+            remove(filemeta)
+        # --- end patch ---
 
 def GetMetaData(filename):
     """
@@ -279,9 +285,7 @@ def setExtent(fileshp):
     """
     if isshape(fileshp):
         extent = GetExtent(fileshp)
-        filemeta = forceext(fileshp, "mta")
-        mta = filetojson(filemeta)
-        mta = {"metadata": {}} if not mta else mta
+        mta = read_metadata(fileshp)
         if "metadata" in mta:
             mta["metadata"]["extent"] = {
                 "minx": extent[0],
