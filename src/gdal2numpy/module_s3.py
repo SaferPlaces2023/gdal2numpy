@@ -29,6 +29,7 @@ import shutil
 import fnmatch
 from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
+from .module_ogr import shpext
 from .module_http import http_exists
 from .module_log import Logger
 
@@ -388,7 +389,7 @@ def copy(src, dst=None, client=None):
     
     exts = []
     if src.endswith(".shp"):
-        exts = ["shx", "dbf", "prj", "cpg", "mta", "qmd"]
+        exts = shpext
     elif src.endswith(".tif"):
         exts = [] #["tfw", "jpw", "prj", "aux.xml"]
         
@@ -424,9 +425,9 @@ def move(src, dst, client=None):
     return dst
 
 
-def remove(uri, client=None):
+def delete(uri, client=None):
     """
-    remove
+    delete
     """
     if iss3(uri):
         s3_remove(uri, client=client)

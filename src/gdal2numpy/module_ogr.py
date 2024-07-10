@@ -40,6 +40,9 @@ from .module_s3 import isfile
 from .module_log import Logger
 from Levenshtein import distance
 
+shpext = ("shp", "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih",
+          "atx", "qlr", "mta", "qmd", "cpg")
+
 
 def create_cpg(fileshp):
     """
@@ -56,9 +59,7 @@ def ogr_move(src, dst):
     """
     res = shutil.move(src, dst)
     if "shp" == justext(src).lower():
-        for ext in (
-                "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
-                "qlr", "mta", "qmd", "cpg"):
+        for ext in shpext:
             src = forceext(src, ext)
             dst = dst if os.path.isdir(dst) else forceext(dst, ext)
             if os.path.isfile(src):
@@ -75,9 +76,7 @@ def ogr_copy(src, dst):
     """
     res = shutil.copy2(src, dst)
     if "shp" == justext(src).lower():
-        for ext in (
-                "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih", "atx",
-                "qlr", "mta", "qmd", "cpg"):
+        for ext in shpext:
             src = forceext(src, ext)
             filedst = forceext(dst, ext)
             filedst = dst if os.path.isdir(dst) else filedst
@@ -96,7 +95,7 @@ def ogr_remove(filename):
         if justext(filename).lower() in ("shp",):
             driver = ogr.GetDriverByName("ESRI Shapefile")
             driver.DeleteDataSource(filename)
-            for ext in ("qlr", "mta", "qmd", "cpg"):
+            for ext in shpext:
                 fileaux = forceext(filename, ext)
                 if os.path.isfile(fileaux):
                     os.unlink(fileaux)
