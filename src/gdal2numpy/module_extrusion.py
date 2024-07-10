@@ -47,7 +47,9 @@ def raster_edit(filetif, fileshp, fileout=None, fieldname=None, mode="add", form
     if mode == "add":
         dem[~np.isnan(dem)] += features_raster[~np.isnan(dem)]
     elif mode == "level":
-        dem[~np.isnan(dem)] = features_raster[~np.isnan(dem)]
+        # with RasterizeLike( ...nodata=0) the nodata value is 0
+        # so put le the level onlly where the features_raster>0
+        dem[features_raster>0] = features_raster[features_raster>0]
     if fileout:
         Numpy2GTiff(dem, gt, prj, fileout, save_nodata_as=-9999, format=format)
     return dem, gt, prj
