@@ -23,6 +23,7 @@
 # Created:
 #-------------------------------------------------------------------------------
 from .filesystem import *
+from .module_types import *
 from .module_geolocate import *
 from .module_GDAL2Numpy import *
 from .module_Numpy2GTiff import *
