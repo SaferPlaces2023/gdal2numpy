@@ -29,10 +29,12 @@ import shutil
 import fnmatch
 from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
-from .module_ogr import shpext
 from .module_http import http_exists
 from .module_log import Logger
 
+
+shpext = ("shp", "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih",
+          "atx", "qlr", "mta", "qmd", "cpg")
 
 def iss3(filename):
     """
