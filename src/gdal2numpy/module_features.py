@@ -391,6 +391,7 @@ def SaveFeatures(features, fileshp):
             layer = ds.CreateLayer(layername, crs, DATATYPE[dtype])
             properties = listify(feature["properties"])
             for name in properties:
+                print(f"<{name}>")
                 dtype, dwidth = (properties[name] + ":0").split(":")
                 p, w = math.modf(float(dwidth))
                 p, w = int(p), int(w)
