@@ -389,9 +389,11 @@ def SaveFeatures(features, fileshp):
         if feature:
             dtype = feature["geometry"]["type"]
             layer = ds.CreateLayer(layername, crs, DATATYPE[dtype])
-            print(feature["properties"])
-            print("^^^^^^^^^^^^^")
-            properties = listify(feature["properties"])
+            
+
+            properties = feature["properties"] if feature["properties"] else {}
+            
+            # properties = { "dtm":0 , "hello":"world"}
             for name in properties:
                 print(f"<{name}>")
                 dtype, dwidth = (properties[name] + ":0").split(":")
