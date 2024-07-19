@@ -231,6 +231,8 @@ def SetTag(filename, tagname, tagvalue="", band=0):
                 if not band:
                     metadata = ds.GetMetadata()
                     metadata[tagname] = f"{tagvalue}"
+                    print(metadata)
+                    print("=================")
                     ds.SetMetadata(metadata)
                 elif 0 < band <= ds.RasterCount:
                     metadata = ds.GetRasterBand(band).GetMetadata()

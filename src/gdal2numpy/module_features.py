@@ -393,10 +393,10 @@ def SaveFeatures(features, fileshp):
 
             properties = feature["properties"] if feature["properties"] else {}
             
-            # properties = { "dtm":0 , "hello":"world"}
+            # properties = { "dtm":1.5 , "hello":"world"}
             for name in properties:
                 print(f"<{name}>")
-                dtype, dwidth = (properties[name] + ":0").split(":")
+                dtype, dwidth = (f"{properties[name]}:0").split(":")
                 p, w = math.modf(float(dwidth))
                 p, w = int(p), int(w)
                 field_name = ogr.FieldDefn(name, DATATYPE[dtype])
