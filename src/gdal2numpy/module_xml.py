@@ -166,7 +166,7 @@ def writeQMD(filename, metadata=None):
         writeXML(data, fileqmd)
 
 
-def SetTag(filename, tagname, tagvalue):
+def SetTagQMD(filename, tagname, tagvalue):
     """
     SetTag - set a tag in metadata of the file or of the band if specified
     """
