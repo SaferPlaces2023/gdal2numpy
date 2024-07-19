@@ -224,10 +224,14 @@ def SetTag(filename, tagname, tagvalue="", band=0):
     """
     SetTag - set a tag in metadata of the file or of the band if specified
     """
+    print(f"1) SetTag({filename}, {tagname}, {tagvalue}, {band})")
     if israster(filename):
+        print(f"2) {filename} is a raster")
         ds = OpenRaster(filename, gdalconst.GA_Update)
+        print(f"3) ds ={ds}")
         if ds:
             if tagname:
+                print(f"4) tagname = {tagname}")
                 if not band:
                     metadata = ds.GetMetadata()
                     metadata[tagname] = f"{tagvalue}"
