@@ -95,17 +95,17 @@ def GTiff2Cog(filetif, fileout=None, algo="NEAREST"):
 
         driver = gdal.GetDriverByName("COG")
         if driver:
-            COMPRESSION = "DEFLATE"
+            COMPRESSION = "LZW"
             CO = [f"COMPRESS={COMPRESSION}", "NUM_THREADS=ALL_CPUS"]
             Logger.debug(f"Creating a COG..{CO}")
-            gdal.SetConfigOption("COMPRESS_OVERVIEW", "DEFLATE")
+            gdal.SetConfigOption("COMPRESS_OVERVIEW", "LZW")
             gdal.SetConfigOption("GDAL_CACHEMAX", "512")
             #ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
             ds.BuildOverviews(algo, CalculateOverviews(ds))
             driver.CreateCopy(filetmp, ds, False, CO)
         else:
             BLOCKSIZE = 512
-            COMPRESSION = "DEFLATE"
+            COMPRESSION = "LZW"
             CO = [  "BIGTIFF=YES",
                     "TILED=YES",
                     f"BLOCKXSIZE={BLOCKSIZE}",

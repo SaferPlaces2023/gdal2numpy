@@ -436,7 +436,7 @@ def GetExtent(filename, t_srs=None):
     if t_srs and not SameSpatialRef(s_srs, t_srs):
 
         minx, miny, maxx, maxy = TransformBBOX([minx, miny, maxx, maxy], s_srs, t_srs)
-        print(f"GetExtent: {minx}, {miny}, {maxx}, {maxy}")
+        #print(f"GetExtent: {minx}, {miny}, {maxx}, {maxy}")
 
     return minx, miny, maxx, maxy
 
