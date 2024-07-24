@@ -151,7 +151,7 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
     if format.upper() == "GTIFF":
         CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"]
     elif format.upper() == "COG":
-        CO = ["BIGTIFF=YES", "COMPRESS=DEFLATE", "NUM_THREADS=ALL_CPUS"]
+        CO = ["BIGTIFF=YES", "COMPRESS=LZW", "NUM_THREADS=ALL_CPUS"]
     else:
         CO = []
 
