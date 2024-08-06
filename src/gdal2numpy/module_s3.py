@@ -413,7 +413,10 @@ def move(src, dst, client=None):
     elif iss3(src) and iss3(dst):
         s3_move(src, dst, client=client)
     elif os.path.isfile(src) and not iss3(dst):
-        shutil.move(src, dst)
+        try:
+            shutil.move(src, dst)
+        except Exception as ex:
+            Logger.warn(ex)
     
     exts = []
     if src.endswith(".shp"):
