@@ -178,5 +178,12 @@ def SetTagQMD(filename, tagname, tagvalue):
             writeQMD(fileqmd)
 
         data = parseXML(fileqmd)
-        data[tagname] = tagvalue
+        #data[tagname] = tagvalue
+        if "keywords" not in data["qgis"]:
+            data["qgis"]["keywords"] = []
+
+        data["qgis"]["keywords"].append({
+            "@vocabulary": tagname,
+            "keyword": tagvalue
+        })
         writeXML(data, fileqmd)
