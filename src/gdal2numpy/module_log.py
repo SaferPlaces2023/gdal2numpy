@@ -1,12 +1,25 @@
 import logging
 
-#logging.basicConfig(format="[%(asctime)s][%(levelname)-8s] %(message)s")
-logging.basicConfig(format="[%(levelname)-8s][%(asctime)s] %(message)s")
-Logger = logging.getLogger(__name__)
-Logger.setLevel(logging.INFO)
-print("Logger initialized from gal2numpy")
+Logger = None
 
-def set_log_level(verbose, debug):
+
+def init_logger():
+    """
+    init_logger - Initialize the logger
+    """
+    if Logger is None:
+        print(
+            "Logger initialized with format [%(levelname)-8s][%(asctime)s] %(message)s")
+        logging.basicConfig(format="[%(levelname)-8s] %(message)s")
+        Logger = logging.getLogger(__name__)
+        Logger.setLevel(logging.CRITICAL)
+
+
+def set_level(verbose, debug):
+    """
+    set_level - Set the log level
+    """
+    init_logger()
     if verbose:
         Logger.setLevel(logging.INFO)
     if debug:
