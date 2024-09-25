@@ -41,7 +41,10 @@ def gdal_translate(filetif, fileout=None, projwin=None, projwin_srs=None, format
     # In case of s3 fileout must be a s3 path
     # fileout = fileout if fileout else tempfilename(suffix=".tif")
     # s3://saferplaces.co/test.tif -> saferplaces.co, test.tif
-    if iss3(fileout):
+    if fileout is None:
+        filetmp = tempfilename(prefix="gdalwarp_", suffix=".tif")
+        fileout = filetmp
+    elif iss3(fileout):
         _, filetmp = get_bucket_name_key(fileout)
         filetmp = tempname4S3(filetmp)
     else:
