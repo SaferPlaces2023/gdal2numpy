@@ -25,11 +25,13 @@
 import os
 from osgeo import gdal
 from .filesystem import tempfilename, listify, now, total_seconds_from, justpath
+from .module_Numpy2GTiff import GTiff2Cog
 from .module_s3 import move, iss3, get_bucket_name_key, tempname4S3
 from .module_log import Logger
+from .module_ogr import AutoIdentify
 
 
-def gdal_translate(filetif, fileout=None, projwin=None, projwin_srs=None):
+def gdal_translate(filetif, fileout=None, projwin=None, projwin_srs=None, format="GTiff"):
     """
     gdal_translate: gdal_translate a raster file
     """
@@ -49,6 +51,7 @@ def gdal_translate(filetif, fileout=None, projwin=None, projwin_srs=None):
     os.makedirs(justpath(filetmp), exist_ok=True)
 
     projwin = listify(projwin) if projwin else None
+    projwin_srs = AutoIdentify(projwin_srs) if projwin_srs else None
 
     co = [
         "BIGTIFF=YES",
@@ -67,6 +70,12 @@ def gdal_translate(filetif, fileout=None, projwin=None, projwin_srs=None):
     }
 
     gdal.Translate(filetmp, filetif, **kwargs)
+
+    if format.lower() == "cog":
+        # inplace conversion
+        t1 = now()
+        GTiff2Cog(filetmp)
+        Logger.debug(f"GTiff2Cog: converted {filetmp}  in {total_seconds_from(t1)} s.")
 
     Logger.debug(f"gdalwarp: move {filetmp} to {fileout}")
     move(filetmp, fileout)
