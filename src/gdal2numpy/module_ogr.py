@@ -33,7 +33,7 @@ import site
 from osgeo import gdal
 from osgeo import osr, ogr
 from pyproj import CRS
-from .filesystem import justext, juststem, forceext, justpath, strtofile, filetostr, md5text
+from .filesystem import justext, juststem, forceext, justpath, strtofile, filetostr, md5text, listify
 from .module_open import OpenRaster
 from .module_open import OpenShape
 from .module_s3 import isfile
@@ -163,6 +163,19 @@ def SamePixelSize(filename1, filename2, decimals=-1):
         size1 = [round(item, decimals) for item in size1]
         size2 = [round(item, decimals) for item in size2]
     return size1 == size2
+
+
+def GetDataType(filename):
+    """
+    GetDataType
+    """
+    ds = OpenRaster(filename)
+    if ds:
+        band = ds.GetRasterBand(1)
+        dtype = gdal.GetDataTypeName(band.DataType)
+        ds = None
+        return dtype
+    return None
 
 
 def AutoIdentify(wkt):
@@ -347,16 +360,21 @@ def GetGeometryType(filename):
     return None
 
 
-def Rectangle(minx, miny, maxx, maxy):
+def Rectangle(minx, miny, maxx, maxy, deltaperc=0.0):
     """
     Rectangle - create ogr polygon from bbox
     """
+    deltaperc = min(1.0, max(0.0, abs(deltaperc)))
+    width = abs(maxx - minx)
+    height = abs(maxy - miny)
+    deltax = width * deltaperc
+    deltay = height * deltaperc
     ring = ogr.Geometry(ogr.wkbLinearRing)
-    ring.AddPoint_2D(minx, miny)
-    ring.AddPoint_2D(maxx, miny)
-    ring.AddPoint_2D(maxx, maxy)
-    ring.AddPoint_2D(minx, maxy)
-    ring.AddPoint_2D(minx, miny)
+    ring.AddPoint_2D(minx-deltax, miny-deltay)
+    ring.AddPoint_2D(maxx+deltax, miny-deltay)
+    ring.AddPoint_2D(maxx+deltax, maxy+deltay)
+    ring.AddPoint_2D(minx-deltax, maxy+deltay)
+    ring.AddPoint_2D(minx-deltax, miny-deltay)
     # Create polygon
     poly = ogr.Geometry(ogr.wkbPolygon)
     poly.AddGeometry(ring)
@@ -402,10 +420,20 @@ def GetExtent(filename, t_srs=None):
     s_srs = None
     minx, miny, maxx, maxy = 0, 0, 0, 0
     ext = justext(f"{filename}").lower()
-    if isinstance(filename, (list, tuple)):
+    if isinstance(filename, str) and not isfile(filename):
+        # replace ; with , in case of a list of coordinates
+        filename = filename.replace(";", ",")
+        # replace single space with , in case of a list of coordinates
+        filename = re.sub(r"\s+", ",", filename)
+        arr = listify(filename)
+        minx, miny, maxx, maxy = [float(item) for item in arr] if len(arr) == 4 else [0, 0, 0, 0]
+        s_srs = GetSpatialRef(4326)
+    elif isinstance(filename, (list, tuple)) and len(filename) == 4:
         minx, miny, maxx, maxy = filename
         s_srs = GetSpatialRef(4326)
-                
+    elif isinstance(filename, ogr.Geometry):
+        minx, maxx, miny, maxy = filename.GetEnvelope()
+        s_srs = filename.GetSpatialReference()
     elif ext == "tif":
         ds = OpenRaster(filename)
         if ds:

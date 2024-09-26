@@ -26,35 +26,28 @@ import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
 from .module_Numpy2GTiff import GTiff2Cog
-from .module_ogr import SameSpatialRef, AutoIdentify
+from .module_ogr import SameSpatialRef, AutoIdentify, GetSpatialRef
 from .module_s3 import *
+from .gdal_translate import dtypeOf
 
 
 def resampling_method(method):
     """
     reasampling_method translation form text to gdalconst
     """
-    method = method.lower()
-    if method == "near":
-        return gdalconst.GRIORA_NearestNeighbour
-    elif method == "bilinear":
-        return gdalconst.GRIORA_Bilinear
-    elif method == "cubic":
-        return gdalconst.GRIORA_Cubic
-    elif method == "cubicspline":
-        return gdalconst.GRIORA_CubicSpline
-    elif method == "lanczos":
-        return gdalconst.GRIORA_Lanczos
-    elif method == "average":
-        return gdalconst.GRIORA_Average
-    elif method == "rms":
-        return gdalconst.GRIORA_RMS
-    elif method == "mode":
-        return gdalconst.GRIORA_Mode
-    elif method == "gauss":
-        return gdalconst.GRIORA_Gauss
-    else:
-        return gdalconst.GRIORA_Bilinear
+    algorithms = {
+        "near": gdalconst.GRIORA_NearestNeighbour,
+        "bilinear": gdalconst.GRIORA_Bilinear,
+        "cubic": gdalconst.GRIORA_Cubic,
+        "cubicspline": gdalconst.GRIORA_CubicSpline,
+        "lanczos": gdalconst.GRIORA_Lanczos,
+        "average": gdalconst.GRIORA_Average,
+        "rms": gdalconst.GRIORA_RMS,
+        "mode": gdalconst.GRIORA_Mode,
+        "gauss": gdalconst.GRIORA_Gauss,
+    }
+    method = method.lower() if isinstance(method, str) else None
+    return algorithms.get(method, gdalconst.GRIORA_NearestNeighbour)
 
 
 def gdalwarp(filelist,
@@ -65,94 +58,95 @@ def gdalwarp(filelist,
              pixelsize=(0, 0),
              resampleAlg="near",
              format="GTiff",
+             ot=None,
              dstNodata=-9999):
     """
     gdalwarp
     """
+    t0 = now()
 
-    gdal.SetConfigOption('CPLErrorHandling', 'silent')
-
-    # In case of s3 fileout must be a s3 path
-    # fileout = fileout if fileout else tempfilename(suffix=".tif")
-    # s3://saferplaces.co/test.tif -> saferplaces.co, test.tif
-    if iss3(fileout):
-        _, filetmp = get_bucket_name_key(fileout)
-        filetmp = tempname4S3(filetmp)
-    else:
-        filetmp = tempfilename(prefix="gdalwarp_", suffix=".tif")
-
-    # assert that the folder exists
-    os.makedirs(justpath(filetmp), exist_ok=True)
-
-    #  copy s3 file to local
-    filelist_tmp = []
     filelist = listify(filelist)
-    for filename in filelist:
-        if iss3(filename):
-            filename = copy(filename, tempfilename(
-                prefix="s3_", suffix=".tif"))
-        filelist_tmp.append(filename)
-    # ----------------------------------------------------------------------
-        
-    # if format.lower() == "cog":
-    #     co = ["BIGTIFF=YES", "NUM_THREADS=ALL_CPUS"]
-    # else:
-    co = [
-        "BIGTIFF=YES",
-        "TILED=YES",
-        "BLOCKXSIZE=512",
-        "BLOCKYSIZE=512",
-        "COMPRESS=LZW",
-        "NUM_THREADS=ALL_CPUS"]
+    if len(filelist) == 0:
+        Logger.warning("gdalwarp: filelist is empty")
+        return None
+
+    co = {
+        "gtiff": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
+        "cog":   ["BIGTIFF=YES", "COMPRESS=LZW"],
+    }
+
+    format = format.lower() if format else "gtiff"
+
+    creation_options = co.get(format, [])
+
+    filetmp = tempfilename(prefix="gdalwarp/tmp_", suffix=".tif")
+    fileout = fileout if fileout else filetmp
+
+    filelist_tmp = copy(filelist)
 
     kwargs = {
-        "format": "GTiff",
-        "outputType": gdalconst.GDT_Float32,
-        "creationOptions": co,
+        #"format": "GTiff",
+        "format": format,
+        "creationOptions": creation_options,
         #"warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
         "dstNodata": dstNodata,
         "resampleAlg": resampling_method(resampleAlg),
-        "multithread": True
+        "multithread": True,
+        "stats": True
     }
 
-    if pixelsize[0] > 0 and pixelsize[1] != 0:
-        kwargs["xRes"] = pixelsize[0]
+    # outputType = [-ot {Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}]
+    if ot and ot in dtypeOf:
+        ot = ot.lower() if isinstance(ot, str) else ot
+        kwargs["outputType"] = dtypeOf[ot] #gdal.GDT_Float32
+  
+    # pixelsize
+    pixelsize = listify(pixelsize)
+    if len(pixelsize) == 1 and pixelsize[0] != 0:
+        kwargs["xRes"] = abs(pixelsize[0])
+        kwargs["yRes"] = abs(pixelsize[0])
+    elif len(pixelsize) == 2 and pixelsize[0] != 0 and pixelsize[1] != 0:
+        kwargs["xRes"] = abs(pixelsize[0])
         kwargs["yRes"] = abs(pixelsize[1])
 
-    if len(filelist) == 1 and SameSpatialRef(filelist[0], dstSRS):
+    if len(filelist) == 1 and SameSpatialRef(filelist_tmp[0], dstSRS):
         Logger.debug(f"Avoid reprojecting {filelist[0]}")
     elif dstSRS:
-        kwargs["dstSRS"] = AutoIdentify(dstSRS)
+        #kwargs["dstSRS"] = AutoIdentify(dstSRS)
+        kwargs["dstSRS"] = GetSpatialRef(dstSRS)
 
+    cutline_tmp = None
     if isfile(cutline):
+        cutline_tmp = copy(cutline)
         kwargs["cropToCutline"] = cropToCutline
-        kwargs["cutlineDSName"] = cutline
-        kwargs["cutlineLayer"] = juststem(cutline)
+        kwargs["cutlineDSName"] = cutline_tmp
+        kwargs["cutlineLayer"] = juststem(cutline_tmp)
     elif isinstance(cutline, (tuple, list)) and len(cutline) == 4:
         kwargs["outputBounds"] = listify(cutline)
 
-    # SetGDALEnv()
-    # inplace gdalwarp
+    # inplace gdalwarp, give the fileout as the first file in the list
     if fileout is None and len(filelist) > 0:
         fileout = filelist[0]
 
-    t0 = now()
+    # assert that the folder exists
+    os.makedirs(justpath(filetmp), exist_ok=True)
     gdal.Warp(filetmp, filelist_tmp, **kwargs)
-    Logger.debug(
-        f"gdalwarp: converted to {filetmp}  in {total_seconds_from(t0)} s.")
+    
+    Logger.debug(f"gdalwarp: converted to {filetmp} in {total_seconds_from(t0)} s.")
    
-    if format.lower() == "cog":
-        # inplace conversion
-        t1 = now()
-        GTiff2Cog(filetmp)
-        Logger.debug(
-            f"GTiff2Cog: converted {filetmp}  in {total_seconds_from(t1)} s.")
+    # if format == "cog":
+    #     # inplace conversion
+    #     t1 = now()
+    #     GTiff2Cog(filetmp)
+    #     Logger.debug(
+    #         f"GTiff2Cog: converted {filetmp}  in {total_seconds_from(t1)} s.")
 
-    Logger.debug(f"gdalwarp: move {filetmp} to {fileout}")
+    # move the file to the output
     move(filetmp, fileout)
 
-    # RestoreGDALEnv()
-    gdal.SetConfigOption('CPLErrorHandling', 'once')
+    # clean the cutline file
+    remove(cutline_tmp)
+
     Logger.debug(f"gdalwarp: completed in {total_seconds_from(t0)} s.")
     # ----------------------------------------------------------------------
     return fileout

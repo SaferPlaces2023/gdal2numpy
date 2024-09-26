@@ -23,68 +23,109 @@
 # Created:     25/09/2024
 # -------------------------------------------------------------------------------import os
 import os
+import numpy as np
 from osgeo import gdal
-from .filesystem import tempfilename, listify, now, total_seconds_from, justpath
-from .module_Numpy2GTiff import GTiff2Cog
-from .module_s3 import move, iss3, get_bucket_name_key, tempname4S3
+from .filesystem import tempfilename, justpath
+from .filesystem import now, total_seconds_from
+from .module_ogr import GetExtent
+from .module_s3 import move, copy, iss3
 from .module_log import Logger
-from .module_ogr import AutoIdentify
 
+dtypeOf = {
+    "byte": gdal.GDT_Byte,
+    "int16": gdal.GDT_Int16,
+    "uint16": gdal.GDT_UInt16,
+    "int32": gdal.GDT_Int32,
+    "int64": gdal.GDT_Int32,  # It is not an error gdal.GDT_Int64 does not exits!
+    "uint32": gdal.GDT_UInt32,
+    "uint64": gdal.GDT_UInt32,  # It is not an error gdal.GDT_Int64 does not exits!
+    "float32": gdal.GDT_Float32,
+    "float64": gdal.GDT_Float64,
+    # --- numpy types ---
+    gdal.GDT_Byte: gdal.GDT_Byte,
+    gdal.GDT_Int16: gdal.GDT_Int16,
+    gdal.GDT_UInt16: gdal.GDT_UInt16,
+    gdal.GDT_Int32: gdal.GDT_Int32,
+    gdal.GDT_UInt32: gdal.GDT_UInt32,
+    gdal.GDT_Float32: gdal.GDT_Float32,
+    gdal.GDT_Float64: gdal.GDT_Float64,
+    # ---
+    np.uint8: gdal.GDT_Byte,
+    np.int16: gdal.GDT_Int16,
+    np.uint16: gdal.GDT_UInt16,
+    np.int32: gdal.GDT_Int32,
+    np.int64: gdal.GDT_Int32,  # It is not an error gdal.GDT_Int64 does not exits!
+    np.uint32: gdal.GDT_UInt32,
+    np.uint64: gdal.GDT_UInt32,  # It is not an error gdal.GDT_Int64 does not exits!
+    np.float32: gdal.GDT_Float32,
+    np.float64: gdal.GDT_Float64,
+}
 
-def gdal_translate(filetif, fileout=None, projwin=None, projwin_srs=None, format="GTiff"):
+def gdal_translate(filetif, ot=None, fileout=None, projwin=None, projwin_srs=None, format="GTiff"):
     """
     gdal_translate: gdal_translate a raster file
     """
     t0 = now()
-    gdal.SetConfigOption('CPLErrorHandling', 'silent')
 
-    # In case of s3 fileout must be a s3 path
-    # fileout = fileout if fileout else tempfilename(suffix=".tif")
-    # s3://saferplaces.co/test.tif -> saferplaces.co, test.tif
-    if fileout is None:
-        filetmp = tempfilename(prefix="gdalwarp_", suffix=".tif")
-        fileout = filetmp
-    elif iss3(fileout):
-        _, filetmp = get_bucket_name_key(fileout)
-        filetmp = tempname4S3(filetmp)
-    else:
-        filetmp = tempfilename(prefix="gdalwarp_", suffix=".tif")
+    co = {
+        "gtiff": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
+        "cog":   ["BIGTIFF=YES", "COMPRESS=LZW"],
+    }
 
-    # assert that the folder exists
-    os.makedirs(justpath(filetmp), exist_ok=True)
+    format = format.lower() if format else "gtiff"
 
-    projwin = listify(projwin) if projwin else None
-    projwin_srs = AutoIdentify(projwin_srs) if projwin_srs else None
+    creation_options = co.get(format, [])
 
-    co = [
-        "BIGTIFF=YES",
-        "TILED=YES",
-        "BLOCKXSIZE=512",
-        "BLOCKYSIZE=512",
-        "COMPRESS=LZW",
-        "NUM_THREADS=ALL_CPUS"]
+    projwin = GetExtent(projwin) if projwin else None
+
+    # patch projWin --------------------------------------------
+    # in case of projwin = [minx, miny, maxx, maxy]
+    # translate it to projwin = [ulx, uly, lrx, lry]
+    if projwin and len(projwin) == 4:
+        minx, miny, maxx, maxy = tuple(projwin)
+        if miny < maxy:
+            projwin = [minx, maxy, maxx, miny]
+    # end of patch --------------------------------------------
+
+    # Case of filetif is a s3 path
+    if iss3(filetif):
+        filetif = copy(filetif)
+
+    filetmp = tempfilename(prefix="gdal_translate/tmp_", suffix=".tif")
+    fileout = fileout if fileout else filetmp
 
     kwargs = {
-        "format": "GTiff",
-        "creationOptions": co,
+        "format": format,
+        "creationOptions": creation_options,
         "projWin": projwin,
         "projWinSRS": projwin_srs,
         "stats": True
     }
 
+    if ot and ot in dtypeOf:
+        # [-ot {Byte/Int8/Int16/UInt16/UInt32/Int32/UInt64/Int64/Float32/Float64/
+        #  CInt16/CInt32/CFloat32/CFloat64}]
+        ot = ot.lower() if isinstance(ot, str) else ot
+        kwargs["outputType"] = dtypeOf[ot] #gdal.GDT_Float32
+    #else:
+        # dont include the outputType in the kwargs
+
+    # assert that the folder exists
+    os.makedirs(justpath(filetmp), exist_ok=True)
     gdal.Translate(filetmp, filetif, **kwargs)
 
-    if format.lower() == "cog":
-        # inplace conversion
-        t1 = now()
-        GTiff2Cog(filetmp)
-        Logger.debug(f"GTiff2Cog: converted {filetmp}  in {total_seconds_from(t1)} s.")
+    # this a workaround for the error: ------------------------------
+    error_message = gdal.GetLastErrorMsg()
+    if error_message and "Error: Computed -srcwin" in error_message:
+        # swap the order of the projwin miny with maxy
+        Logger.warning(f"gdal_translate: error message: {error_message}")
+        projwin = [projwin[0], projwin[3], projwin[2], projwin[1]]
+        kwargs["projWin"] = projwin
+        gdal.Translate(filetmp, filetif, **kwargs)
+    # end of workaround --------------------------------------------
 
-    Logger.debug(f"gdalwarp: move {filetmp} to {fileout}")
     move(filetmp, fileout)
 
-    # RestoreGDALEnv()
-    gdal.SetConfigOption('CPLErrorHandling', 'once')
-    Logger.debug(f"gdalwarp: completed in {total_seconds_from(t0)} s.")
+    Logger.debug(f"gdal_translate: completed in {total_seconds_from(t0)} s.")
     # ----------------------------------------------------------------------
     return fileout

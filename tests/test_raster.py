@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
         """
         test_pixel_size:
         """
-        #self.assertEqual(GetPixelSize(filedem), (22.0,30.9))
+        #self.assertEqual((filedem), (22.0,30.9))
         pass
 
 

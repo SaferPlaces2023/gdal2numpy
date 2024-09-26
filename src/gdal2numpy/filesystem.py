@@ -29,6 +29,7 @@ import os
 import tempfile
 import hashlib
 import shutil
+import random
 from .module_log import Logger
 
 def now():
@@ -155,7 +156,9 @@ def remove(pathname):
     """
     remove - remove a file
     """
-    if os.path.isfile(pathname):
+    if pathname is None:
+        return
+    elif os.path.isfile(pathname):
         try:
             os.remove(pathname)
         except OSError as ex:
@@ -184,7 +187,8 @@ def tempfilename(prefix="", suffix=""):
     """
     return a temporary filename
     """
-    return normpath(tempfile.gettempdir() + "/" + now().strftime(f"{prefix}%Y%m%d%H%M%S%f{suffix}"))
+    r = random.randint(0, 1000)
+    return normpath(f"{tempfile.gettempdir()}/{prefix}{now().strftime('%Y%m%d%H%M%S%f')}{r}{suffix}")
 
 
 def strtofile(text, filename, append=False):

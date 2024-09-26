@@ -27,6 +27,7 @@ import hashlib
 import boto3
 import shutil
 import fnmatch
+from pathlib import Path
 from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
 from .module_http import http_exists
@@ -371,33 +372,49 @@ def copy(src, dst=None, client=None):
     """
     copy
     """
-    dst = dst if dst else tempname4S3(src)
+    if isinstance(src, (tuple,list)) and dst is None:
+        return [copy(file, client=client) for file in src]
 
+    dst = dst if dst else tempfilename(prefix="s3/", suffix=".tif")
+    # if the source and destination are the same file do nothing
+    if src and dst and os.path.isfile(src) and os.path.abspath(src) == os.path.abspath(dst):
+        return dst
+
+    # 1) if the destination is a s3 file
     if os.path.isfile(src) and iss3(dst):
         s3_upload(src, dst, client=client)
+    # 2) if the source is a s3 file
     elif iss3(src) and not iss3(dst):
         s3_download(src, dst, client=client)
+    # 3) if the source and destination are s3 files
     elif iss3(src) and iss3(dst):
         s3_copy(src, dst, client=client)
+    # 4) if the source is a file and the destination is a local file
     elif os.path.isfile(src) and not iss3(dst):
         shutil.copy2(src, dst)
+    # 5) if the source is a folder
     elif os.path.isdir(src):
         if not iss3(dst):
             os.makedirs(dst, exist_ok=True)
         # copy all files in src folder recursively
-        for root, dirs, files in os.walk(src):
+        for root, _, files in os.walk(src):
             for file in files:
                 copy(f"{root}/{file}", f"{dst}/{file}", client=client)
+    # 6) if the source is a list of files
     
+    
+    # Finally
+    # if the source is a shapefile or a tiff file, copy the related files
     exts = []
     if src.endswith(".shp"):
         exts = list(shpext)
         exts.remove("shp")
     elif src.endswith(".tif"):
         exts = [] #["tfw", "jpw", "prj", "aux.xml"]
-        
-    for ext in exts:
-        copy(forceext(src,ext), forceext(dst,ext), client=client)
+
+    # copy the related files
+    _ = [copy(forceext(src, ext), forceext(dst, ext), client=client) for ext in exts]
+    # ----------------------------------------------------------------------
 
     return dst
 
@@ -407,6 +424,10 @@ def move(src, dst, client=None):
     """
     dst = dst if dst else tempname4S3(src)
 
+    # if the source and destination are the same file do nothing
+    if src and dst and os.path.abspath(src) == os.path.abspath(dst):
+        return dst
+
     if os.path.isfile(src) and iss3(dst):
         s3_upload(src, dst, remove_src=True, client=client)
     elif iss3(src) and not iss3(dst):
@@ -415,9 +436,10 @@ def move(src, dst, client=None):
         s3_move(src, dst, client=client)
     elif os.path.isfile(src) and not iss3(dst):
         try:
+            os.makedirs(justpath(dst), exist_ok=True)
             shutil.move(src, dst)
         except Exception as ex:
-            Logger.warn(ex)
+            Logger.warning(ex)
     
     exts = []
     if src.endswith(".shp"):

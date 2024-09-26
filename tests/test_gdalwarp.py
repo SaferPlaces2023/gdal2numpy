@@ -74,10 +74,14 @@ class Test(unittest.TestCase):
         """
         test_gdalwarp_bbox
         """
-        set_log_level(verbose=True,debug=True)
+        #set_log_level(verbose=True,debug=True)
         filedem = r"G:\\Drive condivisi\\GECOsDRIVE_2023\\Parma_safer\\dtm\\parma_dtm_2m_merge-25832.tif"
-        fileout = f"{workdir}/parma_dtm_2m_merge-25832.tif"
-        gdalwarp(filedem, fileout, dstSRS=filedem, format="GTiff", cutline=[609847, 4952419,610339, 4952829])
+        filedem = f"s3://saferplaces.co/test/lidar_rimini_building_2_wd.tif"
+        fileout = f"{workdir}/lidar_rimini_building_2_wd.cropped.tif"
+        file1 = f"{workdir}/12_2k_0015.tif"
+        file2 = f"{workdir}/12_2k_0016.tif"
+        fileout = f"{workdir}/12_2k_0015_0016.tif"
+        gdalwarp([file1, file2], fileout, dstSRS=filedem, format="GTiff") #, cutline=[783785, 4885325 , 784795, 4886006])
 
     # def test_if_is_cog(self):
     #     """
