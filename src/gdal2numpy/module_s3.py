@@ -34,8 +34,7 @@ from .module_http import http_exists
 from .module_log import Logger
 
 
-shpext = ("shp", "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih",
-          "atx", "qlr", "mta", "qmd", "cpg")
+shpext = ("shp", "dbf", "shx", "prj", "qml", "qix", "qlr", "mta", "qmd", "cpg")
 
 def iss3(filename):
     """
@@ -443,7 +442,7 @@ def move(src, dst, client=None):
     
     exts = []
     if src.endswith(".shp"):
-        exts = ["shx", "dbf", "prj", "cpg", "mta", "qmd"]
+        exts = list(shpext)
     elif src.endswith(".tif"):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         
