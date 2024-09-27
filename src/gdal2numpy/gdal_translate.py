@@ -116,7 +116,10 @@ def gdal_translate(filetif, ot=None, a_nodata=None, fileout=None, projwin=None, 
     #print("gdal.Translate with(projWin):", projwin)
     # assert that the folder exists
     os.makedirs(justpath(filetmp), exist_ok=True)
+    # Suppress GDAL warnings and errors
+    gdal.PushErrorHandler('CPLQuietErrorHandler')
     gdal.Translate(filetmp, filetif, **kwargs)
+    gdal.PopErrorHandler()
 
     # this a workaround for the error: ------------------------------
     error_message = gdal.GetLastErrorMsg()

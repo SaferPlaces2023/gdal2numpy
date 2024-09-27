@@ -15,15 +15,15 @@ class Test(unittest.TestCase):
         test_gdal_translate  
         """
         #os.chdir(workdir)
-        filedem = f"NASA_NASADEM_HGT_001_162324.tif"
-        filedem = f"s3://saferplaces.co/test/lidar_rimini_building_2_wd.tif"
+        #filedem = f"NASA_NASADEM_HGT_001_162324.tif"
+        #filerain = f"s3://saferplaces.co/test/lidar_rimini_building_2_wd.tif"
         #fileclay = f"OpenLandMap_SOL_SOL_CLAY-WFRACTION_USDA-3A1A1A_M_v02_160807.tif"
 
-        #filerain = "tests/forecast_acc_6h_2024-09-18_00-00_13h-18h.tif"
-        #filerain = "tests/forecast_acc_6h_3003.tif"
-        filerain = "tests/forecast_acc_6h_3857.tif"
-        #filedem =  "s3://saferplaces.co/Venezia/dtm_bacino3.bld.tif"
-        filedem =  "tests/dtm_bacino3.bld.tif"
+        filerain = "tests/forecast_acc_6h_2024-09-18_00-00_13h-18h.tif"
+        # filerain = "tests/forecast_acc_6h_3003.tif"
+        # filerain = "tests/forecast_acc_6h_3857.tif"
+        filedem =  "s3://saferplaces.co/Venezia/dtm_bacino3.bld.tif"
+        #filedem =  "tests/dtm_bacino3.bld.tif"
         fileout = f"crop.tif"
         projWin = GetExtent(filedem)
         projWinSrs = "EPSG:3003"

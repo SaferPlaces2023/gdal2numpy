@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.360"
+VERSION = "0.0.361"
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi, Marco Renzi"
 EMAIL = "valerio.luzzi@gecosistema.com, marco.renzi@gecosistema.com"
@@ -38,6 +38,7 @@ setuptools.setup(
         "xmltodict" 
     ]
 )
+
 
 
 

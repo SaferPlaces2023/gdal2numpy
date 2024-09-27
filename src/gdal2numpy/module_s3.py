@@ -168,7 +168,9 @@ def tempname4S3(uri):
         tmp = uri.replace("/vsis3/", dest_folder + "/")
     else:
         _, path = os.path.splitdrive(uri)
-        tmp = dest_folder + "/" + path
+        tmp = normpath(dest_folder + "/" + path)
+    
+    os.makedirs(justpath(tmp), exist_ok=True)
     return tmp
 
 
@@ -375,7 +377,8 @@ def copy(src, dst=None, client=None):
     if isinstance(src, (tuple,list)) and dst is None:
         return [copy(file, client=client) for file in src]
 
-    dst = dst if dst else tempfilename(prefix="s3/", suffix=f".{justext(src)}")
+    #dst = dst if dst else tempfilename(prefix="s3/", suffix=f".{justext(src)}")
+    dst = dst if dst else tempname4S3(src)
     # if the source and destination are the same file do nothing
     if src and dst and os.path.isfile(src) and os.path.abspath(src) == os.path.abspath(dst):
         return dst
