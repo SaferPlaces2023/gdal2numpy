@@ -61,7 +61,7 @@ dtypeOf = {
     np.float64: gdal.GDT_Float64,
 }
 
-def gdal_translate(filetif, ot=None, fileout=None, projwin=None, projwin_srs=None, format="GTiff"):
+def gdal_translate(filetif, ot=None, a_nodata=None, fileout=None, projwin=None, projwin_srs=None, format="GTiff"):
     """
     gdal_translate: gdal_translate a raster file
     """
@@ -109,6 +109,9 @@ def gdal_translate(filetif, ot=None, fileout=None, projwin=None, projwin_srs=Non
         kwargs["outputType"] = dtypeOf[ot] #gdal.GDT_Float32
     #else:
         # dont include the outputType in the kwargs
+
+    if a_nodata is not None:
+        kwargs["dstNodata"] = a_nodata
 
     # assert that the folder exists
     os.makedirs(justpath(filetmp), exist_ok=True)

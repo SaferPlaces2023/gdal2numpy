@@ -27,15 +27,21 @@ import numpy as np
 from .filesystem import tempfilename, remove
 from .module_ogr import SamePixelSize, SameSpatialRef, GetSpatialRef, GetExtent, SameExtent
 from .module_ogr import Rectangle, GetPixelSize
+from .module_s3 import isfile
 from .module_GDAL2Numpy import GDAL2Numpy
 from .module_Numpy2GTiff import Numpy2GTiff
 from .gdalwarp import gdalwarp
 from .module_log import Logger
-from .module_s3 import copy
 from .gdal_translate import gdal_translate
 
+# TODO: integrate RasterizeLike and RasterLike into a single function
+# def RasterizeLike(fileshp, filedem, fileout="",  burn_fieldname=None, z_value=None, factor=1.0, nodata=None, buf=0.0, all_touched=False):
 
-def RasterLike(filetif, filetpl, fileout=None, resampleAlg="near", format="GTiff", verbose=False):
+def RasterLike(filename, filetpl, fileout=None, dtype=None, resampleAlg="near",
+                nodata=None,
+                #burn_fieldname=None, z_value=None, factor=1.0, buf=0.0, all_touched=False,
+                format="GTiff",
+                verbose=False):
     """
     RasterLike: adatta un raster al raster template ( dem ) ricampionando, 
     riproiettando estendendo/clippando il file raster se necessario.
@@ -43,62 +49,65 @@ def RasterLike(filetif, filetpl, fileout=None, resampleAlg="near", format="GTiff
     Logger.debug("0)RasterLike...")
     fileout = fileout if fileout else tempfilename(suffix=".tif")
 
-    if SameSpatialRef(filetif, filetpl) and \
-        SamePixelSize(filetif, filetpl, decimals=2) and \
-            SameExtent(filetif, filetpl, decimals=3):
-        Logger.debug("Files have the same srs, pixels size and extent!")
-        fileout = filetif
-        return fileout
+    # is raster file
+    if isfile(filename) and filename.endswith(".tif"):
+        if SameSpatialRef(filename, filetpl) and \
+            SamePixelSize(filename, filetpl, decimals=2) and \
+                SameExtent(filename, filetpl, decimals=3):
+            Logger.debug("Files have the same srs, pixels size and extent!")
+            fileout = filename
+            return fileout
 
-    srs_tpl = GetSpatialRef(filetpl)
-    # Tiff extent
-    tif_minx, tif_miny, tif_maxx, tif_maxy = GetExtent(filetif, srs_tpl)
-    # Template extent
-    tpl_minx, tpl_miny, tpl_maxx, tpl_maxy = GetExtent(filetpl)
-    # Template extent 10% larger
-    delta = 0.1
-    tif_rectangle = Rectangle(tif_minx, tif_miny, tif_maxx, tif_maxy)
-    tpl_rectangle = Rectangle(tpl_minx, tpl_miny, tpl_maxx, tpl_maxy)
-    crp_rectangle = Rectangle(tpl_minx, tpl_miny, tpl_maxx, tpl_maxy, delta)
-    
-    
-    # 0) Preliminary first coarse crop to speed up the process
-    # Just if the tif is 4 times larger than the template
-    if tif_rectangle.Intersects(tpl_rectangle) and \
-        tif_rectangle.GetArea()/tpl_rectangle.GetArea() > 0:
-            crp_minx, crp_maxx, crp_miny, crp_maxy = crp_rectangle.GetEnvelope()
-            file_warp0 = gdal_translate(filetif, projwin=(crp_minx, crp_maxy, crp_maxx, crp_miny), projwin_srs=srs_tpl)
-            #file_warp0 = gdal_translate(filetif, projwin=crp_rectangle.GetEnvelope(), projwin_srs=srs_tpl)
-            remove_file_warp0 = True
-    else:
-        #Otherwise just use the original tif
-        file_warp0 = filetif
-        remove_file_warp0 = False
+        srs_tpl = GetSpatialRef(filetpl)
+        # Tiff extent
+        tif_minx, tif_miny, tif_maxx, tif_maxy = GetExtent(filename, srs_tpl)
+        # Template extent
+        tpl_minx, tpl_miny, tpl_maxx, tpl_maxy = GetExtent(filetpl)
+        # Template extent 10% larger
+        delta = 0.1
+        tif_rectangle = Rectangle(tif_minx, tif_miny, tif_maxx, tif_maxy)
+        tpl_rectangle = Rectangle(tpl_minx, tpl_miny, tpl_maxx, tpl_maxy)
+        crp_rectangle = Rectangle(tpl_minx, tpl_miny, tpl_maxx, tpl_maxy, delta)
 
-    # 1) Second gdalwarp to resample and reproject the tif to the template
-    # defined the fileout because the gdalwarp otherwise will work inplace
-    file_warp1 = tempfilename(suffix=".warp1.tif")
-    file_warp1 = gdalwarp([file_warp0], fileout=file_warp1, dstSRS=srs_tpl,
-                          pixelsize=GetPixelSize(filetpl, um=None),
-                          resampleAlg=resampleAlg)
-    
-    tif_minx, tif_miny, tif_maxx, tif_maxy = GetExtent(file_warp1)
-    tif_rectangle = Rectangle(tif_minx, tif_miny, tif_maxx, tif_maxy)
-    
-    # 2) Final fine crop to the template extent
-    # Note that the projwin has tpl_maxy an tpl_miny inverted
-    if tif_rectangle.Intersects(tpl_rectangle):
-        fileout = gdal_translate(file_warp1, fileout=fileout, projwin=(tpl_minx, tpl_maxy, tpl_maxx, tpl_miny))
-        #fileout = gdal_translate(file_warp1, fileout=fileout, projwin=tpl_rectangle.GetEnvelope())
-    else:
-        wdata, gt, prj = GDAL2Numpy(
-            filetpl, band=1, dtype=np.float32, load_nodata_as=np.nan)
-        wdata.fill(np.nan)
-        Numpy2GTiff(wdata, gt, prj, fileout, format=format)
 
-    # Create temp files
-    if remove_file_warp0:
-        remove(file_warp0)
+        # 0) Preliminary first coarse crop to speed up the process
+        # Just if the tif is 4 times larger than the template
+        if tif_rectangle.Intersects(tpl_rectangle) and \
+            tif_rectangle.GetArea()/tpl_rectangle.GetArea() > 0:
+                crp_minx, crp_maxx, crp_miny, crp_maxy = crp_rectangle.GetEnvelope()
+                file_warp0 = gdal_translate(filename, projwin=(crp_minx, crp_maxy, crp_maxx, crp_miny), projwin_srs=srs_tpl)
+                #file_warp0 = gdal_translate(filetif, projwin=crp_rectangle.GetEnvelope(), projwin_srs=srs_tpl)
+                remove_file_warp0 = True
+        else:
+            #Otherwise just use the original tif
+            file_warp0 = filename
+            remove_file_warp0 = False
 
-    remove(file_warp1)
-    return fileout if os.path.exists(fileout) else None
+        # 1) Second gdalwarp to resample and reproject the tif to the template
+        # defined the fileout because the gdalwarp otherwise will work inplace
+        file_warp1 = tempfilename(suffix=".warp1.tif")
+        file_warp1 = gdalwarp([file_warp0], fileout=file_warp1, dstSRS=srs_tpl,
+                            pixelsize=GetPixelSize(filetpl, um=None),
+                            resampleAlg=resampleAlg)
+
+        tif_minx, tif_miny, tif_maxx, tif_maxy = GetExtent(file_warp1)
+        tif_rectangle = Rectangle(tif_minx, tif_miny, tif_maxx, tif_maxy)
+
+        # 2) Final fine crop to the template extent
+        # Note that the projwin has tpl_maxy an tpl_miny inverted
+        if tif_rectangle.Intersects(tpl_rectangle):
+            fileout = gdal_translate(file_warp1, fileout=fileout, projwin=(tpl_minx, tpl_maxy, tpl_maxx, tpl_miny), ot=dtype, a_nodata=nodata)
+            #fileout = gdal_translate(file_warp1, fileout=fileout, projwin=tpl_rectangle.GetEnvelope())
+        else:
+            wdata, gt, prj = GDAL2Numpy(
+                filetpl, band=1, dtype=dtype, load_nodata_as=np.nan)
+            wdata.fill(np.nan)
+            Numpy2GTiff(wdata, gt, prj, fileout, save_nodata_as=nodata, format=format)
+
+        # Create temp files
+        if remove_file_warp0:
+            remove(file_warp0)
+
+        remove(file_warp1)
+    
+    return fileout if isfile(fileout) else None

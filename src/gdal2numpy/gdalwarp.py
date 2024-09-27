@@ -59,7 +59,7 @@ def gdalwarp(filelist,
              resampleAlg="near",
              format="GTiff",
              ot=None,
-             dstNodata=-9999):
+             dstNodata=None):
     """
     gdalwarp
     """
@@ -89,11 +89,13 @@ def gdalwarp(filelist,
         "format": format,
         "creationOptions": creation_options,
         #"warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
-        "dstNodata": dstNodata,
+        #"dstNodata": dstNodata,
         "resampleAlg": resampling_method(resampleAlg),
         "multithread": True,
-        "stats": True
     }
+
+    if dstNodata is not None:
+        kwargs["dstNodata"] = dstNodata
 
     # outputType = [-ot {Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}]
     if ot and ot in dtypeOf:
