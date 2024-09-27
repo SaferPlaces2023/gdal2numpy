@@ -72,7 +72,7 @@ def RasterLike(filename, filetpl, fileout=None, dtype=None, resampleAlg="near",
         # 0) Preliminary first coarse crop to speed up the process
         # Just if the tif is 4 times larger than the template
         if tif_rectangle.Intersects(tpl_rectangle) and \
-            tif_rectangle.GetArea()/tpl_rectangle.GetArea() > 0:
+            tif_rectangle.GetArea()/tpl_rectangle.GetArea() > 4:
                 crp_minx, crp_maxx, crp_miny, crp_maxy = crp_rectangle.GetEnvelope()
                 file_warp0 = gdal_translate(filename, projwin=(crp_minx, crp_maxy, crp_maxx, crp_miny), projwin_srs=srs_tpl)
                 remove_file_warp0 = True

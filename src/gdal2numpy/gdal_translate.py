@@ -83,7 +83,7 @@ def gdal_translate(filetif, ot=None, a_nodata=None, fileout=None, projwin=None, 
     # translate it to projwin = [ulx, uly, lrx, lry]
     if projwin and len(projwin) == 4:
         minx, miny, maxx, maxy = tuple(projwin)
-        if miny > maxy:
+        if miny < maxy and projwin_srs:
             projwin = [minx, maxy, maxx, miny]
             print(f"gdal_translate: projwin swapped: {projwin}")
     # end of patch --------------------------------------------
