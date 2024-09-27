@@ -408,7 +408,7 @@ def copy(src, dst=None, client=None):
     exts = []
     if src.endswith(".shp"):
         exts = list(shpext)
-        #exts.remove("shp")
+        exts.remove("shp")
     elif src.endswith(".tif"):
         exts = [] #["tfw", "jpw", "prj", "aux.xml"]
 
