@@ -375,7 +375,7 @@ def copy(src, dst=None, client=None):
     if isinstance(src, (tuple,list)) and dst is None:
         return [copy(file, client=client) for file in src]
 
-    dst = dst if dst else tempfilename(prefix="s3/", suffix=".tif")
+    dst = dst if dst else tempfilename(prefix="s3/", suffix=f".{justext(src)}")
     # if the source and destination are the same file do nothing
     if src and dst and os.path.isfile(src) and os.path.abspath(src) == os.path.abspath(dst):
         return dst
