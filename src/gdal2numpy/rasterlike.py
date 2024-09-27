@@ -22,7 +22,6 @@
 #
 # Created:     16/06/2021
 # -------------------------------------------------------------------------------
-import os
 import numpy as np
 from .filesystem import tempfilename, remove
 from .module_ogr import SamePixelSize, SameSpatialRef, GetSpatialRef, GetExtent, SameExtent
@@ -76,7 +75,6 @@ def RasterLike(filename, filetpl, fileout=None, dtype=None, resampleAlg="near",
             tif_rectangle.GetArea()/tpl_rectangle.GetArea() > 0:
                 crp_minx, crp_maxx, crp_miny, crp_maxy = crp_rectangle.GetEnvelope()
                 file_warp0 = gdal_translate(filename, projwin=(crp_minx, crp_maxy, crp_maxx, crp_miny), projwin_srs=srs_tpl)
-                #file_warp0 = gdal_translate(filetif, projwin=crp_rectangle.GetEnvelope(), projwin_srs=srs_tpl)
                 remove_file_warp0 = True
         else:
             #Otherwise just use the original tif
@@ -97,7 +95,6 @@ def RasterLike(filename, filetpl, fileout=None, dtype=None, resampleAlg="near",
         # Note that the projwin has tpl_maxy an tpl_miny inverted
         if tif_rectangle.Intersects(tpl_rectangle):
             fileout = gdal_translate(file_warp1, fileout=fileout, projwin=(tpl_minx, tpl_maxy, tpl_maxx, tpl_miny), ot=dtype, a_nodata=nodata)
-            #fileout = gdal_translate(file_warp1, fileout=fileout, projwin=tpl_rectangle.GetEnvelope())
         else:
             wdata, gt, prj = GDAL2Numpy(
                 filetpl, band=1, dtype=dtype, load_nodata_as=np.nan)
