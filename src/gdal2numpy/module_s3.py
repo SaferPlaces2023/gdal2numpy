@@ -167,7 +167,8 @@ def tempname4S3(uri):
     elif uri.startswith("/vsis3/"):
         tmp = uri.replace("/vsis3/", dest_folder + "/")
     else:
-        tmp = dest_folder + "/" + uri
+        _, path = os.path.splitdrive(uri)
+        tmp = dest_folder + "/" + path
     return tmp
 
 
