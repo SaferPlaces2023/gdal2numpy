@@ -94,7 +94,7 @@ def RasterLike(filename, filetpl, fileout=None, dtype=None, resampleAlg="near",
         # 2) Final fine crop to the template extent
         # Note that the projwin has tpl_maxy an tpl_miny inverted
         if tif_rectangle.Intersects(tpl_rectangle):
-            fileout = gdal_translate(file_warp1, fileout=fileout, projwin=(tpl_minx, tpl_maxy, tpl_maxx, tpl_miny), ot=dtype, a_nodata=nodata)
+            fileout = gdal_translate(file_warp1, fileout=fileout, projwin=tpl_rectangle, projwin_srs=srs_tpl,  ot=dtype, a_nodata=nodata)
         else:
             wdata, gt, prj = GDAL2Numpy(
                 filetpl, band=1, dtype=dtype, load_nodata_as=np.nan)

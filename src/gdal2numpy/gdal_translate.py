@@ -83,9 +83,8 @@ def gdal_translate(filetif, ot=None, a_nodata=None, fileout=None, projwin=None, 
     # translate it to projwin = [ulx, uly, lrx, lry]
     if projwin and len(projwin) == 4:
         minx, miny, maxx, maxy = tuple(projwin)
-        if miny < maxy and projwin_srs:
+        if miny < maxy:
             projwin = [minx, maxy, maxx, miny]
-            print(f"gdal_translate: projwin swapped: {projwin}")
     # end of patch --------------------------------------------
 
     # Case of filetif is a s3 path
@@ -114,6 +113,7 @@ def gdal_translate(filetif, ot=None, a_nodata=None, fileout=None, projwin=None, 
     if a_nodata is not None:
         kwargs["dstNodata"] = a_nodata
 
+    #print("gdal.Translate with(projWin):", projwin)
     # assert that the folder exists
     os.makedirs(justpath(filetmp), exist_ok=True)
     gdal.Translate(filetmp, filetif, **kwargs)
@@ -122,12 +122,12 @@ def gdal_translate(filetif, ot=None, a_nodata=None, fileout=None, projwin=None, 
     error_message = gdal.GetLastErrorMsg()
     if error_message and "Error: Computed -srcwin" in error_message:
         # swap the order of the projwin miny with maxy
-        print(f"gdal_translate: error message: {error_message}")
+        #print(f"gdal_translate: error message: {error_message}")
         projwin = [projwin[0], projwin[3], projwin[2], projwin[1]]
         kwargs["projWin"] = projwin
-        print(f"gdal_translate: retrying with projwin swapped: {projwin}")
+        #print(f"gdal_translate: retrying with projwin swapped: {projwin}")
         gdal.Translate(filetmp, filetif, **kwargs)
-        print(f"---")
+        #print(f"---")
     # end of workaround --------------------------------------------
 
     move(filetmp, fileout)
