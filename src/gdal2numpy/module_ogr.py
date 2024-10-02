@@ -36,7 +36,7 @@ from pyproj import CRS
 from .filesystem import justext, juststem, forceext, justpath, strtofile, filetostr, md5text, listify
 from .module_open import OpenRaster
 from .module_open import OpenShape
-from .module_s3 import isfile
+from .module_s3 import isfile, isshape, israster
 from .module_log import Logger
 from Levenshtein import distance
 
@@ -185,7 +185,7 @@ def AutoIdentify(wkt):
     # get the file pe_hash_list.json from package data
     code = None
 
-    if isfile(wkt) and wkt.endswith(".tif"):
+    if israster(wkt):
         wkt = OpenRaster(wkt).GetProjection()
     elif isfile(wkt) and isfile(forceext(wkt, "prj")):
         wkt = filetostr(forceext(wkt, "prj"))
@@ -312,13 +312,13 @@ def GetSpatialRef(filename):
             srs.ImportFromWkt(wkt)
             srs.AutoIdentifyEPSG()
 
-    elif isinstance(filename, str) and isfile(filename) and filename.lower().endswith(".shp"):
+    elif isinstance(filename, str) and isshape(filename):
         ds = OpenShape(filename)
         if ds:
             srs = ds.GetLayer().GetSpatialRef()
             srs.AutoIdentifyEPSG()
 
-    elif isinstance(filename, str) and isfile(filename) and filename.lower().endswith(".tif"):
+    elif isinstance(filename, str) and israster(filename):
         ds = OpenRaster(filename)
         if ds:
             wkt = ds.GetProjection()

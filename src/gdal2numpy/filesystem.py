@@ -105,18 +105,27 @@ def forceext(pathname, newext):
     return normpath(pathname)
 
 
-def israster(pathname):
-    """
-    israster
-    """
-    return pathname and os.path.isfile(pathname) and justext(pathname).lower() in ("tif",)
+# def israster(pathname):
+#     """
+#     israster
+#     """
+#     return pathname and os.path.isfile(pathname) and justext(pathname).lower() in ("tif",)
 
+# moved to module_s3.py
+# def isshape(pathname):
+#     """
+#     isshape
+#     """
+#     return pathname and os.path.isfile(pathname) and justext(pathname).lower() in ("shp",)
 
-def isshape(pathname):
+def normshape(pathname):
     """
-    isshape
+    normshape
     """
-    return pathname and os.path.isfile(pathname) and justext(pathname).lower() in ("shp",)
+    if pathname == None:
+        return None
+    # sometime the shapefile is in the form s3://bucket/filename.shp|layername
+    return pathname.split("|",1)[0]
 
 
 def filesize(filename):

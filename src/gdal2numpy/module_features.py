@@ -248,10 +248,6 @@ def Transform(fileshp, t_srs, fileout=None):
 
     fileout = fileout if fileout else f"{tempfile.gettempdir()}/{md5sum(fileshp)}_{md5text(t_srs.GetName())}.shp"
 
-    # if isshape(fileout):
-    #     Logger.debug("Using cached file:<%s>..." % fileout)
-    #     return fileout
-
     ds = OpenShape(fileshp)
     if ds:
         layer = ds.GetLayer()

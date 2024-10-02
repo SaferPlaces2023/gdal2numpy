@@ -6,7 +6,7 @@ from gdal2numpy import *
 workdir = justpath(__file__)
 
 filetif = f"{workdir}/CLSA_LiDAR.tif"
-fileshp = f"s3://saferplaces.co/test/barrier.shp"
+fileshp = f"s3://saferplaces.co/test/barrier.shp|barrier"
 
 
 class Test(unittest.TestCase):
@@ -38,13 +38,13 @@ class Test(unittest.TestCase):
     #         print(feature)
 
     
-    # def test_srs(self):
-    #     """
-    #     test_srs: 
-    #     """
-    #     srs = GetSpatialRef(fileshp)
-    #     print(srs)
-    #     self.assertTrue(srs is not None)
+    def test_srs(self):
+        """
+        test_srs: 
+        """
+        srs = GetSpatialRef(fileshp)
+        print(srs)
+        self.assertTrue(srs is not None)
 
 
     # def test_copy(self):

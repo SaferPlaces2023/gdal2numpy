@@ -23,8 +23,8 @@
 # Created:     20/06/2024
 # -------------------------------------------------------------------------------
 import xmltodict
-from .filesystem import isshape, forceext, listify
-from .module_s3 import isfile
+from .filesystem import forceext, listify
+from .module_s3 import isfile, isshape
 from .module_ogr import GetSpatialRef, AutoIdentify, GetExtent
 
 def parseXML(filename):

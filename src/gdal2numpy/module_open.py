@@ -24,10 +24,9 @@
 # -------------------------------------------------------------------------------
 import os
 from osgeo import ogr, gdal
-
-from .filesystem import isshape, isshape, filetostr
+from .filesystem import filetostr, normshape
 from .module_log import Logger
-from .module_s3 import iss3, s3_get
+from .module_s3 import isshape, s3_get
 from .module_http import http_get
 
 def get(uri):
@@ -50,16 +49,18 @@ def OpenShape(fileshp, exclusive=False):
     if not fileshp:
         Logger.debug(f"0) {fileshp}...")
         ds = None
-    elif isinstance(fileshp, str) and isshape(fileshp):
-        Logger.debug(f"1) Opening {fileshp}...")
+    elif isinstance(fileshp, str) and os.path.isfile(fileshp) and ".shp" in fileshp.lower():
+        Logger.debug(f"1) Opening local {fileshp}...")
+        fileshp = normshape(fileshp)
         ds = ogr.Open(fileshp, exclusive)
-    elif isinstance(fileshp, str) and iss3(fileshp) and fileshp.endswith(".shp"):
-        Logger.debug(f"2) Downloading file from s3...")
-        #ds = ogr.Open(copy(fileshp), exclusive)
+    elif isinstance(fileshp, str) and isshape(fileshp):
+        Logger.debug(f"2) Get file from s3...")
         fileshp = fileshp.replace("s3://", "/vsis3/")
+        fileshp = normshape(fileshp)
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, str) and fileshp.startswith("http") and fileshp.endswith(".shp"):
         Logger.debug(f"3) Inspect file from https...")
+        fileshp = normshape(fileshp)
         ds = ogr.Open(f"/vsicurl/{fileshp}", exclusive)
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
         Logger.debug(f"4) Dataset already open...")
@@ -68,7 +69,7 @@ def OpenShape(fileshp, exclusive=False):
         Logger.debug(f"5) Change the open mode: Open({exclusive})")
         ds = ogr.Open(fileshp.GetName(), exclusive)
     else:
-        Logger.debug(f"999) {fileshp} is not a valid shapefile") 
+        Logger.debug(f"999) {fileshp} is not a valid shapefile")
         ds = None
     return ds
 

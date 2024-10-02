@@ -59,6 +59,23 @@ def isfile(filename):
     return False
 
 
+def israster(pathname):
+    """
+    israster
+    """
+    return pathname and isfile(pathname) and justext(pathname).lower() in ("tif",)
+
+
+def isshape(filename):
+    """
+    isshape
+    """
+    if isinstance(filename, str):
+        filename = normshape(filename)
+        return isfile(filename) and filename.endswith(".shp")
+    return False
+
+
 def get_bucket_name_key(uri):
     """
     get_bucket_name_key - get bucket name and key name from uri

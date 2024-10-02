@@ -32,9 +32,15 @@ class Test(unittest.TestCase):
         """
         test_upload_s3: 
         """
-        filetif = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Ambiental_Italy_FloodMap_Fluvial_20yr_v1_0.cog.tif"
-        self.assertTrue(isfile(filetif))
+        filetif = "https://s3.amazonaws.com/saferplaces.co/Ambiental/Fluvial/Italy_FloodMap_Fluvial_100yr_historical_v1_0.cog.tif"
+        self.assertTrue(israster(filetif))
 
+    def test_isfile_shp(self):
+        """
+        test_upload_s3: 
+        """
+        fileshp = "s3://saferplaces.co/test/barrier.shp|barrier"
+        self.assertTrue(isshape(fileshp))
 
     
 
