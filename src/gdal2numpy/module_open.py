@@ -49,19 +49,19 @@ def OpenShape(fileshp, exclusive=False):
     if not fileshp:
         Logger.debug(f"0) {fileshp}...")
         ds = None
+    elif isinstance(fileshp, str) and fileshp.startswith("http") and fileshp.endswith(".shp"):
+        Logger.debug(f"1) Inspect file from https...")
+        fileshp = normshape(fileshp)
+        ds = ogr.Open(f"/vsicurl/{fileshp}", exclusive)
     elif isinstance(fileshp, str) and os.path.isfile(fileshp) and ".shp" in fileshp.lower():
-        Logger.debug(f"1) Opening local {fileshp}...")
+        Logger.debug(f"2) Opening local {fileshp}...")
         fileshp = normshape(fileshp)
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, str) and isshape(fileshp):
-        Logger.debug(f"2) Get file from s3...")
+        Logger.debug(f"3) Get file from s3...")
         fileshp = fileshp.replace("s3://", "/vsis3/")
         fileshp = normshape(fileshp)
         ds = ogr.Open(fileshp, exclusive)
-    elif isinstance(fileshp, str) and fileshp.startswith("http") and fileshp.endswith(".shp"):
-        Logger.debug(f"3) Inspect file from https...")
-        fileshp = normshape(fileshp)
-        ds = ogr.Open(f"/vsicurl/{fileshp}", exclusive)
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
         Logger.debug(f"4) Dataset already open...")
         ds = fileshp
