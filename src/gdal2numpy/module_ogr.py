@@ -33,7 +33,8 @@ import site
 from osgeo import gdal
 from osgeo import osr, ogr
 from pyproj import CRS
-from .filesystem import justext, juststem, forceext, justpath, strtofile, filetostr, md5text, listify
+from .filesystem import justext, juststem, forceext, justpath
+from .filesystem import strtofile, filetostr, md5text, listify, normshape
 from .module_open import OpenRaster
 from .module_open import OpenShape
 from .module_s3 import isfile, isshape, israster
@@ -419,6 +420,7 @@ def GetExtent(filename, t_srs=None):
     """
     s_srs = None
     minx, miny, maxx, maxy = 0, 0, 0, 0
+    filename = normshape(filename)
     ext = justext(f"{filename}").lower()
     if isinstance(filename, str) and not isfile(filename):
         # replace ; with , in case of a list of coordinates
