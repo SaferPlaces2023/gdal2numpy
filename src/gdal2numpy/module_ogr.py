@@ -34,7 +34,7 @@ from osgeo import gdal
 from osgeo import osr, ogr
 from pyproj import CRS
 from .filesystem import justext, juststem, forceext, justpath
-from .filesystem import strtofile, filetostr, md5text, listify, normshape
+from .filesystem import strtofile, filetostr, md5text, listify, normshape, parse_shape_path
 from .module_open import OpenRaster
 from .module_open import OpenShape
 from .module_s3 import isfile, isshape, israster
@@ -456,16 +456,11 @@ def GetExtent(filename, t_srs=None):
         if ds:
             layer = ds.GetLayer()
             s_srs = layer.GetSpatialRef()
-            arr = filename.split("|")
-            
-            if len(arr) == 3:
-                filename, fieldname, fieldvalue = arr
-                if fieldname and fieldname.lower() == "fid":
-                    fid = int(fieldvalue)
-                    feature = layer.GetFeature(fid)
-                    minx, maxx, miny, maxy = feature.GetGeometryRef().GetEnvelope()
-                else:
-                    minx, maxx, miny, maxy = layer.GetExtent() 
+            filename, fieldname, fieldvalue = parse_shape_path(filename)
+            if fieldname and fieldname.lower() == "fid":
+                fid = int(fieldvalue)
+                feature = layer.GetFeature(fid)
+                minx, maxx, miny, maxy = feature.GetGeometryRef().GetEnvelope()
             else:
                 minx, maxx, miny, maxy = layer.GetExtent()
             

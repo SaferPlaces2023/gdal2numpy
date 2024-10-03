@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------
 # Licence:
-# Copyright (c) 2012-2019 Luzzi Valerio 
+# Copyright (c) 2012-2019 Luzzi Valerio
 #
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
@@ -30,7 +30,9 @@ import tempfile
 import hashlib
 import shutil
 import random
+from .module_types import parseInt
 from .module_log import Logger
+
 
 def now():
     """
@@ -56,7 +58,8 @@ def normpath(pathname):
     if not pathname:
         return ""
     pathname = os.path.normpath(pathname.replace("\\", "/")).replace("\\", "/")
-    pathname = pathname.replace(":/", "://") #patch for s3:// and http:// https://
+    # patch for s3:// and http:// https://
+    pathname = pathname.replace(":/", "://")
     return pathname
 
 
@@ -87,12 +90,6 @@ def justfname(pathname):
     return normpath(os.path.basename(normpath(pathname)))
 
 
-
-
-
-
-
-
 # def israster(pathname):
 #     """
 #     israster
@@ -110,11 +107,11 @@ def normshape(pathname):
     """
     normshape
     """
-    if pathname == None:
+    if pathname is None:
         return None
     # sometime the shapefile is in the form s3://bucket/filename.shp|layername
     if ".shp" in pathname.lower():
-        pathname = pathname.split("|",1)[0]
+        pathname = pathname.split("|", 1)[0]
     return normpath(pathname)
 
 
@@ -122,7 +119,7 @@ def parse_shape_path(pathname):
     """
     normshape
     """
-    if pathname == None:
+    if pathname is None:
         return None
     # sometime the shapefile is in the form s3://bucket/filename.shp|layername
     parts = pathname.split("|")
@@ -131,7 +128,8 @@ def parse_shape_path(pathname):
     elif len(parts) == 2:
         return parts[0], parts[1], None
     elif len(parts) == 3:
-        return parts[0], parts[1], parts[2]
+        fid = parseInt(parts[2])
+        return parts[0], parts[1], fid
     return None, None, None
 
 
@@ -185,6 +183,7 @@ def mkdirs(pathname):
     except OSError as ex:
         Logger.error(ex)
     return os.path.isdir(pathname)
+
 
 def remove(pathname):
     """
@@ -275,7 +274,7 @@ def filetojson(filename):
         Logger.error(ex)
         return None
 
-    
+
 def listify(text, sep=",", trim=False):
     """
     listify -  make a list from string
@@ -319,7 +318,7 @@ def md5sum(filename):
                 break
             d.update(buf)
         f.close()
-        res=  d.hexdigest()
+        res = d.hexdigest()
         return res
     else:
         return ""
