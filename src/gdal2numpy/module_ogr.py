@@ -51,7 +51,7 @@ def create_cpg(fileshp):
     :param fileshp:
     :return:
     """
-    strtofile("UFT-8", forceext(fileshp), "cpg")
+    strtofile("UFT-8", forceext(fileshp, "cpg"))
 
 
 def ogr_move(src, dst):
