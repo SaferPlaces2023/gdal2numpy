@@ -421,8 +421,7 @@ def GetExtent(filename, t_srs=None):
     """
     s_srs = None
     minx, miny, maxx, maxy = 0, 0, 0, 0
-    filename = normshape(filename)
-    if isinstance(filename, str) and not isfile(filename):
+    if isinstance(filename, str) and not isfile(normshape(filename)):
         # replace ; with , in case of a list of coordinates
         filename = filename.replace(";", ",")
         # replace single space with , in case of a list of coordinates
