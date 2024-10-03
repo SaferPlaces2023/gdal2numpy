@@ -42,8 +42,9 @@ def GetFeatures(fileshp, filter=None, format=None):
     ds = OpenShape(fileshp)
     if ds:
         # filter features by fid
+        filter = listify(filter)
         if filter and len(filter) > 0:
-            res = [ds.GetLayer().GetFeature(fid) for fid in listify(filter)]
+            res = [ds.GetLayer().GetFeature(fid) for fid in filter]
         else:
             res = ds.GetLayer()
 

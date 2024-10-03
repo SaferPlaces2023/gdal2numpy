@@ -25,7 +25,7 @@
 import os
 import numpy as np
 from osgeo import gdalconst
-from .filesystem import forceext, filetojson, remove
+from .filesystem import forceext, filetojson, remove, normshape
 from .module_s3 import isfile, israster, isshape
 from .module_GDAL2Numpy import GDAL2Numpy
 from .module_Numpy2GTiff import Numpy2GTiff

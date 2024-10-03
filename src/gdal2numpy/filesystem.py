@@ -87,22 +87,10 @@ def justfname(pathname):
     return normpath(os.path.basename(normpath(pathname)))
 
 
-def justext(pathname):
-    """
-    justext
-    """
-    pathname = os.path.basename(normpath(pathname))
-    _, ext = os.path.splitext(pathname)
-    return ext.lstrip(".")
 
 
-def forceext(pathname, newext):
-    """
-    forceext
-    """
-    root, _ = os.path.splitext(normpath(pathname))
-    pathname = root + ("." + newext if len(newext.strip()) > 0 else "")
-    return normpath(pathname)
+
+
 
 
 # def israster(pathname):
@@ -125,7 +113,44 @@ def normshape(pathname):
     if pathname == None:
         return None
     # sometime the shapefile is in the form s3://bucket/filename.shp|layername
-    return pathname.split("|",1)[0]
+    if ".shp" in pathname.lower():
+        pathname = pathname.split("|",1)[0]
+    return normpath(pathname)
+
+
+def parse_shape_path(pathname):
+    """
+    normshape
+    """
+    if pathname == None:
+        return None
+    # sometime the shapefile is in the form s3://bucket/filename.shp|layername
+    parts = pathname.split("|")
+    if len(parts) == 1:
+        return parts[0], None, None
+    elif len(parts) == 2:
+        return parts[0], parts[1], None
+    elif len(parts) == 3:
+        return parts[0], parts[1], parts[2]
+    return None, None, None
+
+
+def justext(pathname):
+    """
+    justext
+    """
+    pathname = os.path.basename(normpath(pathname))
+    _, ext = os.path.splitext(pathname)
+    return ext.lstrip(".")
+
+
+def forceext(pathname, newext):
+    """
+    forceext
+    """
+    root, _ = os.path.splitext(normpath(pathname))
+    pathname = root + ("." + newext if len(newext.strip()) > 0 else "")
+    return normpath(pathname)
 
 
 def filesize(filename):

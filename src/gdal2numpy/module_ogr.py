@@ -51,7 +51,7 @@ def create_cpg(fileshp):
     :param fileshp:
     :return:
     """
-    strtofile("UFT-8", forceext(fileshp, "cpg"))
+    strtofile("UFT-8", forceext(fileshp), "cpg"))
 
 
 def ogr_move(src, dst):
@@ -188,8 +188,8 @@ def AutoIdentify(wkt):
 
     if israster(wkt):
         wkt = OpenRaster(wkt).GetProjection()
-    elif isfile(wkt) and isfile(forceext(wkt, "prj")):
-        wkt = filetostr(forceext(wkt, "prj"))
+    elif isshape(wkt) and isfile(forceext(wkt), "prj"):
+        wkt = filetostr(forceext(wkt), "prj")
     elif isinstance(wkt, int):
         wkt = f"EPSG:{wkt}"
         return wkt
@@ -421,7 +421,6 @@ def GetExtent(filename, t_srs=None):
     s_srs = None
     minx, miny, maxx, maxy = 0, 0, 0, 0
     filename = normshape(filename)
-    ext = justext(f"{filename}").lower()
     if isinstance(filename, str) and not isfile(filename):
         # replace ; with , in case of a list of coordinates
         filename = filename.replace(";", ",")
@@ -436,7 +435,7 @@ def GetExtent(filename, t_srs=None):
     elif isinstance(filename, ogr.Geometry):
         minx, maxx, miny, maxy = filename.GetEnvelope()
         s_srs = filename.GetSpatialReference()
-    elif ext == "tif":
+    elif israster(filename):
         ds = OpenRaster(filename)
         if ds:
             "{xmin} {ymin} {xmax} {ymax}"
@@ -451,16 +450,25 @@ def GetExtent(filename, t_srs=None):
             s_srs.ImportFromWkt(wkt)
             ds = None
 
-    elif ext in ("shp", "dbf"):
-
-        filename = forceext(filename, "shp")
-        # driver = ogr.GetDriverByName("ESRI Shapefile")
-        # ds = driver.Open(filename, 0)
+    elif isshape(filename):
+        
         ds = OpenShape(filename, 0)
         if ds:
             layer = ds.GetLayer()
-            minx, maxx, miny, maxy = layer.GetExtent()
             s_srs = layer.GetSpatialRef()
+            arr = filename.split("|")
+            
+            if len(arr) == 3:
+                filename, fieldname, fieldvalue = arr
+                if fieldname and fieldname.lower() == "fid":
+                    fid = int(fieldvalue)
+                    feature = layer.GetFeature(fid)
+                    minx, maxx, miny, maxy = feature.GetGeometryRef().GetEnvelope()
+                else:
+                    minx, maxx, miny, maxy = layer.GetExtent() 
+            else:
+                minx, maxx, miny, maxy = layer.GetExtent()
+            
             ds = None
 
     if t_srs and not SameSpatialRef(s_srs, t_srs):

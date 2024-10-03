@@ -468,7 +468,7 @@ def move(src, dst, client=None):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         
     for ext in exts:
-        move(forceext(src,ext), forceext(dst,ext), client=client)
+        move(forceext(src, ext), forceext(dst, ext), client=client)
 
     return dst
 
