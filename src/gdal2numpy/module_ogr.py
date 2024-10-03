@@ -188,8 +188,8 @@ def AutoIdentify(wkt):
 
     if israster(wkt):
         wkt = OpenRaster(wkt).GetProjection()
-    elif isshape(wkt) and isfile(forceext(wkt), "prj"):
-        wkt = filetostr(forceext(wkt), "prj")
+    elif isshape(wkt) and isfile(forceext(wkt, "prj")):
+        wkt = filetostr(forceext(wkt, "prj"))
     elif isinstance(wkt, int):
         wkt = f"EPSG:{wkt}"
         return wkt
