@@ -403,9 +403,10 @@ def TransformBBOX(bbox, s_srs=None, t_srs=None):
     # t_minx, t_maxx, t_miny, t_maxy = rect.GetEnvelope()
     # transformed_bbox = (t_minx, t_miny, t_maxx, t_maxy)
     s_minx, s_miny, s_maxx, s_maxy = bbox
-    minx, miny, maxx, maxy = transform.TransformBounds(s_minx, s_miny, s_maxx, s_maxy, 2)
+    minx, miny, maxx, maxy = transform.TransformBounds(
+        s_minx, s_miny, s_maxx, s_maxy, 2)
 
-     # patch for EPSG:6876
+    # patch for EPSG:6876
     if SameSpatialRef(t_srs, GetSpatialRef(6876)):
         minx, miny, maxx, maxy = miny, minx, maxy, maxx
     elif SameSpatialRef(t_srs, GetSpatialRef(3035)):
@@ -427,7 +428,8 @@ def GetExtent(filename, t_srs=None):
         # replace single space with , in case of a list of coordinates
         filename = re.sub(r"\s+", ",", filename)
         arr = listify(filename)
-        minx, miny, maxx, maxy = [float(item) for item in arr] if len(arr) == 4 else [0, 0, 0, 0]
+        minx, miny, maxx, maxy = [float(item) for item in arr] if len(
+            arr) == 4 else [0, 0, 0, 0]
         s_srs = GetSpatialRef(4326)
     elif isinstance(filename, (list, tuple)) and len(filename) == 4:
         minx, miny, maxx, maxy = filename
@@ -451,25 +453,25 @@ def GetExtent(filename, t_srs=None):
             ds = None
 
     elif isshape(filename):
-        
+
         ds = OpenShape(filename, 0)
         if ds:
             layer = ds.GetLayer()
             s_srs = layer.GetSpatialRef()
-            filename, fieldname, fieldvalue = parse_shape_path(filename)
+            filename, fieldname, fid = parse_shape_path(filename)
             if fieldname and fieldname.lower() == "fid":
-                fid = int(fieldvalue)
                 feature = layer.GetFeature(fid)
                 minx, maxx, miny, maxy = feature.GetGeometryRef().GetEnvelope()
             else:
                 minx, maxx, miny, maxy = layer.GetExtent()
-            
+
             ds = None
 
     if t_srs and not SameSpatialRef(s_srs, t_srs):
 
-        minx, miny, maxx, maxy = TransformBBOX([minx, miny, maxx, maxy], s_srs, t_srs)
-        #print(f"GetExtent: {minx}, {miny}, {maxx}, {maxy}")
+        minx, miny, maxx, maxy = TransformBBOX(
+            [minx, miny, maxx, maxy], s_srs, t_srs)
+        # print(f"GetExtent: {minx}, {miny}, {maxx}, {maxy}")
 
     return minx, miny, maxx, maxy
 
@@ -516,7 +518,7 @@ def find_PROJ_LIB():
         pathnames += glob.glob(root + "/**/proj.db", recursive=True)
         if len(pathnames):
             break
-    return justpath(pathnames[0]) if len(pathnames)>0 else ""
+    return justpath(pathnames[0]) if len(pathnames) > 0 else ""
 
 
 def find_GDAL_DATA():
@@ -529,7 +531,7 @@ def find_GDAL_DATA():
         pathnames += glob.glob(root + "/**/gt_datum.csv", recursive=True)
         if len(pathnames):
             break
-    return justpath(pathnames[0]) if len(pathnames)>0 else ""
+    return justpath(pathnames[0]) if len(pathnames) > 0 else ""
 
 
 def CreateRectangleShape(minx, miny, maxx, maxy, srs, fileshp="tempxy...."):
