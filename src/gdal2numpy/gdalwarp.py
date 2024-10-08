@@ -86,8 +86,10 @@ def gdalwarp(filelist,
     filelist_tmp = copy(filelist)
 
     kwargs = {
-        "format": "GTiff",
-        "creationOptions": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
+        #"format": "GTiff",
+        #"creationOptions": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
+        "format": format,
+        "creationOptions": co.get(format, []),
         #"warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
         "dstNodata": dstNodata,
         "resampleAlg": resampling_method(resampleAlg),
@@ -138,12 +140,12 @@ def gdalwarp(filelist,
         gdal.PopErrorHandler()
 
     # convert to COG
-    if format == "cog":
-        print(f"gdalwarp: converting to COG {filetmp}=>{fileout}")
-        gdal_translate(filetmp, fileout, format="cog", a_nodata=-9999)
-    else:
-        print(f"gdalwarp: moving {filetmp} to {fileout}")
-        move(filetmp, fileout)
+    # if format == "cog":
+    #     print(f"gdalwarp: converting to COG {filetmp}=>{fileout}")
+    #     gdal_translate(filetmp, fileout, format="cog", a_nodata=-9999)
+    # else:
+    print(f"gdalwarp: moving {filetmp} to {fileout}")
+    move(filetmp, fileout)
 
     Logger.debug(f"gdalwarp: converted to {filetmp} in {total_seconds_from(t0)} s.")
    
