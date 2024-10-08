@@ -191,12 +191,12 @@ def remove(pathname):
     """
     if pathname is None:
         return
-    elif os.path.isfile(pathname):
+    elif isinstance(pathname, str) and os.path.isfile(pathname):
         try:
             os.remove(pathname)
         except OSError as ex:
             Logger.error(ex)
-    elif os.path.isdir(pathname):
+    elif isinstance(pathname, str) and os.path.isdir(pathname):
         try:
             shutil.rmtree(pathname)
         except OSError as ex:

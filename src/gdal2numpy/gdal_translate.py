@@ -111,7 +111,7 @@ def gdal_translate(filetif, ot=None, a_nodata=None, fileout=None, projwin=None, 
         # dont include the outputType in the kwargs
 
     if a_nodata is not None:
-        kwargs["dstNodata"] = a_nodata
+        kwargs["noData"] = a_nodata
 
     #print("gdal.Translate with(projWin):", projwin)
     # assert that the folder exists

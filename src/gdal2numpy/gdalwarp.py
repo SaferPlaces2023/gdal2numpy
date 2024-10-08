@@ -136,13 +136,6 @@ def gdalwarp(filelist,
     
     Logger.debug(f"gdalwarp: converted to {filetmp} in {total_seconds_from(t0)} s.")
    
-    # if format == "cog":
-    #     # inplace conversion
-    #     t1 = now()
-    #     GTiff2Cog(filetmp)
-    #     Logger.debug(
-    #         f"GTiff2Cog: converted {filetmp}  in {total_seconds_from(t1)} s.")
-
     # move the file to the output
     move(filetmp, fileout)
 

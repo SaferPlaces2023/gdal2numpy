@@ -40,6 +40,7 @@ from .rasterizelike import RasterizeLike
 from .module_gdal import *
 from .gdalwarp import gdalwarp
 from .gdal_translate import gdal_translate
+from .gdal_merge import gdal_merge
 from .module_log import *
 from .module_xml import *
 from .module_extrusion import *

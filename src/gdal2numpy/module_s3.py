@@ -391,7 +391,7 @@ def copy(src, dst=None, client=None):
     """
     copy
     """
-    if isinstance(src, (tuple,list)) and dst is None:
+    if isinstance(src, (tuple, list)): # and dst is None:
         return [copy(file, client=client) for file in src]
 
     #dst = dst if dst else tempfilename(prefix="s3/", suffix=f".{justext(src)}")
