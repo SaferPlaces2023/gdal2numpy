@@ -62,6 +62,7 @@ def gdalwarp(filelist,
     """
     gdalwarp
     """
+    
     t0 = now()
 
     filelist = listify(filelist)
@@ -127,8 +128,15 @@ def gdalwarp(filelist,
 
     # assert that the folder exists
     os.makedirs(justpath(filetmp), exist_ok=True)
-    gdal.Warp(filetmp, filelist_tmp, **kwargs)
-    
+    try:
+        gdal.UseExceptions()
+        gdal.PushErrorHandler('CPLQuietErrorHandler')
+        gdal.Warp(filetmp, filelist_tmp, **kwargs)
+    except Exception as ex:
+        Logger.error(ex)
+    finally:
+        gdal.PopErrorHandler()
+
     # convert to COG
     if format == "cog":
         print(f"gdalwarp: converting to COG {filetmp}=>{fileout}")
