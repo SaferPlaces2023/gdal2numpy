@@ -85,7 +85,7 @@ def gdalwarp(filelist,
         "format": "GTiff",
         "creationOptions": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
         #"warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
-        #"dstNodata": dstNodata,
+        "noData": dstNodata,
         "resampleAlg": resampling_method(resampleAlg),
         "multithread": True,
     }
@@ -132,10 +132,10 @@ def gdalwarp(filelist,
     
     # convert to COG
     if format == "cog":
-        Logger.debug(f"gdalwarp: converting to COG {filetmp}")
+        print(f"gdalwarp: converting to COG {filetmp}")
         gdal_translate(filetmp, fileout, format="cog")
     else:
-        Logger.debug(f"gdalwarp: moving {filetmp} to {fileout}")
+        print(f"gdalwarp: moving {filetmp} to {fileout}")
         move(filetmp, fileout)
 
     Logger.debug(f"gdalwarp: converted to {filetmp} in {total_seconds_from(t0)} s.")
