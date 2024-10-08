@@ -24,7 +24,7 @@
 # -------------------------------------------------------------------------------
 import os
 import numpy as np
-from osgeo import gdalconst
+from osgeo import gdal, gdalconst
 from .filesystem import forceext, filetojson, remove, normshape
 from .module_s3 import isfile, israster, isshape
 from .module_GDAL2Numpy import GDAL2Numpy
@@ -225,6 +225,7 @@ def SetTag(filename, tagname, tagvalue="", band=0):
     SetTag - set a tag in metadata of the file or of the band if specified
     """
     if israster(filename):
+        gdal.DontUseExceptions()
         ds = OpenRaster(filename, gdalconst.GA_Update)
         if ds:
             if tagname:
