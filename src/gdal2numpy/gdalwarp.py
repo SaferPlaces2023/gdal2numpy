@@ -85,7 +85,7 @@ def gdalwarp(filelist,
         "format": "GTiff",
         "creationOptions": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
         #"warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
-        "noData": dstNodata,
+        "dstNodata": dstNodata,
         "resampleAlg": resampling_method(resampleAlg),
         "multithread": True,
     }
