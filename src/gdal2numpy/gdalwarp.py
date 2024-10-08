@@ -62,7 +62,7 @@ def gdalwarp(filelist,
     """
     gdalwarp
     """
-    
+
     t0 = now()
 
     filelist = listify(filelist)
@@ -78,7 +78,7 @@ def gdalwarp(filelist,
     format = format.lower() if format else "gtiff"
 
     filetmp = tempfilename(prefix="gdalwarp/tmp_", suffix=".tif")
-     # inplace gdalwarp, give the fileout as the first file in the list
+    # inplace gdalwarp, give the fileout as the first file in the list
     if fileout is None and len(filelist) > 0:
         fileout = filelist[0]
     fileout = fileout if fileout else filetmp
@@ -86,12 +86,11 @@ def gdalwarp(filelist,
     filelist_tmp = copy(filelist)
 
     kwargs = {
-        #"format": "GTiff",
-        #"creationOptions": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
+        # "format": "GTiff",
+        # "creationOptions": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
         "format": format,
         "creationOptions": co.get(format, []),
-        #"warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
-        "dstNodata": dstNodata,
+        # "warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
         "resampleAlg": resampling_method(resampleAlg),
         "multithread": True,
     }
@@ -102,8 +101,8 @@ def gdalwarp(filelist,
     # outputType = [-ot {Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}]
     if ot and ot in dtypeOf:
         ot = ot.lower() if isinstance(ot, str) else ot
-        kwargs["outputType"] = dtypeOf[ot] #gdal.GDT_Float32
-  
+        kwargs["outputType"] = dtypeOf[ot]  # gdal.GDT_Float32
+
     # pixelsize
     pixelsize = listify(pixelsize)
     if len(pixelsize) == 1 and pixelsize[0] != 0:
@@ -116,7 +115,7 @@ def gdalwarp(filelist,
     if len(filelist) == 1 and SameSpatialRef(filelist_tmp[0], dstSRS):
         Logger.debug(f"Avoid reprojecting {filelist[0]}")
     elif dstSRS:
-        #kwargs["dstSRS"] = AutoIdentify(dstSRS)
+        # kwargs["dstSRS"] = AutoIdentify(dstSRS)
         kwargs["dstSRS"] = GetSpatialRef(dstSRS)
 
     cutline_tmp = None
@@ -144,11 +143,10 @@ def gdalwarp(filelist,
     #     print(f"gdalwarp: converting to COG {filetmp}=>{fileout}")
     #     gdal_translate(filetmp, fileout, format="cog", a_nodata=-9999)
     # else:
-    print(f"gdalwarp: moving {filetmp} to {fileout}")
     move(filetmp, fileout)
 
-    Logger.debug(f"gdalwarp: converted to {filetmp} in {total_seconds_from(t0)} s.")
-   
+    Logger.debug(
+        f"gdalwarp: converted to {filetmp} in {total_seconds_from(t0)} s.")
 
     # clean the cutline file
     remove(cutline_tmp)
