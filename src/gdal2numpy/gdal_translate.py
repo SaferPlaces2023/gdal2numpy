@@ -61,7 +61,7 @@ dtypeOf = {
     np.float64: gdal.GDT_Float64,
 }
 
-def gdal_translate(filetif, ot=None, a_nodata=None, fileout=None, projwin=None, projwin_srs=None, format="GTiff"):
+def gdal_translate(filetif, fileout=None, ot=None, a_nodata=None, projwin=None, projwin_srs=None, format="GTiff"):
     """
     gdal_translate: gdal_translate a raster file
     """
