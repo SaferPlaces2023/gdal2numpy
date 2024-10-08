@@ -131,17 +131,14 @@ def gdalwarp(filelist,
     try:
         gdal.UseExceptions()
         gdal.PushErrorHandler('CPLQuietErrorHandler')
+        print("gdal.Warp with:", kwargs)
         gdal.Warp(filetmp, filelist_tmp, **kwargs)
     except Exception as ex:
         Logger.error(ex)
     finally:
         gdal.PopErrorHandler()
 
-    # convert to COG
-    # if format == "cog":
-    #     print(f"gdalwarp: converting to COG {filetmp}=>{fileout}")
-    #     gdal_translate(filetmp, fileout, format="cog", a_nodata=-9999)
-    # else:
+    # moving the filetmp to fileout
     move(filetmp, fileout)
 
     Logger.debug(
