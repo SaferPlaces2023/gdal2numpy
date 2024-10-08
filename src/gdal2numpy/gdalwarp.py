@@ -26,8 +26,10 @@ import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
 from .module_ogr import SameSpatialRef, GetSpatialRef
+from .module_metadata import GetNoData, GDALFixNoData
 from .module_s3 import *
-from .gdal_translate import dtypeOf, gdal_translate
+from .gdal_translate import dtypeOf
+from .module_log import Logger
 
 
 def resampling_method(method):
@@ -131,12 +133,16 @@ def gdalwarp(filelist,
     try:
         gdal.UseExceptions()
         gdal.PushErrorHandler('CPLQuietErrorHandler')
-        print("gdal.Warp with:", kwargs)
         gdal.Warp(filetmp, filelist_tmp, **kwargs)
     except Exception as ex:
         Logger.error(ex)
     finally:
         gdal.PopErrorHandler()
+
+    # patch notdata value
+    if GetNoData(filetmp) != dstNodata:
+        Logger.debug(f"gdalwarp: fixing nodata value to {dstNodata}")
+        GDALFixNoData(filetmp, format=format, nodata = dstNodata)
 
     # moving the filetmp to fileout
     move(filetmp, fileout)
