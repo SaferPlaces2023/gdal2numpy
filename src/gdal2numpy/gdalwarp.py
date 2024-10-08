@@ -132,7 +132,7 @@ def gdalwarp(filelist,
     # convert to COG
     if format == "cog":
         print(f"gdalwarp: converting to COG {filetmp}=>{fileout}")
-        gdal_translate(filetmp, fileout, format="cog")
+        gdal_translate(filetmp, fileout, format="cog", a_nodata=-9999)
     else:
         print(f"gdalwarp: moving {filetmp} to {fileout}")
         move(filetmp, fileout)
