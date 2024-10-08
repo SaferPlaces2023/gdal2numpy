@@ -45,11 +45,10 @@ class Test(unittest.TestCase):
         file1 = f"{wkdir}/water_depth_bacino4.tif"
         file2 = f"{wkdir}/water_depth_bacino5.tif"
         fileout = f"{wkdir}/water_depth_bacino4_5.tif"
-        #fileout = gdal_merge([file1, file2], fileout)
+        fileout = gdal_merge([file1, file2], fileout)
         #gdal.BuildVRT(f"{wkdir}/tmp.vrt", [file1, file2], **{"srcNodata": -9999, "VRTNodata": -9999, "resampleAlg": "hello"})
 
-        text = inspect.getsource(average)
-        print(text)
+        
 
 
 

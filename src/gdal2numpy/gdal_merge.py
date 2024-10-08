@@ -23,6 +23,7 @@
 # Created:     07/10/2024
 # -----------------------------------------------------------------------------
 import os
+import inspect
 import numpy as np
 from osgeo import gdal, gdalconst
 from .module_s3 import copy, move
@@ -30,11 +31,6 @@ from .filesystem import tempfilename, forceext, justpath, listify
 from .filesystem import remove
 from .module_log import Logger
 
-resampling_function_text = '''<VRTRasterBand dataType="Float32" band="1" subClass="VRTDerivedRasterBand">
-    <PixelFunctionType>average</PixelFunctionType>
-    <PixelFunctionLanguage>Python</PixelFunctionLanguage>
-    <PixelFunctionCode><![CDATA[
-import numpy as np
 
 def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, buf_radius, gt, **kwargs):
     """
@@ -42,27 +38,29 @@ def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize,
     """
     nodata_value = -9999.0
     # Initialize the output array with NoData value
-    tmp = np.empty_like(out_ar)
-    tmp.fill(nodata_value)
+    # tmp = np.empty_like(out_ar)
+    # tmp.fill(nodata_value)
+    # for arr in in_ar:
+    #     arr[np.isnan(arr)] = nodata_value
+    #     tmp[tmp == nodata_value] = arr[tmp == nodata_value]
+    # out_ar[:] = tmp[:]
+
+    out_ar.fill(nodata_value)
     for arr in in_ar:
         arr[np.isnan(arr)] = nodata_value
-        tmp[tmp == nodata_value] = arr[tmp == nodata_value]
-    out_ar[:] = tmp[:]
+        out_ar[out_ar == nodata_value] = arr[out_ar == nodata_value]
+
+resampling_function_text = f'''<VRTRasterBand dataType="Float32" band="1" subClass="VRTDerivedRasterBand">
+    <PixelFunctionType>average</PixelFunctionType>
+    <PixelFunctionLanguage>Python</PixelFunctionLanguage>
+    <PixelFunctionCode><![CDATA[
+import numpy as np
+
+{inspect.getsource(average)}
 ]]>
     </PixelFunctionCode>
 '''
-def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, buf_radius, gt, **kwargs):
-    """
-    average - average the input arrays
-    """
-    nodata_value = -9999.0
-    # Initialize the output array with NoData value
-    tmp = np.empty_like(out_ar)
-    tmp.fill(nodata_value)
-    for arr in in_ar:
-        arr[np.isnan(arr)] = nodata_value
-        tmp[tmp == nodata_value] = arr[tmp == nodata_value]
-    out_ar[:] = tmp[:]
+
 
 def gdal_merge(filelist, fileout, format="GTiff"):
     """
@@ -89,11 +87,7 @@ def gdal_merge(filelist, fileout, format="GTiff"):
 
     creation_options = co.get(format, [])
 
-    kwargs = {
-        "srcNodata": -9999,
-    }
-
-    ds = gdal.BuildVRT(filevrt, filelist_tmp, **kwargs)
+    ds = gdal.BuildVRT(filevrt, filelist_tmp, **{"srcNodata": -9999})
     ds.FlushCache()
     del ds
 
@@ -110,13 +104,13 @@ def gdal_merge(filelist, fileout, format="GTiff"):
     kwargs = {
         "format": format,
         "creationOptions": creation_options,
-        "stats": True,
-        "outputType": gdal.GDT_Float32,
         "resampleAlg": gdalconst.GRIORA_Average,
         "noData": -9999,
+        "stats": True,
     }
 
     try:
+        gdal.UseExceptions()
         gdal.PushErrorHandler('CPLQuietErrorHandler')
         gdal.SetConfigOption("GDAL_VRT_ENABLE_PYTHON", "YES")
         gdal.Translate(filetmp, filevrt, **kwargs)

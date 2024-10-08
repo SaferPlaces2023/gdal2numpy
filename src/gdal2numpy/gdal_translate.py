@@ -61,7 +61,7 @@ dtypeOf = {
     np.float64: gdal.GDT_Float64,
 }
 
-def gdal_translate(filetif, fileout=None, ot=None, a_nodata=None, projwin=None, projwin_srs=None, format="GTiff"):
+def gdal_translate(filein, fileout=None, ot=None, a_nodata=None, projwin=None, projwin_srs=None, format="GTiff"):
     """
     gdal_translate: gdal_translate a raster file
     """
@@ -87,9 +87,9 @@ def gdal_translate(filetif, fileout=None, ot=None, a_nodata=None, projwin=None, 
             projwin = [minx, maxy, maxx, miny]
     # end of patch --------------------------------------------
 
-    # Case of filetif is a s3 path
-    if iss3(filetif):
-        filetif = copy(filetif)
+    # Case of filein is a s3 path
+    if iss3(filein):
+        filein = copy(filein)
 
     filetmp = tempfilename(prefix="gdal_translate/tmp_", suffix=".tif")
     fileout = fileout if fileout else filetmp
@@ -118,7 +118,7 @@ def gdal_translate(filetif, fileout=None, ot=None, a_nodata=None, projwin=None, 
     os.makedirs(justpath(filetmp), exist_ok=True)
     # Suppress GDAL warnings and errors
     gdal.PushErrorHandler('CPLQuietErrorHandler')
-    gdal.Translate(filetmp, filetif, **kwargs)
+    gdal.Translate(filetmp, filein, **kwargs)
     gdal.PopErrorHandler()
 
     # this a workaround for the error: ------------------------------
@@ -129,7 +129,7 @@ def gdal_translate(filetif, fileout=None, ot=None, a_nodata=None, projwin=None, 
         projwin = [projwin[0], projwin[3], projwin[2], projwin[1]]
         kwargs["projWin"] = projwin
         #print(f"gdal_translate: retrying with projwin swapped: {projwin}")
-        gdal.Translate(filetmp, filetif, **kwargs)
+        gdal.Translate(filetmp, filein, **kwargs)
         #print(f"---")
     # end of workaround --------------------------------------------
 
