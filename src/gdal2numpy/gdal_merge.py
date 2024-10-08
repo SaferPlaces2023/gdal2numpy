@@ -23,9 +23,10 @@
 # Created:     07/10/2024
 # -----------------------------------------------------------------------------
 import os
+import numpy as np
 from osgeo import gdal, gdalconst
 from .module_s3 import copy, move
-from .filesystem import tempfilename, forceext, justpath
+from .filesystem import tempfilename, forceext, justpath, listify
 from .filesystem import remove
 from .module_log import Logger
 
@@ -50,7 +51,18 @@ def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize,
 ]]>
     </PixelFunctionCode>
 '''
-
+def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, buf_radius, gt, **kwargs):
+    """
+    average - average the input arrays
+    """
+    nodata_value = -9999.0
+    # Initialize the output array with NoData value
+    tmp = np.empty_like(out_ar)
+    tmp.fill(nodata_value)
+    for arr in in_ar:
+        arr[np.isnan(arr)] = nodata_value
+        tmp[tmp == nodata_value] = arr[tmp == nodata_value]
+    out_ar[:] = tmp[:]
 
 def gdal_merge(filelist, fileout, format="GTiff"):
     """
@@ -62,6 +74,7 @@ def gdal_merge(filelist, fileout, format="GTiff"):
     fileout = fileout or filetmp
 
     # copy the filelist into a temporary directory
+    filelist = listify(filelist)
     filelist_tmp = copy(filelist, tmpdir)
 
     filevrt = forceext(fileout, "vrt")

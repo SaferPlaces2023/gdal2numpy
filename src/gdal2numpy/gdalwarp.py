@@ -25,10 +25,9 @@
 import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
-from .module_Numpy2GTiff import GTiff2Cog
-from .module_ogr import SameSpatialRef, AutoIdentify, GetSpatialRef
+from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_s3 import *
-from .gdal_translate import dtypeOf
+from .gdal_translate import dtypeOf, gdal_translate
 
 
 def resampling_method(method):
@@ -77,17 +76,14 @@ def gdalwarp(filelist,
 
     format = format.lower() if format else "gtiff"
 
-    creation_options = co.get(format, [])
-
     filetmp = tempfilename(prefix="gdalwarp/tmp_", suffix=".tif")
     fileout = fileout if fileout else filetmp
 
     filelist_tmp = copy(filelist)
 
     kwargs = {
-        #"format": "GTiff",
-        "format": format,
-        "creationOptions": creation_options,
+        "format": "GTiff",
+        "creationOptions": ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"],
         #"warpOptions": ["NUM_THREADS=ALL_CPUS", "GDAL_CACHEMAX=512"],
         #"dstNodata": dstNodata,
         "resampleAlg": resampling_method(resampleAlg),
@@ -134,10 +130,14 @@ def gdalwarp(filelist,
     os.makedirs(justpath(filetmp), exist_ok=True)
     gdal.Warp(filetmp, filelist_tmp, **kwargs)
     
+    # convert to COG
+    if format == "cog":
+        gdal_translate(filetmp, fileout, format="cog")
+    else:
+        move(filetmp, fileout)
+
     Logger.debug(f"gdalwarp: converted to {filetmp} in {total_seconds_from(t0)} s.")
    
-    # move the file to the output
-    move(filetmp, fileout)
 
     # clean the cutline file
     remove(cutline_tmp)
