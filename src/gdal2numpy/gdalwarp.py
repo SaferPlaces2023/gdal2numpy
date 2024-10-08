@@ -77,6 +77,9 @@ def gdalwarp(filelist,
     format = format.lower() if format else "gtiff"
 
     filetmp = tempfilename(prefix="gdalwarp/tmp_", suffix=".tif")
+     # inplace gdalwarp, give the fileout as the first file in the list
+    if fileout is None and len(filelist) > 0:
+        fileout = filelist[0]
     fileout = fileout if fileout else filetmp
 
     filelist_tmp = copy(filelist)
@@ -121,10 +124,6 @@ def gdalwarp(filelist,
         kwargs["cutlineLayer"] = juststem(cutline_tmp)
     elif isinstance(cutline, (tuple, list)) and len(cutline) == 4:
         kwargs["outputBounds"] = listify(cutline)
-
-    # inplace gdalwarp, give the fileout as the first file in the list
-    if fileout is None and len(filelist) > 0:
-        fileout = filelist[0]
 
     # assert that the folder exists
     os.makedirs(justpath(filetmp), exist_ok=True)
