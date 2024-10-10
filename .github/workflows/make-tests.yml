@@ -1,8 +1,9 @@
 name: Test application
 on:
   push:
-    branches:
-      - development
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'test-*' # Push events to matching test-*, i.e. test-is-file
 
 jobs:
   test-application:
