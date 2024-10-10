@@ -14,23 +14,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Generate Release Notes
-        id: notes
-        uses: RedCrafter07/release-notes-action@v1
-        with:
-          tag-name: ${{ github.event.inputs.tag-name }}
-          token: ${{ secrets.SAFERPLACES_TOKEN }}
-      - name: Do something
-        run: echo ${{ steps.notes.outputs.release-notes }}
+      # Step 2: Read the release notes from the file
+      - name: Read release notes from file
+        id: read_release_notes
+        run: |
+          release_notes=$(cat release-notes.md)
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$release_notes" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-      # - name: Create Release
-      #   id: create_release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.SAFERPLACES_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      #   with:
-      #     tag_name: ${{ github.ref }}
-      #     release_name: Release ${{ github.ref }}
-      #     body: ${{ steps.notes.outputs.release-notes }}
-      #     draft: false
-      #     prerelease: false
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.SAFERPLACES_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ steps.notes.outputs.release_notes }}
+          draft: false
+          prerelease: false
