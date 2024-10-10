@@ -14,7 +14,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Read the release notes from the file
+      # Step 1 - Configure AWS Credentials for read data from S3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      # Step 2 - make tests
+      - name: "Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip' # caching pip dependencie
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libgdal-dev
+          version: 1.0
+      - run: |
+          export PROJ_LIB=/usr/share/proj
+          export GDAL_DATA=/usr/share/gdal
+          pip install -U pip wheel setuptools
+          pip install numpy==1.24.4 
+          pip install GDAL==3.4.1
+          pip install -e .
+          python tests/test_isfile.py
+          python tests/test_open.py
+          python tests/test_raster.py
+          python tests/test_whatsmyip.py
+          python tests/test_wkt.py
+          python tests/test_features.py
+          python tests/test_gdal_translate.py
+
+      # Step 3: Read the release notes from the file
       - name: Read release notes from file
         id: notes
         run: |
