@@ -17,7 +17,7 @@ jobs:
       - name: Read release notes from file
         id: get_release_notes
         run: |
-          release_notes=$(release-notes.md)
+          release_notes=$(cat release-notes.md)
           echo "::set-output name=notes::$release_notes"
 
       - name: Create Release
