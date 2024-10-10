@@ -1,5 +1,5 @@
-First release test
- - v0.0.397
+Second release test
+    - try to get the notes from release-notes.md
 
 
 
