@@ -13,6 +13,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - run: pip freeze > requirements.txt
 
       # Step 1 - Configure AWS Credentials for read data from S3
       - name: Configure AWS Credentials
