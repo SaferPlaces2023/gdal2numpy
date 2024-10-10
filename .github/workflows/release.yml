@@ -16,7 +16,7 @@ jobs:
 
       # Step 2: Read the release notes from the file
       - name: Read release notes from file
-        id: read_release_notes
+        id: notes
         run: |
           release_notes=$(cat release-notes.md)
           echo "release_notes<<EOF" >> $GITHUB_OUTPUT
