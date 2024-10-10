@@ -34,7 +34,7 @@ jobs:
         export PROJ_LIB=/usr/share/proj
         export GDAL_DATA=/usr/share/gdal
         pip install -U pip wheel setuptools
-        pip install numba==0.57.1 numpy==1.24.4 
+        pip install numpy==1.24.4 
         pip install GDAL==3.4.1
         pip install -e .
         python tests/test_isfile.py
