@@ -1,12 +1,10 @@
-import os
 import unittest
 import warnings
 from gdal2numpy import *
 
-workdir = justpath(__file__)
 
-filetif = f"{workdir}/data/CLSA_LiDAR.tif"
-fileshp = f"{workdir}/test_building.shp"
+filetif = "s3://saferplaces.co/packages/gdal2numpy/open/CLSA_LiDAR.tif"
+fileshp = "s3://saferplaces.co/packages/gdal2numpy/open/OSM_BUILDINGS_102258.shp"
 
 class Test(unittest.TestCase):
     """
@@ -15,20 +13,30 @@ class Test(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("ignore", ResourceWarning)
 
-
     def tearDown(self):
         warnings.simplefilter("default", ResourceWarning)
 
-    def test_wkt(self):
+    def test_GetSpatialRef(self):
         """
-        test_read 
+        test_GetSpatialRef 
         """
-        #code = GetSpatialRef(fileshp)
-        #print(code)
+        srs = GetSpatialRef(filetif)
+        code = AutoIdentify(srs)
+        self.assertEqual(code, "EPSG:26914")
 
-        filename = r"D:\Users\vlr20\Projects\GitHub\saferplaces\saferplaces-4.0\mnt\efs\projects\valluzzi@gmail.com\DigitalTwin_20240214\catania.tif"
-        code = AutoIdentify(filename)
-        print(code)
+    def test_AutoIdentify(self):
+        """
+        test_AutoIdentify 
+        """
+        code = AutoIdentify(filetif)
+        self.assertEqual(code, "EPSG:26914")
+
+    def test_AutoIdentifySHP(self):
+        """
+        test_AutoIdentifySHP 
+        """
+        code = AutoIdentify(fileshp)
+        self.assertEqual(code, "EPSG:4326")
 
 
 if __name__ == '__main__':

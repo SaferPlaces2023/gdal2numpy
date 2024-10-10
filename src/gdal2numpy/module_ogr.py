@@ -34,8 +34,8 @@ from osgeo import gdal
 from osgeo import osr, ogr
 from pyproj import CRS
 from .filesystem import justext, juststem, forceext, justpath
-from .filesystem import strtofile, filetostr, md5text, listify, normshape, parse_shape_path
-from .module_open import OpenRaster
+from .filesystem import strtofile, md5text, listify, normshape, parse_shape_path
+from .module_open import OpenRaster, get
 from .module_open import OpenShape
 from .module_s3 import isfile, isshape, israster
 from .module_log import Logger
@@ -189,7 +189,7 @@ def AutoIdentify(wkt):
     if israster(wkt):
         wkt = OpenRaster(wkt).GetProjection()
     elif isshape(wkt) and isfile(forceext(wkt, "prj")):
-        wkt = filetostr(forceext(wkt, "prj"))
+        wkt = get(forceext(wkt, "prj"))
     elif isinstance(wkt, int):
         wkt = f"EPSG:{wkt}"
         return wkt

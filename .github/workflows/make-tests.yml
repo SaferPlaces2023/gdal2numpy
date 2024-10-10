@@ -39,3 +39,7 @@ jobs:
         pip install -e .
         python tests/test_isfile.py
         python tests/test_open.py
+        python tests/test_raster.py
+        python tests/test_whatsmyip.py
+        python tests/test_wkt.py
+        python tests/test_features.py

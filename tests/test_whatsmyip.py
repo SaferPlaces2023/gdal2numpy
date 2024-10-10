@@ -22,17 +22,16 @@ class Test(unittest.TestCase):
         test_localip: 
         """
         myip = local_ip()
-        print(myip)
         self.assertTrue(myip is not None)
-
+        self.assertTrue(len(myip.split("."))==4)
 
     def test_whatsmyip(self):
         """
         test_whatsmyip: 
         """
         myip = whatsmyip()
-        print(myip)
         self.assertTrue(myip is not None)
+        self.assertTrue(len(myip.split("."))==4)
 
 
 
