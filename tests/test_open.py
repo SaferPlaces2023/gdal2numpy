@@ -39,7 +39,6 @@ class Test(unittest.TestCase):
         """
         test_opentext: 
         """
-        filetxt = f"{workdir}/geojson.prj"
         filetxt = f"https://s3.amazonaws.com/saferplaces.co/packages/gdal2numpy/open/residential.csv"
         filetxt = f"s3://saferplaces.co/packages/gdal2numpy/open/residential.csv"
 
