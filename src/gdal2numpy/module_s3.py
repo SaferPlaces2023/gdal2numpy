@@ -72,7 +72,7 @@ def isshape(filename):
     """
     if isinstance(filename, str):
         filename = normshape(filename)
-        return isfile(filename) and filename.endswith(".shp")
+        return isfile(filename) and ".shp" in filename.lower()
     return False
 
 
@@ -426,7 +426,7 @@ def copy(src, dst=None, client=None):
     # Finally
     # if the source is a shapefile or a tiff file, copy the related files
     exts = []
-    if src.endswith(".shp"):
+    if ".shp" in src.lower():
         exts = list(shpext)
         exts.remove("shp")
     elif src.endswith(".tif"):
