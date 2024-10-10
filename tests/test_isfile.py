@@ -1,11 +1,6 @@
-import os
 import unittest
 import warnings
 from gdal2numpy import *
-
-workdir = justpath(__file__)
-
-filetif = f"{workdir}/data/CLSA_LiDAR.tif"
 
 
 class Test(unittest.TestCase):
@@ -15,10 +10,8 @@ class Test(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("ignore", ResourceWarning)
 
-
     def tearDown(self):
         warnings.simplefilter("default", ResourceWarning)
-
 
     def test_isfile_s3(self):
         """
@@ -26,7 +19,6 @@ class Test(unittest.TestCase):
         """
         filetif = "s3://saferplaces.co/fdamage/shared/residential.csv"
         self.assertTrue(isfile(filetif))
-
 
     def test_isfile_http(self):
         """
@@ -42,11 +34,6 @@ class Test(unittest.TestCase):
         fileshp = "s3://saferplaces.co/packages/gdal2numpy/isfile/CLSA_LiDAR.tif"
         self.assertTrue(israster(fileshp))
 
-    
-
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
