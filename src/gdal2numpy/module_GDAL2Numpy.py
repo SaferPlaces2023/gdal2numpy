@@ -26,7 +26,7 @@ import math
 import numpy as np
 from osgeo import gdal
 from .filesystem import now, total_seconds_from, justfname
-from .module_ogr import TransformBBOX, GetSpatialRef
+from .module_ogr import TransformBBOX
 from .module_s3 import *
 from .module_open import OpenRaster
 from .module_log import Logger
