@@ -31,8 +31,6 @@ jobs:
         packages: libgdal-dev
         version: 1.0
     - run: |
-        export CPLUS_INCLUDE_PATH=/usr/include/gdal
-        export C_INCLUDE_PATH=/usr/include/gdal
         export PROJ_LIB=/usr/share/proj
         export GDAL_DATA=/usr/share/gdal
         pip install -U pip wheel setuptools

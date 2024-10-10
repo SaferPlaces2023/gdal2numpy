@@ -26,7 +26,7 @@ import os
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
 from .module_ogr import SameSpatialRef, GetSpatialRef
-from .module_metadata import GetNoData, GDALFixNoData
+from .module_meta import GetNoData, GDALFixNoData
 from .module_s3 import *
 from .gdal_translate import dtypeOf
 from .module_log import Logger
