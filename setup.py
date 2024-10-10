@@ -1,10 +1,10 @@
 import setuptools
 
-VERSION = "0.0.393"
+VERSION = "0.0.394"
 PACKAGE_NAME = "gdal2numpy"
 AUTHOR = "Valerio Luzzi, Marco Renzi"
 EMAIL = "valerio.luzzi@gecosistema.com, marco.renzi@gecosistema.com"
-GITHUB = f"https://github.com/valluzzi/{PACKAGE_NAME}.git"
+GITHUB = f"https://github.com/Saferplaces2023/{PACKAGE_NAME}.git"
 DESCRIPTION = "An utils functions package"
 
 setuptools.setup(
