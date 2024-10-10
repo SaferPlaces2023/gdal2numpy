@@ -1,0 +1,41 @@
+name: Test application
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  test-application:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - run: pip freeze > requirements.txt
+    
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: "Setup Python"
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip' # caching pip dependencie
+    - uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: libgdal-dev
+        version: 1.0
+    - run: |
+        export CPLUS_INCLUDE_PATH=/usr/include/gdal
+        export C_INCLUDE_PATH=/usr/include/gdal
+        export PROJ_LIB=/usr/share/proj
+        export GDAL_DATA=/usr/share/gdal
+        pip install -U pip wheel setuptools
+        pip install numba==0.57.1 numpy==1.24.4 
+        pip install GDAL==3.4.3
+        pip install -e .
+        pytest tests/test_.py -v
