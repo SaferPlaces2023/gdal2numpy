@@ -140,7 +140,7 @@ def gdalwarp(filelist,
         gdal.PopErrorHandler()
 
     # patch notdata value
-    if GetNoData(filetmp) != dstNodata:
+    if dstNodata is not None and GetNoData(filetmp) != dstNodata:
         Logger.debug(f"gdalwarp: fixing nodata value to {dstNodata}")
         GDALFixNoData(filetmp, format=format, nodata = dstNodata)
 
