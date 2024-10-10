@@ -43,3 +43,4 @@ jobs:
         python tests/test_whatsmyip.py
         python tests/test_wkt.py
         python tests/test_features.py
+        python tests/test_gdal_translate.py

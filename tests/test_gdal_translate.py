@@ -3,40 +3,49 @@ import unittest
 import numpy as np
 from gdal2numpy import *
 
-workdir = justpath(__file__)
-workdir = f"D:/Users/vlr20/Projects/GitHub/saferplaces/saferplaces-4.0/mnt/efs/projects/valluzzi@gmail.com/Congo2"
+
+filetif = "s3://saferplaces.co/packages/gdal2numpy/open/CLSA_LiDAR.tif"
+fileshp = "s3://saferplaces.co/packages/gdal2numpy/open/OSM_BUILDINGS_102258.shp"
+
 
 class Test(unittest.TestCase):
     """
     Tests
     """
+
     def test_gdal_translate(self):
         """
         test_gdal_translate  
         """
-        #os.chdir(workdir)
-        #filedem = f"NASA_NASADEM_HGT_001_162324.tif"
-        #filerain = f"s3://saferplaces.co/test/lidar_rimini_building_2_wd.tif"
-        #fileclay = f"OpenLandMap_SOL_SOL_CLAY-WFRACTION_USDA-3A1A1A_M_v02_160807.tif"
-
-        filerain = "tests/forecast_acc_6h_2024-09-18_00-00_13h-18h.tif"
-        # filerain = "tests/forecast_acc_6h_3003.tif"
-        # filerain = "tests/forecast_acc_6h_3857.tif"
-        filedem =  "s3://saferplaces.co/Venezia/dtm_bacino3.bld.tif"
-        #filedem =  "tests/dtm_bacino3.bld.tif"
-        fileout = f"crop.tif"
-        projWin = GetExtent(filedem)
-        projWinSrs = "EPSG:3003"
-        fileout = None # "ab/cropped.tif"
-          
-        fileout = gdal_translate(filerain, fileout=fileout, projwin=projWin, projwin_srs=projWinSrs, format="GTiff")
-        print(fileout)
+        fileout = tempdir() + "/CLSA_LiDAR.cog.tif"
+        # def gdal_translate(filein, fileout=None, ot=None, a_nodata=None, projwin=None, projwin_srs=None, format="GTiff"):
+        # fileout = gdal_translate(filerain, fileout=fileout, projwin=projWin, projwin_srs=projWinSrs, format="GTiff")
+        fileout = gdal_translate(filetif, fileout, format="COG")
         self.assertTrue(isfile(fileout))
+        self.assertEqual(GetRasterShape(fileout), GetRasterShape(filetif))
+        self.assertEqual(GetPixelSize(fileout), GetPixelSize(filetif))
+        self.assertEqual(GetExtent(fileout), GetExtent(filetif))
+        self.assertTrue(IsValid(fileout))
+        self.assertEqual(AutoIdentify(fileout), AutoIdentify(filetif))
+        self.assertTrue(SameSpatialRef(fileout, filetif))
+        os.remove(fileout)
 
-    
+    def test_crop(self):
+        """
+        test_crop  
+        """
+        bbox = (492253, 5216180, 492758, 5216518)
+        srs = "EPSG:26914"
+        fileout = tempdir() + "/CLSA_LiDAR.crop.tif"
+        # def gdal_translate(filein, fileout=None, ot=None, a_nodata=None,
+        #                       projwin=None, projwin_srs=None, format="GTiff"):
+        fileout = gdal_translate(
+            filetif, fileout, projwin=bbox, projwin_srs=srs, format="GTiff")
+        self.assertTrue(isfile(fileout))
+        self.assertEqual(GetRasterShape(fileout), (338, 505))
+        self.assertEqual(GetPixelSize(fileout), (1.0, 1.0))
+        os.remove(fileout)
+
 
 if __name__ == '__main__':
     unittest.main()
-
-
-

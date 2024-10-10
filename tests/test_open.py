@@ -3,10 +3,8 @@ import unittest
 import warnings
 from gdal2numpy import *
 
-workdir = justpath(__file__)
-
-filetif = f"{workdir}/CLSA_LiDAR.tif"
-
+filetif = "s3://saferplaces.co/packages/gdal2numpy/open/CLSA_LiDAR.tif"
+fileshp = "s3://saferplaces.co/packages/gdal2numpy/open/OSM_BUILDINGS_102258.shp"
 
 class Test(unittest.TestCase):
     """
@@ -23,7 +21,7 @@ class Test(unittest.TestCase):
         """
         test_open: 
         """
-        fileshp = "s3://saferplaces.co/packages/gdal2numpy/open/OSM_BUILDINGS_102258.shp"
+        
         ds = OpenShape(fileshp)
         self.assertTrue(ds is not None)
         self.assertEqual(GetFeatureCount(ds), 23989)
@@ -32,7 +30,7 @@ class Test(unittest.TestCase):
         """
         test_open: 
         """
-        filetif = "s3://saferplaces.co/packages/gdal2numpy/open/CLSA_LiDAR.tif"
+        
         ds = OpenRaster(filetif)
         self.assertTrue(ds is not None)
         self.assertEqual(ds.RasterCount, 1)
