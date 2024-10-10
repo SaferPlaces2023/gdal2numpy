@@ -163,33 +163,32 @@ def GetMetaData(filename):
     :param filename: the pathname
     :return: returns a dictionary with metadata
     """
-    if isfile(filename):
-        if filename.endswith(".tif"):
-            ds = OpenRaster(filename)
-            if ds:
-                m, n = ds.RasterYSize, ds.RasterXSize
-                band = ds.GetRasterBand(1)
-                gt = ds.GetGeoTransform()
-                wkt = ds.GetProjection()
-                meta = ds.GetMetadata()
-                nodata = band.GetNoDataValue()
-                minx, px, _, maxy, _, py = gt
-                maxx = minx + n * px
-                miny = maxy + m * py
-                miny, maxy = min(miny, maxy), max(miny, maxy)
-                ds = None
-                return {
-                    "m": m,
-                    "n": n,
-                    "px": px,
-                    "py": py,
-                    "wkt": wkt,
-                    "nodata": nodata,
-                    "extent": [minx, miny, maxx, maxy],
-                    "metadata": meta
-                }
-        elif filename.endswith(".shp"):
-            return read_metadata(filename)
+    if israster(filename):
+        ds = OpenRaster(filename)
+        if ds:
+            m, n = ds.RasterYSize, ds.RasterXSize
+            band = ds.GetRasterBand(1)
+            gt = ds.GetGeoTransform()
+            wkt = ds.GetProjection()
+            meta = ds.GetMetadata()
+            nodata = band.GetNoDataValue()
+            minx, px, _, maxy, _, py = gt
+            maxx = minx + n * px
+            miny = maxy + m * py
+            miny, maxy = min(miny, maxy), max(miny, maxy)
+            ds = None
+            return {
+                "m": m,
+                "n": n,
+                "px": px,
+                "py": py,
+                "wkt": wkt,
+                "nodata": nodata,
+                "extent": [minx, miny, maxx, maxy],
+                "metadata": meta
+            }
+    elif isshape(filename):
+        return read_metadata(filename)
 
     return {}
 
@@ -198,24 +197,23 @@ def GetTag(filename, tagname, band=0):
     """
     GetTag - get a tag in metadata of the file or of the band if specified
     """
-    if isfile(filename):
-        if filename.endswith(".tif"):
-            ds = OpenRaster(filename)
-            if ds:
-                if not band:
-                    metadata = ds.GetMetadata()
-                elif 0 < band <= ds.RasterCount:
-                    metadata = ds.GetRasterBand(band).GetMetadata()
-                else:
-                    metadata = {}
-                if tagname in metadata:
-                    ds = None
-                    return metadata[tagname]
+    if israster(filename):
+        ds = OpenRaster(filename)
+        if ds:
+            if not band:
+                metadata = ds.GetMetadata()
+            elif 0 < band <= ds.RasterCount:
+                metadata = ds.GetRasterBand(band).GetMetadata()
+            else:
+                metadata = {}
+            if tagname in metadata:
                 ds = None
-        elif filename.endswith(".shp"):
-            meta = read_metadata(filename)
-            if meta and "metadata" in meta and tagname in meta["metadata"]:
-                return meta["metadata"][tagname]
+                return metadata[tagname]
+            ds = None
+    elif isshape(filename):
+        meta = read_metadata(filename)
+        if meta and "metadata" in meta and tagname in meta["metadata"]:
+            return meta["metadata"][tagname]
 
     return None
 

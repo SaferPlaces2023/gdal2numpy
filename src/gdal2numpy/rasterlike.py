@@ -26,7 +26,7 @@ import numpy as np
 from .filesystem import tempfilename, remove
 from .module_ogr import SamePixelSize, SameSpatialRef, GetSpatialRef, GetExtent, SameExtent
 from .module_ogr import Rectangle, GetPixelSize
-from .module_s3 import isfile
+from .module_s3 import isfile, israster
 from .module_GDAL2Numpy import GDAL2Numpy
 from .module_Numpy2GTiff import Numpy2GTiff
 from .gdalwarp import gdalwarp
@@ -49,7 +49,7 @@ def RasterLike(filename, filetpl, fileout=None, dtype=None, resampleAlg="near",
     fileout = fileout if fileout else tempfilename(suffix=".tif")
 
     # is raster file
-    if isfile(filename) and filename.endswith(".tif"):
+    if israster(filename):
         if SameSpatialRef(filename, filetpl) and \
             SamePixelSize(filename, filetpl, decimals=2) and \
                 SameExtent(filename, filetpl, decimals=3):
