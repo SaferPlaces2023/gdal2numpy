@@ -38,3 +38,4 @@ jobs:
         pip install GDAL==3.4.1
         pip install -e .
         python tests/test_isfile.py
+        python tests/test_open.py
