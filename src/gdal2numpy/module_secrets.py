@@ -29,7 +29,11 @@ def load_secret(filename, varname=None):
     """
     load_secret
     """
-    if filename and filename.startswith("/run/secrets/") and os.path.isfile(filename):
+    # Auto-complete the path
+    if filename and not filename.startswith("/run/secrets/"):
+        filename = f"/run/secrets/{filename}"
+
+    if filename and os.path.isfile(filename):
         with open(filename, "r", encoding="utf-8") as f:
             secret = f.read().strip()
             if varname:
@@ -45,4 +49,4 @@ def load_secrets():
     for root, _, files in os.walk("/run/secrets/"):
         for file in files:
             varname = juststem(file).upper()
-            load_secret(os.path.join(root, file), varname)
+            load_secret(file, varname)
