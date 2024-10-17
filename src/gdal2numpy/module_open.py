@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------
-# Licence:
+# MIT License:
 # Copyright (c) 2012-2023 Luzzi Valerio
 #
 # The above copyright notice and this permission notice shall be

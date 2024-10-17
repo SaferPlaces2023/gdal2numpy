@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------
-# Licence:
+# MIT License:
 # Copyright (c) 2012-2022 Valerio for Gecosistema S.r.l.
 #
 # The above copyright notice and this permission notice shall be

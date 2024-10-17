@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------
 # MIT License:
-# Copyright (c) 2012-2023 Luzzi Valerio
+# Copyright (c) 2012-2022 Luzzi Valerio
 #
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
@@ -15,41 +15,34 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 #
-# Name:        memory.py
+# Name:        module_secrets.py
 # Purpose:
 #
 # Author:      Luzzi Valerio
 #
-# Created:     16/06/2023
+# Created:     17/10/2024
 # -------------------------------------------------------------------------------
 import os
-import gc
-import psutil
-from .module_log import Logger
+from .filesystem import juststem
 
-MAX_MEMORY_USED = 0
+def load_secret(filename, varname=None):
+    """
+    load_secret
+    """
+    if filename and filename.startswith("/run/secrets/") and os.path.isfile(filename):
+        with open(filename, "r", encoding="utf-8") as f:
+            secret = f.read().strip()
+            if varname:
+                #varname = juststem(filename).upper()
+                os.environ[varname] = secret
+            return secret
+    return None
 
-def mem_usage():
+def load_secrets():
     """
-    mem_usage - return the memory used
+    load_secrets
     """
-    global MAX_MEMORY_USED
-    gc.collect()
-    # m = psutil.virtual_memory().used / (1024 ** 2) questa è la memoria
-    # totale utilizzata dalla macchina
-    process = psutil.Process(os.getpid())
-    m = process.memory_info().rss
-    MAX_MEMORY_USED = max(m, MAX_MEMORY_USED)
-    MB = m / (1024**2)
-    Logger.debug("Memory used:%.2f MB"%(MB))
-    Logger.debug("_______________________")
-
-
-def max_mem_usage():
-    """
-    max_mem_usage - return the max memory used
-    """
-    global MAX_MEMORY_USED
-    MB = MAX_MEMORY_USED / (1024**2)
-    Logger.debug(f"Max Memory used:{MB:.2f} MB")
-    Logger.debug("_______________________")
+    for root, _, files in os.walk("/run/secrets/"):
+        for file in files:
+            varname = juststem(file).upper()
+            load_secret(os.path.join(root, file), varname)

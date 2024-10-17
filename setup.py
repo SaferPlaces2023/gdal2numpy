@@ -1,8 +1,8 @@
 import setuptools
 
-VERSION = "0.0.411"
+VERSION = "0.0.415"
 PACKAGE_NAME = "gdal2numpy"
-AUTHOR = "Valerio Luzzi, Marco Renzi"
+AUTHOR = "Valerio Luzzi, Marco Renzi, Lorenzo Borelli"
 EMAIL = "valerio.luzzi@gecosistema.com, marco.renzi@gecosistema.com"
 GITHUB = f"https://github.com/SaferPlaces2023/{PACKAGE_NAME}.git"
 DESCRIPTION = "An utils functions package"
@@ -38,6 +38,7 @@ setuptools.setup(
         "xmltodict" 
     ]
 )
+
 
 
 

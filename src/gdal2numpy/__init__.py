@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Licence:
+# MIT License:
 # Copyright (c) 2012-2020 Valerio for Gecosistema S.r.l.
 #
 # The above copyright notice and this permission notice shall be
@@ -44,4 +44,5 @@ from .gdal_merge import gdal_merge
 from .module_log import *
 from .module_xml import *
 from .module_extrusion import *
+from .module_secrets import *
 
