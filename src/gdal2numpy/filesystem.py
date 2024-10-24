@@ -30,7 +30,7 @@ import tempfile
 import hashlib
 import shutil
 import random
-from .module_types import parseInt
+from .module_types import parseInt, isstring, isarray
 from .module_log import Logger
 
 
@@ -123,7 +123,10 @@ def parse_key_value(text, sep="="):
         return {}
     elif isinstance(text, str):
         key, value = text.split(sep, 1)
-        return key.strip(), value.strip()
+        key, value = key.strip(), value.strip()
+        if "," in value:
+            value = listify(value)
+        return key, value
     elif isinstance(text, (tuple, list)) and len(text) == 2:
         return text
     return None, None
@@ -135,7 +138,10 @@ def parse_shape_path(pathname):
     """
     if pathname is None:
         return None
-    # sometime the shapefile is in the form s3://bucket/filename.shp|layername
+    # sometime the shapefile is in the form 
+    # s3://bucket/filename.shp|layername=filename
+    # s3://bucket/filename.shp|layername=filename|fid=0
+    # s3://bucket/filename.shp|layername=filename|fid=1,3,7
     parts = pathname.split("|")
     if len(parts) == 1:
         return parts[0], None, None
@@ -150,7 +156,10 @@ def parse_shape_path(pathname):
         key, name = parse_key_value(parts[1])
         layername = name if key.lower() == "layername" else None
         key, fid = parse_key_value(parts[2])
-        fid = parseInt(fid) if key.lower() == "fid" else None
+        if isstring(fid) and key.lower() == "fid":
+            fid = parseInt(fid)   
+        elif isarray(fid) and key.lower() == "fid":
+            fid = [parseInt(f) for f in fid]
         return filename, layername, fid
     return None, None, None
 

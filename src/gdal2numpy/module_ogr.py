@@ -418,13 +418,19 @@ def PolygonFrom(extent):
         return Rectangle(minx, miny, maxx, maxy)
     # from shape extent
     elif isshape(extent):
-        filename, fieldname, fid = parse_shape_path(extent)
+        filename, fieldname, fids = parse_shape_path(extent)
         ds = OpenShape(filename)
         if ds:
             layer = ds.GetLayer()
-            if fieldname and fid is not None:
-                feature = layer.GetFeature(fid)
-                geom = feature.GetGeometryRef().Clone()
+            if fieldname and fids is not None:
+                features = [layer.GetFeature(fid) for fid in listify(fids)]
+                geoms = [feature.GetGeometryRef() for feature in features if feature]
+                # merge all the geometries
+                if len(geoms) > 0:
+                    geom = geoms[0].Clone()
+                    for g in geoms[1:]:
+                        geom = geom.Union(g)
+                    return geom
             else:
                 minx, maxx, miny, maxy = layer.GetExtent()
                 geom = Rectangle(minx, miny, maxx, maxy)
