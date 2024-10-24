@@ -115,6 +115,20 @@ def normshape(pathname):
     return normpath(pathname)
 
 
+def parse_key_value(text, sep="="):
+    """
+    parse_key_value
+    """
+    if text is None:
+        return {}
+    elif isinstance(text, str):
+        key, value = text.split(sep, 1)
+        return key.strip(), value.strip()
+    elif isinstance(text, (tuple, list)) and len(text) == 2:
+        return text
+    return None, None
+
+
 def parse_shape_path(pathname):
     """
     normshape
@@ -126,10 +140,18 @@ def parse_shape_path(pathname):
     if len(parts) == 1:
         return parts[0], None, None
     elif len(parts) == 2:
-        return parts[0], parts[1], None
+        filename = parts[0]
+        key, name = parse_key_value(parts[1])
+        layername = name if key.lower() == "layername" else None
+        fid = None
+        return filename, layername, fid
     elif len(parts) == 3:
-        fid = parseInt(parts[2])
-        return parts[0], parts[1], fid
+        filename = parts[0]
+        key, name = parse_key_value(parts[1])
+        layername = name if key.lower() == "layername" else None
+        key, fid = parse_key_value(parts[2])
+        fid = parseInt(fid) if key.lower() == "fid" else None
+        return filename, layername, fid
     return None, None, None
 
 

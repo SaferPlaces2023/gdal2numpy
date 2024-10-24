@@ -40,6 +40,8 @@ from .module_open import OpenShape
 from .module_s3 import isfile, isshape, israster
 from .module_log import Logger
 from Levenshtein import distance
+from .module_types import parseFloat, isarray, isstring
+from .module_http import nominatim_search
 
 shpext = ("shp", "dbf", "shx", "prj", "qpj", "qml", "qix", "idx", "dat", "sbn", "sbx", "fbn", "fbx", "ain", "aih",
           "atx", "qlr", "mta", "qmd", "cpg")
@@ -380,6 +382,69 @@ def Rectangle(minx, miny, maxx, maxy, deltaperc=0.0):
     poly = ogr.Geometry(ogr.wkbPolygon)
     poly.AddGeometry(ring)
     return poly
+
+
+def PolygonFrom(extent):
+    """
+    PolygonFrom
+    """
+    if not extent:
+        return None
+    elif isinstance(extent, ogr.Geometry) and\
+            extent.GetGeometryName() in ("POLYGON", "MULTIPOLYGON"):
+        return extent
+    elif isinstance(extent, ogr.Feature):
+        return PolygonFrom(extent.GetGeometryRef())
+    # array di 4 stringhe
+    elif isstring(extent) and len(listify(extent))==4 and\
+        all([isinstance(parseFloat(item), float) for item in listify(extent)]):
+            extent = [float(item) for item in listify(extent)]
+            return Rectangle(*extent)
+    # array di 4 float
+    elif isarray(extent) and len(extent) == 4:
+        extent = [float(item) for item in extent]
+        return Rectangle(*extent)
+    # wkt string
+    elif isstring(extent) and\
+        (extent.startswith("POLYGON") or extent.startswith("MULTIPOLYGON")):
+        try:
+            geom = ogr.CreateGeometryFromWkt(extent)
+        except Exception as e:
+            Logger.error(f"PolygonFrom: {e}")
+        return geom
+    # from raster extent
+    elif israster(extent):
+        minx, miny, maxx, maxy = GetExtent(extent)
+        return Rectangle(minx, miny, maxx, maxy)
+    # from shape extent
+    elif isshape(extent):
+        filename, fieldname, fid = parse_shape_path(extent)
+        ds = OpenShape(filename)
+        if ds:
+            layer = ds.GetLayer()
+            if fieldname and fid is not None:
+                feature = layer.GetFeature(fid)
+                geom = feature.GetGeometryRef().Clone()
+            else:
+                minx, maxx, miny, maxy = layer.GetExtent()
+                geom = Rectangle(minx, miny, maxx, maxy)
+        ds = None
+        return geom
+    # from nominatim query
+    elif isstring(extent):
+        geojson = nominatim_search(extent)
+        if geojson and "geotext" in geojson:
+            wkt = geojson["geotext"]
+            return PolygonFrom(wkt)
+        elif geojson and "boundingbox" in geojson:
+            extent = geojson["boundingbox"]
+            return PolygonFrom(extent)
+
+
+
+    return None
+
+
 
 
 def TransformBBOX(bbox, s_srs=None, t_srs=None):

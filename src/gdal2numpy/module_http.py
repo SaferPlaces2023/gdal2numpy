@@ -1,5 +1,10 @@
 import socket
 import requests
+import ssl
+import json
+import urllib.request
+from urllib.parse import quote
+
 from .module_log import Logger
 
 def hostname():
@@ -58,13 +63,14 @@ def http_exists(url):
     return False
 
 
-def http_get(url, mode=""):
+def http_get(url, headers={}, mode="text"):
     """
     http_get use requests
     """
     if url and isinstance(url, str) and url.startswith("http"):
         try:
-            with requests.get(url) as response:
+            with requests.get(url, headers=headers) as response:
+                print(response.status_code)
                 if response.status_code == 200:
                     if mode == "json":
                         return response.json()
@@ -72,9 +78,21 @@ def http_get(url, mode=""):
                         return response.text
                     return response.content
         except requests.exceptions.RequestException as ex:
+            print(ex)
             Logger.error(ex)
     return None
 
 
-
+def nominatim_search(query):
+    """
+    nominatim_search
+    """
+    if query:
+        city = quote(query)
+        url = f"https://nominatim.openstreetmap.org/search?city={city}&format=json&limit=1&polygon_text=1"
+        ssl._create_default_https_context = ssl._create_unverified_context
+        with urllib.request.urlopen(url) as response:
+            geojson = json.loads(response.read())
+            return geojson[0] if len(geojson) > 0 else None
+    return None
 

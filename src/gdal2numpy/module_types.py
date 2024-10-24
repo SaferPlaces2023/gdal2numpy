@@ -24,3 +24,17 @@ def parseFloat(text):
         return float(f"{text}")
     except ValueError:
         return None
+    
+
+def isstring(text):
+    """
+    isstring
+    """
+    return isinstance(text, (str,))
+
+
+def isarray(text):
+    """
+    isarray
+    """
+    return isinstance(text, (list, tuple))
