@@ -27,6 +27,7 @@ from .module_types import *
 from .module_geolocate import *
 from .module_GDAL2Numpy import *
 from .module_Numpy2GTiff import *
+from .module_cog import *
 from .module_meta import *
 from .module_ogr import *
 from .module_features import *
