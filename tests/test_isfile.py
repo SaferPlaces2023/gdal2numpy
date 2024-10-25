@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         """
         test_upload_s3: 
         """
-        filetif = "https://s3.amazonaws.com/saferplaces.co/packages/gdal2numpy/isfile/CLSA_LiDAR.tif"
+        filetif = "https://s3.us-east-1.amazonaws.com/saferplaces.co/packages/gdal2numpy/isfile/CLSA_LiDAR.tif"
         self.assertTrue(israster(filetif))
 
     def test_isfile_shp(self):

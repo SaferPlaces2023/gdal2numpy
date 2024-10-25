@@ -94,6 +94,8 @@ def get_bucket_name_key(uri):
         _, _, bucket_name, key_name = uri.split("/", 3)
     elif uri.startswith("https://s3.amazonaws.com/"):
         _, _, bucket_name, key_name = uri.split("/", 3)
+    elif uri.startswith("https://s3."):
+        _, _, bucket_name, key_name = uri.split("/", 3)
     else:
         bucket_name, key_name = None, uri
     return bucket_name, key_name

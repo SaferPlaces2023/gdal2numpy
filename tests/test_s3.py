@@ -68,7 +68,7 @@ class Test(unittest.TestCase):
     #     """
     #     test_s3: 
     #     """
-    #     #data, _, _ = GDAL2Numpy("https://s3.amazonaws.com/saferplaces.co/lidar-rer-100m.tif", load_nodata_as=np.nan)
+    #     #data, _, _ = GDAL2Numpy("https://s3.us-east-1.amazonaws.com/saferplaces.co/lidar-rer-100m.tif", load_nodata_as=np.nan)
     #     #self.assertEqual(data.shape, (1458, 3616))
 
 

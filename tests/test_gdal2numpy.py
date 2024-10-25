@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         """
         test_save: 
         """
-        filedem = "https://s3.amazonaws.com/saferplaces.co/test/lidar_rimini_building_2.tif"
+        filedem = "https://s3.us-east-1.amazonaws.com/saferplaces.co/test/lidar_rimini_building_2.tif"
         data, gt, prj = GDAL2Numpy(filedem, load_nodata_as=np.nan)
         self.assertTrue(data.size>0)
 
