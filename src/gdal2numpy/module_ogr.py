@@ -437,13 +437,16 @@ def PolygonFrom(extent, delta=0.0):
     # from nominatim query
     elif isstring(extent):
         geojson = nominatim_search(extent)
-        if geojson and "geotext" in geojson:
+        if geojson and "geotext" in geojson and "POLYGON" in geojson["geotext"]:
             wkt = geojson["geotext"]
             geom = PolygonFrom(wkt, delta)
         elif geojson and "boundingbox" in geojson:
             extent = geojson["boundingbox"]
+            extent = [float(item) for item in extent]
+            minlat, maxlat, minlon, maxlon = extent 
+            extent = (minlon, minlat, maxlon, maxlat)
             geom = PolygonFrom(extent, delta)
-
+            
     if geom and abs(delta) > 0:
         # delta is a percentage of the width and height
         minx, maxx, miny, maxy = geom.GetEnvelope()
