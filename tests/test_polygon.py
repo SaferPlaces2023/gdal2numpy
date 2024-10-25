@@ -119,6 +119,19 @@ class Test(unittest.TestCase):
         self.assertTrue(miny == 41.6556417)
         self.assertTrue(maxy == 42.1410285)
 
+    def test_poly_increase(self):
+        """
+        test_poly_increase
+        """
+        coords = "12,44,12.05,44.05"
+        geom = PolygonFrom(coords, delta=0.1)
+        minx, maxx, miny, maxy = geom.GetEnvelope()
+        self.assertTrue(geom.GetGeometryName() == "POLYGON")
+        self.assertTrue(minx == 11.995000000000001)
+        self.assertTrue(maxx == 12.055)
+        self.assertTrue(miny == 43.995)
+        self.assertTrue(maxy == 44.055)
+       
         
 
 if __name__ == '__main__':

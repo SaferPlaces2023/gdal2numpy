@@ -384,38 +384,38 @@ def Rectangle(minx, miny, maxx, maxy, deltaperc=0.0):
     return poly
 
 
-def PolygonFrom(extent):
+def PolygonFrom(extent, delta=0.0):
     """
     PolygonFrom
     """
+    geom = None
     if not extent:
         return None
     elif isinstance(extent, ogr.Geometry) and\
             extent.GetGeometryName() in ("POLYGON", "MULTIPOLYGON"):
-        return extent
+        geom = extent
     elif isinstance(extent, ogr.Feature):
-        return PolygonFrom(extent.GetGeometryRef())
+        geom = PolygonFrom(extent.GetGeometryRef(), delta)
     # array di 4 stringhe
     elif isstring(extent) and len(listify(extent))==4 and\
         all([isinstance(parseFloat(item), float) for item in listify(extent)]):
             extent = [float(item) for item in listify(extent)]
-            return Rectangle(*extent)
+            geom = Rectangle(*extent)
     # array di 4 float
     elif isarray(extent) and len(extent) == 4:
         extent = [float(item) for item in extent]
-        return Rectangle(*extent)
+        geom = Rectangle(*extent)
     # wkt string
     elif isstring(extent) and\
         (extent.startswith("POLYGON") or extent.startswith("MULTIPOLYGON")):
         try:
             geom = ogr.CreateGeometryFromWkt(extent)
         except Exception as e:
-            Logger.error(f"PolygonFrom: {e}")
-        return geom
+            Logger.error(f"PolygonFrom: {e}")     
     # from raster extent
     elif israster(extent):
         minx, miny, maxx, maxy = GetExtent(extent)
-        return Rectangle(minx, miny, maxx, maxy)
+        geom = Rectangle(minx, miny, maxx, maxy)
     # from shape extent
     elif isshape(extent):
         filename, fieldname, fids = parse_shape_path(extent)
@@ -430,25 +430,31 @@ def PolygonFrom(extent):
                     geom = geoms[0].Clone()
                     for g in geoms[1:]:
                         geom = geom.Union(g)
-                    return geom
             else:
                 minx, maxx, miny, maxy = layer.GetExtent()
                 geom = Rectangle(minx, miny, maxx, maxy)
         ds = None
-        return geom
     # from nominatim query
     elif isstring(extent):
         geojson = nominatim_search(extent)
         if geojson and "geotext" in geojson:
             wkt = geojson["geotext"]
-            return PolygonFrom(wkt)
+            geom = PolygonFrom(wkt, delta)
         elif geojson and "boundingbox" in geojson:
             extent = geojson["boundingbox"]
-            return PolygonFrom(extent)
+            geom = PolygonFrom(extent, delta)
 
+    if geom and abs(delta) > 0:
+        # delta is a percentage of the width and height
+        minx, maxx, miny, maxy = geom.GetEnvelope()
+        width = abs(maxx - minx)
+        height = abs(maxy - miny)
+        sign = 1 if delta > 0 else -1
+        delta = min(1.0, max(0.0, abs(delta)))
+        buff = min(width, height) * delta * sign
+        geom = geom.Buffer(buff)
 
-
-    return None
+    return geom
 
 
 
