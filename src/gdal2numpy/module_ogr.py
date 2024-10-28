@@ -329,7 +329,7 @@ def GetSpatialRef(filename):
             srs.ImportFromWkt(wkt)
             srs.AutoIdentifyEPSG()
     else:
-        srs = osr.SpatialReference()
+        srs = None
 
     return srs
 
