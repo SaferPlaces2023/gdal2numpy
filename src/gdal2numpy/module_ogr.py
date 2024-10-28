@@ -363,104 +363,6 @@ def GetGeometryType(filename):
     return None
 
 
-def Rectangle(minx, miny, maxx, maxy, deltaperc=0.0):
-    """
-    Rectangle - create ogr polygon from bbox
-    """
-    deltaperc = min(1.0, max(0.0, abs(deltaperc)))
-    width = abs(maxx - minx)
-    height = abs(maxy - miny)
-    deltax = width * deltaperc
-    deltay = height * deltaperc
-    ring = ogr.Geometry(ogr.wkbLinearRing)
-    ring.AddPoint_2D(minx-deltax, miny-deltay)
-    ring.AddPoint_2D(maxx+deltax, miny-deltay)
-    ring.AddPoint_2D(maxx+deltax, maxy+deltay)
-    ring.AddPoint_2D(minx-deltax, maxy+deltay)
-    ring.AddPoint_2D(minx-deltax, miny-deltay)
-    # Create polygon
-    poly = ogr.Geometry(ogr.wkbPolygon)
-    poly.AddGeometry(ring)
-    return poly
-
-
-def PolygonFrom(extent, delta=0.0):
-    """
-    PolygonFrom
-    """
-    geom = None
-    if not extent:
-        return None
-    elif isinstance(extent, ogr.Geometry) and\
-            extent.GetGeometryName() in ("POLYGON", "MULTIPOLYGON"):
-        geom = extent
-    elif isinstance(extent, ogr.Feature):
-        geom = PolygonFrom(extent.GetGeometryRef(), delta)
-    # array di 4 stringhe
-    elif isstring(extent) and len(listify(extent))==4 and\
-        all([isinstance(parseFloat(item), float) for item in listify(extent)]):
-            extent = [float(item) for item in listify(extent)]
-            geom = Rectangle(*extent)
-    # array di 4 float
-    elif isarray(extent) and len(extent) == 4:
-        extent = [float(item) for item in extent]
-        geom = Rectangle(*extent)
-    # wkt string
-    elif isstring(extent) and\
-        (extent.startswith("POLYGON") or extent.startswith("MULTIPOLYGON")):
-        try:
-            geom = ogr.CreateGeometryFromWkt(extent)
-        except Exception as e:
-            Logger.error(f"PolygonFrom: {e}")     
-    # from raster extent
-    elif israster(extent):
-        minx, miny, maxx, maxy = GetExtent(extent)
-        geom = Rectangle(minx, miny, maxx, maxy)
-    # from shape extent
-    elif isshape(extent):
-        filename, fieldname, fids = parse_shape_path(extent)
-        ds = OpenShape(filename)
-        if ds:
-            layer = ds.GetLayer()
-            if fieldname and fids is not None:
-                features = [layer.GetFeature(fid) for fid in listify(fids)]
-                geoms = [feature.GetGeometryRef() for feature in features if feature]
-                # merge all the geometries
-                if len(geoms) > 0:
-                    geom = geoms[0].Clone()
-                    for g in geoms[1:]:
-                        geom = geom.Union(g)
-            else:
-                minx, maxx, miny, maxy = layer.GetExtent()
-                geom = Rectangle(minx, miny, maxx, maxy)
-        ds = None
-    # from nominatim query
-    elif isstring(extent):
-        geojson = nominatim_search(extent)
-        if geojson and "geotext" in geojson and "POLYGON" in geojson["geotext"]:
-            wkt = geojson["geotext"]
-            geom = PolygonFrom(wkt, delta)
-        elif geojson and "boundingbox" in geojson:
-            extent = geojson["boundingbox"]
-            minlat, maxlat, minlon, maxlon = extent
-            extent = (minlon, minlat, maxlon, maxlat)
-            geom = PolygonFrom(extent, delta)
-
-    if geom and abs(delta) > 0:
-        # delta is a percentage of the width and height
-        minx, maxx, miny, maxy = geom.GetEnvelope()
-        width = abs(maxx - minx)
-        height = abs(maxy - miny)
-        sign = 1 if delta > 0 else -1
-        delta = min(1.0, max(0.0, abs(delta)))
-        buff = min(width, height) * delta * sign
-        geom = geom.Buffer(buff)
-
-    return geom
-
-
-
-
 def TransformBBOX(bbox, s_srs=None, t_srs=None):
     """
     TransformBBOX
@@ -492,6 +394,120 @@ def TransformBBOX(bbox, s_srs=None, t_srs=None):
         minx, miny, maxx, maxy = miny, minx, maxy, maxx
 
     return minx, miny, maxx, maxy
+
+
+
+def Rectangle(minx, miny, maxx, maxy, deltaperc=0.0):
+    """
+    Rectangle - create ogr polygon from bbox
+    """
+    deltaperc = min(1.0, max(0.0, abs(deltaperc)))
+    width = abs(maxx - minx)
+    height = abs(maxy - miny)
+    deltax = width * deltaperc
+    deltay = height * deltaperc
+    ring = ogr.Geometry(ogr.wkbLinearRing)
+    ring.AddPoint_2D(minx-deltax, miny-deltay)
+    ring.AddPoint_2D(maxx+deltax, miny-deltay)
+    ring.AddPoint_2D(maxx+deltax, maxy+deltay)
+    ring.AddPoint_2D(minx-deltax, maxy+deltay)
+    ring.AddPoint_2D(minx-deltax, miny-deltay)
+    # Create polygon
+    poly = ogr.Geometry(ogr.wkbPolygon)
+    poly.AddGeometry(ring)
+    return poly
+
+
+def PolygonFrom(extent, delta=0.0, s_srs=None, t_srs=None):
+    """
+    PolygonFrom
+    """
+    geom = None
+    if not extent:
+        return None
+    elif isinstance(extent, ogr.Geometry) and\
+            extent.GetGeometryName() in ("POLYGON", "MULTIPOLYGON"):
+        geom = extent
+    elif isinstance(extent, ogr.Feature):
+        geom = PolygonFrom(extent.GetGeometryRef(), delta, s_srs, t_srs)
+    # array di 4 stringhe
+    elif isstring(extent) and len(listify(extent))==4 and\
+        all([isinstance(parseFloat(item), float) for item in listify(extent)]):
+            extent = [float(item) for item in listify(extent)]
+            geom = Rectangle(*extent)
+    # array di 4 float
+    elif isarray(extent) and len(extent) == 4:
+        extent = [float(item) for item in extent]
+        geom = Rectangle(*extent)
+    # wkt string
+    elif isstring(extent) and\
+        (extent.startswith("POLYGON") or extent.startswith("MULTIPOLYGON")):
+        try:
+            geom = ogr.CreateGeometryFromWkt(extent)
+        except Exception as e:
+            Logger.error(f"PolygonFrom: {e}")     
+    # from raster extent
+    elif israster(extent):
+        minx, miny, maxx, maxy = GetExtent(extent)
+        geom = Rectangle(minx, miny, maxx, maxy)
+        s_srs = s_srs if s_srs else GetSpatialRef(extent)
+
+    # from shape extent
+    elif isshape(extent):
+        filename, fieldname, fids = parse_shape_path(extent)
+        ds = OpenShape(filename)
+        if ds:
+            layer = ds.GetLayer()
+            if fieldname and fids is not None:
+                features = [layer.GetFeature(fid) for fid in listify(fids)]
+                geoms = [feature.GetGeometryRef() for feature in features if feature]
+                # merge all the geometries
+                if len(geoms) > 0:
+                    geom = geoms[0].Clone()
+                    for g in geoms[1:]:
+                        geom = geom.Union(g)
+            else:
+                minx, maxx, miny, maxy = layer.GetExtent()
+                geom = Rectangle(minx, miny, maxx, maxy)
+    
+        # get the spatial reference
+        s_srs = s_srs if s_srs else GetSpatialRef(extent)
+        ds = None
+    # from nominatim query
+    elif isstring(extent):
+        geojson = nominatim_search(extent)
+        if geojson and "geotext" in geojson and "POLYGON" in geojson["geotext"]:
+            wkt = geojson["geotext"]
+            geom = PolygonFrom(wkt, delta, s_srs, t_srs)
+        elif geojson and "boundingbox" in geojson:
+            extent = geojson["boundingbox"]
+            minlat, maxlat, minlon, maxlon = extent
+            extent = (minlon, minlat, maxlon, maxlat)
+            geom = PolygonFrom(extent, delta, s_srs, t_srs)
+
+    # Increase the extent by a delta percentage
+    if geom and abs(delta) > 0:
+        # delta is a percentage of the width and height
+        minx, maxx, miny, maxy = geom.GetEnvelope()
+        width = abs(maxx - minx)
+        height = abs(maxy - miny)
+        sign = 1 if delta > 0 else -1
+        delta = min(1.0, max(0.0, abs(delta)))
+        buff = min(width, height) * delta * sign
+        geom = geom.Buffer(buff)
+
+    # Transform the geometry
+    if s_srs and t_srs and not SameSpatialRef(s_srs, t_srs):
+        s_srs = GetSpatialRef(s_srs)
+        t_srs = GetSpatialRef(t_srs)
+        if s_srs and s_srs.IsGeographic():
+            s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        if t_srs and t_srs.IsGeographic():
+            t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        transform = osr.CoordinateTransformation(s_srs, t_srs)
+        geom.Transform(transform)
+
+    return geom
 
 
 def GetExtent(filename, t_srs=None):

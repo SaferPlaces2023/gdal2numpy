@@ -132,6 +132,14 @@ class Test(unittest.TestCase):
         self.assertTrue(miny == 43.995)
         self.assertTrue(maxy == 44.055)
        
+    def test_poly_into4326(self):
+        """
+        test_poly_into4326
+        """
+        filetif = "https://s3.us-east-1.amazonaws.com/saferplaces.co/packages/gdal2numpy/open/CLSA_LiDAR.tif"
+        geom = PolygonFrom(filetif, t_srs="EPSG:4326")
+        minx, maxx, miny, maxy = geom.GetEnvelope()
+        print(minx, miny, maxx, maxy)
         
 
 if __name__ == '__main__':
