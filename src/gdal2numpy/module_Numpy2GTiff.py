@@ -74,10 +74,13 @@ def CalculateStats(ds):
     arr = ds.GetRasterBand(1).ReadAsArray()
     if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
         arr[arr <= -9999] = np.nan
-        minValue = float(np.nanmin(arr))
-        maxValue = float(np.nanmax(arr))
-        meanValue = float(np.nanmean(arr))
-        stdValue = float(np.nanstd(arr))
+        if np.any(~np.isnan(arr)):
+            minValue = float(np.nanmin(arr))
+            maxValue = float(np.nanmax(arr))
+            meanValue = float(np.nanmean(arr))
+            stdValue = float(np.nanstd(arr))
+        else:
+            minValue = maxValue = meanValue = stdValue = 0
         ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
 
 
