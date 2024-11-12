@@ -38,6 +38,8 @@ from .module_http import *
 from .module_open import get
 from .rasterlike import RasterLike
 from .rasterizelike import RasterizeLike
+from .polygonize import Polygonize
+from .dissolve import Dissolve
 from .module_gdal import *
 from .gdalwarp import gdalwarp
 from .gdal_translate import gdal_translate
