@@ -466,6 +466,7 @@ def move(src, dst, client=None):
     exts = []
     if src.endswith(".shp"):
         exts = list(shpext)
+        exts.remove("shp")
     elif src.endswith(".tif"):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         
