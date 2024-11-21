@@ -62,7 +62,7 @@ def gdalwarp(filelist,
              format="GTiff",
              ot=None,
              dstNodata=None,
-             stats=True):
+             stats=False):
     """
     gdalwarp
     """
@@ -146,12 +146,12 @@ def gdalwarp(filelist,
         Logger.debug(f"gdalwarp: fixing nodata value to {dstNodata}")
         GDALFixNoData(filetmp, format=format, nodata = dstNodata)
     
+    if stats:
+        CalculateStats(filetmp)
+        move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
+
     # moving the filetmp to fileout
     move(filetmp, fileout)
-    
-    if stats:
-        os.system(f"gdalinfo -stats {filetmp}")
-        move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
 
     Logger.debug(
         f"gdalwarp: converted to {fileout} in {total_seconds_from(t0)} s.")
