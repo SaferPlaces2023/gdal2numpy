@@ -224,7 +224,7 @@ def SetTag(filename, tagname, tagvalue="", band=0):
     """
     if israster(filename):
         gdal.DontUseExceptions()
-        ds = OpenRaster(filename, gdalconst.GA_Update)
+        ds = OpenRaster(filename) #, gdalconst.GA_Update)
         if ds:
             if tagname:
                 if not band:
