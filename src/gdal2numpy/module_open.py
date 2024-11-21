@@ -127,6 +127,13 @@ def OpenRaster(filename, update=0):
             filename = f"/vsirar/{filename}"
     else:
         return None
+
+    if isinstance(filename, gdal.Dataset):
+        return ds
     
-    ds = ds if isinstance(filename, gdal.Dataset) else gdal.Open(filename, update)
+    if update>0:
+        ds = gdal.OpenEx(filename, open_options=['IGNORE_COG_LAYOUT_BREAK=YES'])
+    else:
+        ds = gdal.Open(filename)
+
     return ds
