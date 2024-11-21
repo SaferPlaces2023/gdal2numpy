@@ -70,6 +70,7 @@ def CalculateStats(ds):
     :return:
     """
     # Set the statistics
+    ds = OpenRaster(ds)
     dtype = ds.GetRasterBand(1).DataType
     arr = ds.GetRasterBand(1).ReadAsArray()
     if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):

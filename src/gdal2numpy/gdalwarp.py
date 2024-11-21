@@ -27,6 +27,7 @@ from osgeo import gdal, gdalconst
 from .filesystem import juststem, tempfilename, listify
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_meta import GetNoData, GDALFixNoData
+from .module_Numpy2GTiff import CalculateStats
 from .module_s3 import *
 from .gdal_translate import dtypeOf
 from .module_log import Logger
@@ -60,7 +61,8 @@ def gdalwarp(filelist,
              resampleAlg="near",
              format="GTiff",
              ot=None,
-             dstNodata=None):
+             dstNodata=None,
+             stats=True):
     """
     gdalwarp
     """
@@ -143,12 +145,16 @@ def gdalwarp(filelist,
     if dstNodata is not None and GetNoData(filetmp) != dstNodata:
         Logger.debug(f"gdalwarp: fixing nodata value to {dstNodata}")
         GDALFixNoData(filetmp, format=format, nodata = dstNodata)
-
+    
     # moving the filetmp to fileout
     move(filetmp, fileout)
+    
+    if stats:
+        os.system(f"gdalinfo -stats {filetmp}")
+        move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
 
     Logger.debug(
-        f"gdalwarp: converted to {filetmp} in {total_seconds_from(t0)} s.")
+        f"gdalwarp: converted to {fileout} in {total_seconds_from(t0)} s.")
 
     # clean the cutline file
     remove(cutline_tmp)
