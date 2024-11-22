@@ -62,7 +62,7 @@ def gdalwarp(filelist,
              format="GTiff",
              ot=None,
              dstNodata=None,
-             stats=False):
+             stats=True):
     """
     gdalwarp
     """
