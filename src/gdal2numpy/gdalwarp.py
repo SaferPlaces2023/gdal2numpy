@@ -147,7 +147,7 @@ def gdalwarp(filelist,
         GDALFixNoData(filetmp, format=format, nodata = dstNodata)
     
     if stats:
-        CalculateStats(filetmp)
+        os.system(f'gdalinfo -stats "{filetmp}"')
         move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
 
     # moving the filetmp to fileout
