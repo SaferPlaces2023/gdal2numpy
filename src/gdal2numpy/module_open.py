@@ -125,11 +125,10 @@ def OpenRaster(filename, update=0):
             filename = f"/vsi7z/{filename}"
         elif ".rar/" in filename.lower():
             filename = f"/vsirar/{filename}"
+    elif isinstance(filename, gdal.Dataset):
+        return ds
     else:
         return None
-
-    if isinstance(filename, gdal.Dataset):
-        return ds
     
     if update>0:
         ds = gdal.OpenEx(filename, open_options=['IGNORE_COG_LAYOUT_BREAK=YES'])
