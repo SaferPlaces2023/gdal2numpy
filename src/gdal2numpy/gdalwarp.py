@@ -147,8 +147,8 @@ def gdalwarp(filelist,
         Logger.debug(f"gdalwarp: fixing nodata value to {dstNodata}")
         GDALFixNoData(filetmp, format=format, nodata = dstNodata)
     
-    if stats:
-        #os.system(f'gdalinfo -stats "{filetmp} >nul"')
+    if stats and isfile(filetmp):
+        #os.system(f'gdalinfo -stats "{filetmp}"')
         subprocess.run(f'gdalinfo -stats "{filetmp}', shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
 
