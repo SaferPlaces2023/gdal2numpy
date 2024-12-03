@@ -81,8 +81,10 @@ class Test(unittest.TestCase):
         file1 = f"{workdir}/12_2k_0015.tif"
         file2 = f"{workdir}/12_2k_0016.tif"
         fileout = f"{workdir}/12_2k_0015_0016.tif"
+        fileaux = f"{workdir}/12_2k_0015_0016.tif.aux.xml"
         gdalwarp([file1, file2], fileout, dstSRS=filedem, format="GTiff") #, cutline=[783785, 4885325 , 784795, 4886006])
         self.assertTrue(isfile(fileout))
+        self.assertTrue(isfile(fileaux))
 
     # def test_if_is_cog(self):
     #     """

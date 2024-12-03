@@ -149,7 +149,7 @@ def gdalwarp(filelist,
     
     if stats and isfile(filetmp):
         #os.system(f'gdalinfo -stats "{filetmp}"')
-        subprocess.run(f'gdalinfo -stats "{filetmp}', shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
 
     # moving the filetmp to fileout
