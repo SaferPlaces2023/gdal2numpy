@@ -70,7 +70,6 @@ def http_get(url, headers={}, mode="text"):
     if url and isinstance(url, str) and url.startswith("http"):
         try:
             with requests.get(url, headers=headers) as response:
-                print(response.status_code)
                 if response.status_code == 200:
                     if mode == "json":
                         return response.json()

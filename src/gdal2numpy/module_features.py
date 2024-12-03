@@ -392,7 +392,6 @@ def SaveFeatures(features, fileshp):
             
             # properties = { "dtm":1.5 , "hello":"world"}
             for name in properties:
-                print(f"<{name}>")
                 dtype, dwidth = (f"{properties[name]}:0").split(":")
                 p, w = math.modf(float(dwidth))
                 p, w = int(p), int(w)
