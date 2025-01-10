@@ -290,47 +290,25 @@ def Transform(fileshp, t_srs, fileout=None):
     return False
 
 
-def QueryByPoint(file_shp, point):
+def QueryByOsmid(file_shp, osmid):
     """
-    QueryByPoint - Search the closest geometry to the point
+    QueryByAttribute - Search for alla features that have the attribute osmid=value
     fileshp: shapefile path
-    point: [lon, lat] in EPSG:4326
+    osmid: the value of the attribute
     """
-    closest_geometry_id = None
-
-    lon, lat = point
-    point = ogr.Geometry(ogr.wkbPoint)
-    point.AddPoint(lon, lat)  # Replace 'x' and 'y' with your point coordinates
     # Open the shapefile
+    features = []
     ds = OpenShape(file_shp, 0)
     if ds:
         layer = ds.GetLayer(0)
-        t_srs = layer.GetSpatialRef()
-
-        s_srs = osr.SpatialReference()
-        s_srs.ImportFromEPSG(4326)
-        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-        # Transform the point into the same projection system as the layer
-        if not SameSpatialRef(t_srs, s_srs):
-            transform = osr.CoordinateTransformation(s_srs, t_srs)
-            point.Transform(transform)
-
-        closest_distance = float('inf')
-
         layer.ResetReading()
-        for feature in layer:
-            geometry = feature.GetGeometryRef()
-            # Corto citcuito if the point is inside the geometry
-            if point.Intersects(geometry):
-                return feature.GetFID()
+        layer.SetAttributeFilter(f"osmid={osmid}")
+        features = [feature for feature in layer]
+        ds = None
+        
+    return features
 
-            distance = point.Distance(geometry)
-            if distance < closest_distance:
-                closest_distance = distance
-                closest_geometry_id = feature.GetFID()
 
-    return closest_geometry_id
 
 
 def CreateGeometryFromJson(geojson):

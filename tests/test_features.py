@@ -56,6 +56,16 @@ class TestFeatures(unittest.TestCase):
         self.assertEqual(GetFeatureCount(fileout), GetFeatureCount(fileshp))
         os.remove(fileout)
 
+    def test_query_by_osmid(self):
+        """
+        test_query_by_osmid: test that the function returns the correct features
+        """
+        fileshp = "OSM_BUILDINGS_091244.shp"
+        features = QueryByOsmid(fileshp, osmid=11)
+        for feature in features:
+            print(feature.GetField("descr"))
+        self.assertEqual(len(features), 1)
+
 
 if __name__ == '__main__':
     unittest.main()
