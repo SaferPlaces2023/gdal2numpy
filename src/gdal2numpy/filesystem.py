@@ -366,6 +366,15 @@ def lock(filename, username):
         f.write(f"{username},{datetime.datetime.now()}")
 
 
+def unlock(filename):
+    """
+    unlock - remove the lock file
+    """
+    filelock = forceext(filename, "lock")
+    if os.path.isfile(filelock):
+        os.unlink(filelock)
+
+
 def is_locked(filename, username, timeout=60):
     """
     is_locked - check if the file is locked
