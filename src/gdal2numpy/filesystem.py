@@ -393,3 +393,15 @@ def is_locked(filename, username, timeout=60):
                     # remove the lock file
                     os.unlink(filelock)
     return locked
+
+
+def locked_by(filename):
+    """
+    locked_by - get the locker
+    """
+    filelock = forceext(filename, "lock")
+    if os.path.isfile(filelock):
+        with open(filelock, "r", encoding="utf-8") as f:
+            locker, _ = f.read().split(",")
+            return locker
+    return None
