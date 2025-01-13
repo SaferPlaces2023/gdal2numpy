@@ -353,3 +353,33 @@ def md5sum(filename):
         return res
     else:
         return ""
+
+
+def lock(filename, username):
+    """
+    lock - create a lock file
+    """
+    filelock = forceext(filename, "lock")
+    #get pid
+    username = username or f"{os.getpid()}"
+    with open(filelock, "w", encoding="utf-8") as f:
+        f.write(f"{username},{datetime.datetime.now()}")
+
+
+def is_locked(filename, username, timeout=60):
+    """
+    is_locked - check if the file is locked
+    """
+    locked = False
+    filelock = forceext(filename, "lock")
+    if os.path.isfile(filelock):
+        with open(filelock, "r", encoding="utf-8") as f:
+            locker, locktime = f.read().split(",")
+            if locker != username:
+                locktime = datetime.datetime.strptime(locktime, "%Y-%m-%d %H:%M:%S.%f")
+                if (datetime.datetime.now() - locktime).total_seconds() < 5 * 60:
+                    locked = True
+                else:
+                    # remove the lock file
+                    os.unlink(filelock)
+    return locked
