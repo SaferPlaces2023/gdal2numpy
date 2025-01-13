@@ -371,13 +371,14 @@ def is_locked(filename, username, timeout=60):
     is_locked - check if the file is locked
     """
     locked = False
+    timeout = timeout or 60
     filelock = forceext(filename, "lock")
     if os.path.isfile(filelock):
         with open(filelock, "r", encoding="utf-8") as f:
             locker, locktime = f.read().split(",")
             if locker != username:
                 locktime = datetime.datetime.strptime(locktime, "%Y-%m-%d %H:%M:%S.%f")
-                if (datetime.datetime.now() - locktime).total_seconds() < 5 * 60:
+                if (datetime.datetime.now() - locktime).total_seconds() < timeout:
                     locked = True
                 else:
                     # remove the lock file
