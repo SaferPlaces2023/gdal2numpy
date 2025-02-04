@@ -131,7 +131,8 @@ def OpenRaster(filename, update=0):
         return None
     
     if update>0:
-        ds = gdal.OpenEx(filename, open_options=['IGNORE_COG_LAYOUT_BREAK=YES'])
+        #ds = gdal.OpenEx(filename, open_options=['IGNORE_COG_LAYOUT_BREAK=YES'])
+        ds = gdal.OpenEx(filename)
     else:
         ds = gdal.Open(filename)
 
