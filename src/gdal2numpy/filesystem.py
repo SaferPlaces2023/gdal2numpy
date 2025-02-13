@@ -265,8 +265,8 @@ def strtofile(text, filename, append=False):
             text = text.encode("utf-8")
         if isinstance(text, (bytes,)):
             flag += 'b'
-        mkdirs(justpath(filename))
-        with open(filename, flag) as stream:
+        os.makedirs(justpath(filename), exist_ok=True)
+        with open(filename, flag, encoding="utf-8") as stream:
             if text:
                 stream.write(text)
     except OSError as ex:
@@ -360,7 +360,8 @@ def lock(filename, username):
     lock - create a lock file
     """
     filelock = forceext(filename, "lock")
-    #get pid
+    os.makedirs(justpath(filelock), exist_ok=True)
+    #get pid if username is not provided
     username = username or f"{os.getpid()}"
     with open(filelock, "w", encoding="utf-8") as f:
         f.write(f"{username},{datetime.datetime.now()}")

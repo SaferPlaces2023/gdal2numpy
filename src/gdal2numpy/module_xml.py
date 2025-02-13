@@ -52,7 +52,7 @@ def parseQMD(filename):
     metadata = parseXML(fileqmd)
     if metadata:
         qgis = metadata["qgis"] if "qgis" in metadata else {}
-        if qgis:
+        if qgis and "keywords" in qgis:
             keywords = listify(qgis["keywords"])
             for item in keywords:
                 key = item["@vocabulary"]
