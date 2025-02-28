@@ -197,10 +197,13 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
                 data = np.array(arr)
                 data[data == save_nodata_as] = np.nan
-                minValue = float(np.nanmin(data))
-                maxValue = float(np.nanmax(data))
-                meanValue = float(np.nanmean(data))
-                stdValue = float(np.nanstd(data))
+                if np.all(np.isnan(data)):
+                    minValue = maxValue = meanValue = stdValue = 0
+                else:
+                    minValue = float(np.nanmin(data))
+                    maxValue = float(np.nanmax(data))
+                    meanValue = float(np.nanmean(data))
+                    stdValue = float(np.nanstd(data))
                 ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
             # ---
 
