@@ -274,16 +274,17 @@ def Transform(fileshp, t_srs, fileout=None):
         # Copy and transform each feature
         for feature in layer:
             transformed = feature.GetGeometryRef()
-            transformed.Transform(transform)
+            if transformed:
+                transformed.Transform(transform)
 
-            geom = ogr.CreateGeometryFromWkb(transformed.ExportToWkb())
-            defn = outlayer.GetLayerDefn()
-            new_feature = ogr.Feature(defn)
-            for j in range(defn.GetFieldCount()):
-                new_feature.SetField(j, feature.GetField(j))
-            new_feature.SetGeometry(geom)
-            outlayer.CreateFeature(new_feature)
-            new_feature = None
+                geom = ogr.CreateGeometryFromWkb(transformed.ExportToWkb())
+                defn = outlayer.GetLayerDefn()
+                new_feature = ogr.Feature(defn)
+                for j in range(defn.GetFieldCount()):
+                    new_feature.SetField(j, feature.GetField(j))
+                new_feature.SetGeometry(geom)
+                outlayer.CreateFeature(new_feature)
+                new_feature = None
 
         ds, dw = None, None
         return fileout

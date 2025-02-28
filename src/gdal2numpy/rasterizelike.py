@@ -109,26 +109,26 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
             # f is the feature in the memory layer & it has FID field
             f = ogr.Feature(layer.GetLayerDefn())
             geom = feature.GetGeometryRef()
+            if geom:
+                # # Transform the geometry if it is not in the same projection as the raster
+                if not SameSpatialRef(s_srs, t_srs):
+                    # Logger.debug(f"Transforming geometry from {s_srs} to {t_srs}")
+                    transform = osr.CoordinateTransformation(s_srs, t_srs)
+                    geom.Transform(transform)
 
-            # # Transform the geometry if it is not in the same projection as the raster
-            if not SameSpatialRef(s_srs, t_srs):
-                # Logger.debug(f"Transforming geometry from {s_srs} to {t_srs}")
-                transform = osr.CoordinateTransformation(s_srs, t_srs)
-                geom.Transform(transform)
+                # add buffer
+                # solo per i poligoni
+                if buf > 0 and geom.GetGeometryType() == ogr.wkbPolygon or geom.GetGeometryType() == ogr.wkbMultiPolygon:
+                    buffer = geom.Buffer(buf)
+                else:
+                    buffer = geom
 
-            # add buffer
-            # solo per i poligoni
-            if buf > 0 and geom.GetGeometryType() == ogr.wkbPolygon or geom.GetGeometryType() == ogr.wkbMultiPolygon:
-                buffer = geom.Buffer(buf)
-            else:
-                buffer = geom
-
-            f.SetFrom(feature)
-            f.SetGeometry(buffer)
-            f.SetField("FID", feature.GetFID())
-            for j in range(layer_defn.GetFieldCount()):
-                f.SetField(layer_defn.GetFieldDefn(j).GetNameRef(), feature.GetField(j))
-            layer.CreateFeature(f)
+                f.SetFrom(feature)
+                f.SetGeometry(buffer)
+                f.SetField("FID", feature.GetFID())
+                for j in range(layer_defn.GetFieldCount()):
+                    f.SetField(layer_defn.GetFieldDefn(j).GetNameRef(), feature.GetField(j))
+                layer.CreateFeature(f)
         #-----------------------------------------------------------------------
         # Create the destination data source
         options = [
