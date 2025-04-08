@@ -5,7 +5,7 @@ dist
 .idea/*
 venv
 py12
-tests/__pycache__
+**/__pycache__
 tests/*.tif
 tests/*.shp
 tests/*.shx
