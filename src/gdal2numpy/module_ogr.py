@@ -181,6 +181,18 @@ def GetDataType(filename):
     return None
 
 
+def GetBandCount(filename):
+    """
+    GetBandCount
+    """
+    ds = OpenRaster(filename)
+    if ds:
+        bandcount = ds.RasterCount
+        ds = None
+        return bandcount
+    return 0
+
+
 def AutoIdentify(wkt):
     """
     AutoIdentify

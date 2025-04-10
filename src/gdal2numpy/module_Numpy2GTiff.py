@@ -227,6 +227,115 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
             return filetif
     return None
 
+def Numpy2GTiffMultiBanda(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, metadata=None, verbose=False):
+    """
+    Numpy2GTiffMultiBanda - Write a numpy array in  a GTiff file
+    :param arr: the numpy array
+    :param gt:  the geotransform array (x0, px, r0, y0, r1, py)
+    :param prj: the proj4 string
+    :param fileout: the output filename
+    :param format: the format GTiff/COG/etc...
+    :param save_nodata_as: the nodata
+    :param metadata:
+    :return: returns the pathname
+    """
+    GDT = {
+        'uint8': gdal.GDT_Byte,
+        'uint16': gdal.GDT_UInt16,
+        'uint32': gdal.GDT_UInt32,
+        'int16': gdal.GDT_Int16,
+        'int32': gdal.GDT_Int32,
+
+        'float32': gdal.GDT_Float32,
+        'float64': gdal.GDT_Float64
+    }
+
+    if format.upper() == "GTIFF":
+        CO = ["BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=512", "BLOCKYSIZE=512", "COMPRESS=LZW"]
+    elif format.upper() == "COG":
+        CO = ["BIGTIFF=YES", "COMPRESS=LZW", "NUM_THREADS=ALL_CPUS"]
+    else:
+        CO = []
+
+
+    if isinstance(arr, np.ndarray):
+        
+        if len(arr.shape) == 2:
+            rows, cols = arr.shape
+            nb = 1
+            arr = np.array([arr])
+        elif len(arr.shape) == 3:
+            nb, rows, cols = arr.shape
+        else:
+            Logger.error("The array must be 2D or 3D")
+            return None
+
+        if rows > 0 and cols > 0:
+            dtype = str(arr.dtype).lower()
+            dtype = GDT[dtype] if dtype in GDT else gdal.GDT_Float64
+
+            driver = gdal.GetDriverByName("COG")
+            cog = driver and f"{format}".upper() == "COG"
+
+            drivername = "GTiff" if not cog else "MEM"
+            MEM_CO = CO if not cog else []
+
+            # Check if fileout is a S3 path
+            filetif = tempname4S3(fileout) if iss3(fileout) else fileout
+            # ----
+            # Create the path to fileout if not exists
+            os.makedirs(justpath(filetif), exist_ok=True)
+
+            # Create the output dataset
+            driver = gdal.GetDriverByName(drivername)  # GTiff or MEM
+            ds = driver.Create(filetif, cols, rows, nb, dtype, MEM_CO)  # fileout is ignore if MEM
+
+            if gt is not None:
+                ds.SetGeoTransform(gt)
+            if prj is not None:
+                if not isWkt(prj):
+                    srs = GetSpatialRef(prj)
+                    prj = srs.ExportToWkt()
+                ds.SetProjection(prj)
+            if metadata is not None:
+                ds.SetMetadata(metadata)
+                # ds.GetRasterBand(1).SetMetadata(metadata) set metadata to the specified band
+
+            # Set the statistics
+            if dtype in (gdal.GDT_Float32, gdal.GDT_Float64):
+                for b in range(nb):
+                    data = np.array(arr[b, :, :])
+                    data[data == save_nodata_as] = np.nan
+                    if np.all(np.isnan(data)):
+                        minValue = maxValue = meanValue = stdValue = 0
+                    else:
+                        minValue  = float(np.nanmin(data))
+                        maxValue  = float(np.nanmax(data))
+                        meanValue = float(np.nanmean(data))
+                        stdValue  = float(np.nanstd(data))
+                    ds.GetRasterBand(b+1).SetStatistics(minValue, maxValue, meanValue, stdValue)
+                    # ---
+                    # Finally write each band to the dataset
+                    ds.GetRasterBand(b+1).SetNoDataValue(save_nodata_as)
+                    ds.GetRasterBand(b+1).WriteArray(data)
+
+            if cog:
+                Logger.debug(f"Creating a COG..{CO}")
+                driver = gdal.GetDriverByName("COG")
+                # ds.BuildOverviews('NEAREST', [2, 4, 8, 16, 32])
+                ds.BuildOverviews("NEAREST", CalculateOverviews(ds))
+                dst_ds = driver.CreateCopy(filetif, ds, False, CO)
+                ds = dst_ds
+
+            ds.FlushCache()
+            ds = None
+
+            if iss3(fileout):
+                move(filetif, fileout)
+
+            return filetif
+    return None
+
 
 def Numpy2AAIGrid(data, gt, prj, filename, save_nodata_as=-9999, format=" %.5g"):
     """
