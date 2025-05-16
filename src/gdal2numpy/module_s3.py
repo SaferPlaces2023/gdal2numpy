@@ -63,7 +63,7 @@ def israster(pathname):
     """
     israster
     """
-    return pathname and isfile(pathname) and justext(pathname).lower() in ("tif","tiff")
+    return pathname and isfile(pathname) and justext(pathname).lower() in ("tif","tiff","vrt")
 
 
 def isshape(filename):
