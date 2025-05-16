@@ -26,7 +26,7 @@ import os
 from osgeo import ogr, gdal
 from .filesystem import filetostr, normshape
 from .module_log import Logger
-from .module_s3 import isshape, s3_get
+from .module_s3 import isshape, israster, s3_get
 from .module_http import http_get
 
 def get(uri):
@@ -101,7 +101,7 @@ def OpenRaster(filename, update=0):
     """
     if not filename:
         return None
-    elif isinstance(filename, str) and filename.lower().endswith(".tif"):
+    elif isinstance(filename, str) and israster(filename):
        
         if os.path.isfile(filename):
             pass
