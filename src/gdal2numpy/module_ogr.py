@@ -134,15 +134,16 @@ def GetPixelSize(filename, um="m"):
         prj = ds.GetProjection()
         ds = None
 
-        # srs = osr.SpatialReference()
-        # srs.ImportFromProj4(prj)
         srs = GetSpatialRef(prj)
 
         if srs.IsGeographic() and um == "m":
             dx = Haversine(maxy, minx, maxy, minx + px * n) / n
             dy = Haversine(maxy, minx, maxy + m * py, minx) / m
             return round(dx, 1), round(dy, 1)
-
+        elif srs.IsProjected() and um == "dg":
+            px = px*1e-5
+            py = py*1e-5
+            return round(px, 6), round(py, 6)
         return px, abs(py)
 
     return None, None
