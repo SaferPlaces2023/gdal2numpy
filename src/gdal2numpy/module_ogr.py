@@ -338,9 +338,12 @@ def GetSpatialRef(filename):
         ds = OpenRaster(filename)
         if ds:
             wkt = ds.GetProjection()
+            print(wkt)
             srs = osr.SpatialReference()
             srs.ImportFromWkt(wkt)
+            print("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
             srs.AutoIdentifyEPSG()
+            print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     else:
         srs = None
 
