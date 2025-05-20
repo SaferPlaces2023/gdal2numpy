@@ -361,8 +361,6 @@ def SameSpatialRef(filename1, filename2):
     """
     SameSpatialRef
     """
-    print(f"SameSpatialRef: {filename1}, {filename2}")
-    print("========================================================")
     srs1 = GetSpatialRef(filename1)
     srs2 = GetSpatialRef(filename2)
     if srs1 and srs2:
