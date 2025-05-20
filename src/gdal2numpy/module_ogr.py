@@ -292,6 +292,16 @@ def isWkt(wkt):
     return False
 
 
+def AutoIdentifyEPSG(srs):
+    if isinstance(srs, osr.SpatialReference):
+        try:
+            srs.AutoIdentifyEPSG()
+        except Exception as e:
+            Logger.error(f"AutoIdentifyEPSG: {e}")
+            return None
+    return srs
+
+
 def GetSpatialRef(filename):
     """
     GetSpatialRef
@@ -303,19 +313,19 @@ def GetSpatialRef(filename):
     elif isinstance(filename, int):
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(filename)
-        srs.AutoIdentifyEPSG()
+        AutoIdentifyEPSG(srs)
 
     elif isEPSG(filename):
         code = int(filename.split(":")[1])
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(code)
-        srs.AutoIdentifyEPSG()
+        AutoIdentifyEPSG(srs)
 
     elif isProj4(filename):
         proj4text = filename
         srs = osr.SpatialReference()
         srs.ImportFromProj4(proj4text)
-        srs.AutoIdentifyEPSG()
+        AutoIdentifyEPSG(srs)
 
     elif isWkt(filename):
         wkt = filename
@@ -326,24 +336,21 @@ def GetSpatialRef(filename):
             srs.ImportFromEPSG(code)
         else:
             srs.ImportFromWkt(wkt)
-            srs.AutoIdentifyEPSG()
+            AutoIdentifyEPSG(srs)
 
     elif isinstance(filename, str) and isshape(filename):
         ds = OpenShape(filename)
         if ds:
             srs = ds.GetLayer().GetSpatialRef()
-            srs.AutoIdentifyEPSG()
+            AutoIdentifyEPSG(srs)
 
     elif isinstance(filename, str) and israster(filename):
         ds = OpenRaster(filename)
         if ds:
             wkt = ds.GetProjection()
-            print(wkt)
             srs = osr.SpatialReference()
             srs.ImportFromWkt(wkt)
-            print("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
-            srs.AutoIdentifyEPSG()
-            print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+            AutoIdentifyEPSG(srs)
     else:
         srs = None
 
