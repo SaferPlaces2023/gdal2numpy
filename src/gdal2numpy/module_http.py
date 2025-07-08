@@ -44,7 +44,7 @@ def whatsmyip():
             "https://api.ipify.org"]
     for uri in uris:
         try:
-            return requests.get(uri).text.strip()
+            return requests.get(uri, timeout=5).text.strip()
         except requests.exceptions.RequestException:
             continue
     return None
@@ -56,10 +56,10 @@ def http_exists(url):
     """
     if isinstance(url, str) and url.startswith("http"):
         try:
-            r = requests.head(url)
-            return r.status_code == requests.codes.ok
+            r = requests.head(url, timeout=5)
+            return r.status_code == 200
         except Exception as ex:
-            Logger.warn(ex)
+            Logger.warning(ex)
     return False
 
 
@@ -69,7 +69,7 @@ def http_get(url, headers={}, mode="text"):
     """
     if url and isinstance(url, str) and url.startswith("http"):
         try:
-            with requests.get(url, headers=headers) as response:
+            with requests.get(url, headers=headers, timeout=5) as response:
                 if response.status_code == 200:
                     if mode == "json":
                         return response.json()
