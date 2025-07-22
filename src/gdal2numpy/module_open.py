@@ -47,29 +47,29 @@ def OpenShape(fileshp, exclusive=False):
     OpenDataset
     """
     if not fileshp:
-        Logger.debug(f"0) {fileshp}...")
+        Logger.debug("0) %s...", fileshp)
         ds = None
     elif isinstance(fileshp, str) and fileshp.startswith("http")  and ".shp" in fileshp.lower():
-        Logger.debug(f"1) Inspect file from https...")
+        Logger.debug("1) Inspect file from https...")
         fileshp = normshape(fileshp)
-        ds = ogr.Open(f"/vsicurl/{fileshp}", exclusive)
+        ds = ogr.Open("/vsicurl/%s exclusive", fileshp)
     elif isinstance(fileshp, str) and os.path.isfile(fileshp) and ".shp" in fileshp.lower():
-        Logger.debug(f"2) Opening local {fileshp}...")
+        Logger.debug("2) Opening local %s...", fileshp)
         fileshp = normshape(fileshp)
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, str) and isshape(fileshp):
-        Logger.debug(f"3) Get file from s3...")
+        Logger.debug("3) Get file from s3...")
         fileshp = fileshp.replace("s3://", "/vsis3/")
         fileshp = normshape(fileshp)
         ds = ogr.Open(fileshp, exclusive)
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) >= exclusive:
-        Logger.debug(f"4) Dataset already open...")
+        Logger.debug("4) Dataset already open...")
         ds = fileshp
     elif isinstance(fileshp, ogr.DataSource) and GetAccess(fileshp) < exclusive:
-        Logger.debug(f"5) Change the open mode: Open({exclusive})")
+        Logger.debug("5) Change the open mode: Open(%s)", exclusive)
         ds = ogr.Open(fileshp.GetName(), exclusive)
     else:
-        Logger.debug(f"999) {fileshp} is not a valid shapefile")
+        Logger.debug("999) %s is not a valid shapefile", fileshp)
         ds = None
     return ds
 
@@ -130,6 +130,7 @@ def OpenRaster(filename, update=0):
     else:
         return None
     
+    gdal.UseExceptions()
     ds = gdal.Open(filename, update)
 
     return ds

@@ -21,16 +21,15 @@ class Test(unittest.TestCase):
         """
         test_open: 
         """
-        
         ds = OpenShape(fileshp)
         self.assertTrue(ds is not None)
         self.assertEqual(GetFeatureCount(ds), 23989)
+    
 
     def test_open_raster(self):
         """
         test_open: 
         """
-        
         ds = OpenRaster(filetif)
         self.assertTrue(ds is not None)
         self.assertEqual(ds.RasterCount, 1)

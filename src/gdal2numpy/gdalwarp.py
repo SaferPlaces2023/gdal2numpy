@@ -118,7 +118,7 @@ def gdalwarp(filelist,
         kwargs["yRes"] = abs(pixelsize[1])
 
     if len(filelist) == 1 and SameSpatialRef(filelist_tmp[0], dstSRS):
-        Logger.debug(f"Avoid reprojecting {filelist[0]}")
+        Logger.debug("Avoid reprojecting %s",filelist[0])
     elif dstSRS:
         kwargs["dstSRS"] = GetSpatialRef(dstSRS)
 

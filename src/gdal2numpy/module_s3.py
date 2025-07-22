@@ -24,10 +24,10 @@
 # -------------------------------------------------------------------------------
 import os
 import hashlib
-import boto3
 import shutil
 import fnmatch
-from pathlib import Path
+import warnings
+import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
 from .module_http import http_exists
@@ -115,8 +115,11 @@ def s3_get(uri, client=None):
     bucket_name, key_name = get_bucket_name_key(uri)
     if bucket_name and key_name:
         try:
-            client = get_client(client)
-            return client.get_object(Bucket=bucket_name, Key=key_name)['Body'].read().decode('utf-8')
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=DeprecationWarning)
+                # Get the object from S3
+                client = get_client(client)
+                return client.get_object(Bucket=bucket_name, Key=key_name)['Body'].read().decode('utf-8')
         except ClientError as ex:
             Logger.error(ex)
     return None
@@ -249,10 +252,10 @@ def s3_download(uri, fileout=None, remove_src=False, client=None):
                     fileout = f"{fileout}/{justfname(key)}"
 
                 if os.path.isfile(fileout) and s3_equals(uri, fileout, client):
-                    Logger.debug(f"using cached file {fileout}")
+                    Logger.debug("using cached file %s", fileout)
                 else:
                     # Download the file
-                    Logger.debug(f"downloading {uri} into {fileout}...")
+                    Logger.debug("downloading %s into %s...", uri, fileout)
                     os.makedirs(justpath(fileout), exist_ok=True)
                     client.download_file(
                         Filename=fileout, Bucket=bucket_name, Key=key)
@@ -270,7 +273,7 @@ def s3_download(uri, fileout=None, remove_src=False, client=None):
                                     f"{dst}/{pathname}", client)
 
         except ClientError as ex:
-            #Logger.error(ex)
+            Logger.error(ex)
             return None
         except NoCredentialsError as ex:
             Logger.error(ex)
@@ -288,8 +291,10 @@ def s3_exists(uri, client=None):
         bucket_name, filepath = get_bucket_name_key(uri)
         if bucket_name and filepath:
             client = get_client(client)
-            client.head_object(Bucket=bucket_name, Key=filepath)
-            res = True
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=DeprecationWarning)
+                client.head_object(Bucket=bucket_name, Key=filepath)
+                res = True
     except ClientError as ex:
         pass
         #Logger.error(ex)
@@ -374,7 +379,9 @@ def s3_list(uri, etag=False, client=None):
         Logger.debug(bucket_name, key_name)
         if bucket_name and key_name:
             client = get_client(client)
-            response = client.list_objects_v2(Bucket=bucket_name, Prefix=key_name)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=DeprecationWarning)
+                response = client.list_objects_v2(Bucket=bucket_name, Prefix=key_name)
             for obj in response['Contents']:
                 if fnmatch.fnmatch(obj['Key'], pattern):
                     item = f"s3://{bucket_name}/{obj['Key']}"
