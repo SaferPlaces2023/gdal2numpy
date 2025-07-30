@@ -131,6 +131,11 @@ def OpenRaster(filename, update=0):
         return None
     
     gdal.UseExceptions()
-    ds = gdal.Open(filename, update)
-
+    if update:
+        # open in update mode
+        ds = gdal.OpenEx(filename, gdal.OF_UPDATE, open_options=['IGNORE_COG_LAYOUT_BREAK=YES'])
+    else:
+        # open in read-only mode
+        ds = gdal.Open(filename, update)
+        
     return ds
