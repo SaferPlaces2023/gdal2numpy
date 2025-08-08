@@ -177,8 +177,9 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
 
         data = band.ReadAsArray(0, 0, n, m)
 
-        if fileout:
-            Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=nodata)
+        # this cause a error beacuse fileout is already Created 
+        # if fileout:
+        #     Numpy2GTiff(data, gt, prj, fileout, save_nodata_as=nodata)
 
         ds, vector, target_ds = None, None, None
         return data, gt, prj
