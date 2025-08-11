@@ -52,7 +52,7 @@ def OpenShape(fileshp, exclusive=False):
     elif isinstance(fileshp, str) and fileshp.startswith("http")  and ".shp" in fileshp.lower():
         Logger.debug("1) Inspect file from https...")
         fileshp = normshape(fileshp)
-        ds = ogr.Open("/vsicurl/%s exclusive", fileshp)
+        ds = ogr.Open(f"/vsicurl/{fileshp}",exclusive)
     elif isinstance(fileshp, str) and os.path.isfile(fileshp) and ".shp" in fileshp.lower():
         Logger.debug("2) Opening local %s...", fileshp)
         fileshp = normshape(fileshp)
