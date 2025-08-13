@@ -23,13 +23,13 @@
 # Created:     16/06/2021
 # -------------------------------------------------------------------------------
 import os
-import subprocess
 from osgeo import gdal, gdalconst
-from .filesystem import juststem, tempfilename, listify
+from .filesystem import juststem, justpath, tempfilename, listify
+from .filesystem import now, total_seconds_from
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_meta import GetNoData, GDALFixNoData
 from .module_Numpy2GTiff import CalculateStats
-from .module_s3 import *
+from .module_s3 import copy, isfile, move, remove
 from .gdal_translate import dtypeOf
 from .module_log import Logger
 
@@ -118,7 +118,7 @@ def gdalwarp(filelist,
         kwargs["yRes"] = abs(pixelsize[1])
 
     if len(filelist) == 1 and SameSpatialRef(filelist_tmp[0], dstSRS):
-        Logger.debug("Avoid reprojecting %s",filelist[0])
+        Logger.debug("Avoid reprojecting %s", filelist[0])
     elif dstSRS:
         kwargs["dstSRS"] = GetSpatialRef(dstSRS)
 
@@ -144,23 +144,28 @@ def gdalwarp(filelist,
 
     # patch notdata value
     if dstNodata is not None and GetNoData(filetmp) != dstNodata:
-        Logger.debug(f"gdalwarp: fixing nodata value to {dstNodata}")
-        GDALFixNoData(filetmp, format=format, nodata = dstNodata)
-    
+        Logger.debug("gdalwarp: fixing nodata value to %s", dstNodata)
+        GDALFixNoData(filetmp, format=format, nodata=dstNodata)
+
     if stats and isfile(filetmp):
-        #os.system(f'gdalinfo -stats "{filetmp}"')
-        subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
+        # subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
+        try:
+            ds = gdal.Open(filetmp, gdalconst.GA_Update)
+            CalculateStats(ds)
+            ds = None
+        except Exception as ex:
+            Logger.error("gdalwarp: error calculating stats: %s", ex)
 
     # moving the filetmp to fileout
     move(filetmp, fileout)
 
-    Logger.debug(
-        f"gdalwarp: converted to {fileout} in {total_seconds_from(t0)} s.")
+    Logger.debug("gdalwarp: converted to %s in %.2fs.",
+                 fileout, total_seconds_from(t0))
 
     # clean the cutline file
     remove(cutline_tmp)
 
-    Logger.debug(f"gdalwarp: completed in {total_seconds_from(t0)} s.")
+    Logger.debug("gdalwarp: completed in %.2fs.", total_seconds_from(t0))
     # ----------------------------------------------------------------------
     return fileout

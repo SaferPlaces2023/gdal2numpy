@@ -70,6 +70,7 @@ def CalculateStats(ds):
     :return:
     """
     # Set the statistics
+    ds = OpenRaster(ds, gdalconst.GA_Update)
     if ds:
         dtype = ds.GetRasterBand(1).DataType
         arr = ds.GetRasterBand(1).ReadAsArray()
@@ -83,6 +84,7 @@ def CalculateStats(ds):
             else:
                 minValue = maxValue = meanValue = stdValue = 0
             ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
+    
 
 
 def GTiff2Cog(filetif, fileout=None, algo="NEAREST"):
