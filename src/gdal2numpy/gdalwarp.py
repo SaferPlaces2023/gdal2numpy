@@ -153,12 +153,14 @@ def gdalwarp(filelist,
     if stats and isfile(filetmp):
         # subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
-        try:
-            ds = gdal.Open(filetmp, gdalconst.GA_Update)
-            CalculateStats(ds)
-            ds = None
-        except Exception as ex:
-            Logger.error("gdalwarp: error calculating stats: %s", ex)
+        print("[GDALWARP] bypass calculating stats for", filetmp)
+        # try:
+        #     ds = gdal.Open(filetmp, gdalconst.GA_Update)
+        #     CalculateStats(ds)
+        #     ds = None
+        # except Exception as ex:
+        #     Logger.error("gdalwarp: error calculating stats: %s", ex)
+        pass
 
     # moving the filetmp to fileout
     move(filetmp, fileout)
