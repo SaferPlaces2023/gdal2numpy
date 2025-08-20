@@ -152,14 +152,16 @@ def gdalwarp(filelist,
     if dstNodata is not None and GetNoData(filetmp) != dstNodata:
         Logger.debug("gdalwarp: fixing nodata value to %s", dstNodata)
         GDALFixNoData(filetmp, format=format, nodata=dstNodata)
+        print("[GDALFixNoData] but fileprj:", os.path.exists(forceext(filetmp, "prj")))
 
     if stats and isfile(filetmp):
-        subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
+        #subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        #move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
         # try:
         #     CalculateStats(filetmp)
         # except Exception as ex:
         #     print(f"[GDALWARP]: error calculating stats: {ex}")
+        pass
 
     # moving the filetmp to fileout
     move(filetmp, fileout)
