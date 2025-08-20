@@ -478,8 +478,9 @@ def move(src, dst, client=None):
         exts = ["tfw", "jpw", "prj", "aux.xml"]
         
     for ext in exts:
-        print(f"moving {forceext(src, ext)} to {forceext(dst, ext)}")
-        move(forceext(src, ext), forceext(dst, ext), client=client)
+        if os.path.isfile(forceext(src, ext)):
+            print(f"moving {forceext(src, ext)} to {forceext(dst, ext)}")
+            move(forceext(src, ext), forceext(dst, ext), client=client)
 
     return dst
 
