@@ -42,6 +42,19 @@ def get(uri):
             return s3_get(uri)
     return None
 
+def is_cog(filename):
+    """
+    is_cog - check if the file is a COG
+    """
+    ds = OpenRaster(filename)
+    if ds:
+        img_struct = ds.GetMetadata("IMAGE_STRUCTURE") or {}
+        res = img_struct.get("LAYOUT", "").upper() == "COG"
+        Logger.debug("is_cog(%s) = %s", filename, res)
+        ds = None
+        return res
+    return False
+
 def OpenShape(fileshp, exclusive=False):
     """
     OpenDataset
@@ -131,7 +144,7 @@ def OpenRaster(filename, update=0):
         return None
     
     gdal.UseExceptions()
-    if update:
+    if update and is_cog(filename):
         # open in update mode
         ds = gdal.OpenEx(filename, update, open_options=['IGNORE_COG_LAYOUT_BREAK=YES'])
     else:
