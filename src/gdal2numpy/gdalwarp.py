@@ -23,6 +23,7 @@
 # Created:     16/06/2021
 # -------------------------------------------------------------------------------
 import os
+import subprocess
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, justpath, tempfilename, listify
 from .filesystem import now, total_seconds_from
@@ -151,12 +152,12 @@ def gdalwarp(filelist,
         GDALFixNoData(filetmp, format=format, nodata=dstNodata)
 
     if stats and isfile(filetmp):
-        # subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        # move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
-        try:
-            CalculateStats(filetmp)
-        except Exception as ex:
-            print(f"[GDALWARP]: error calculating stats: {ex}")
+        subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
+        # try:
+        #     CalculateStats(filetmp)
+        # except Exception as ex:
+        #     print(f"[GDALWARP]: error calculating stats: {ex}")
 
     # moving the filetmp to fileout
     move(filetmp, fileout)
