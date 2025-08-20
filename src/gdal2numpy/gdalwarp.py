@@ -138,7 +138,7 @@ def gdalwarp(filelist,
         gdal.PushErrorHandler('CPLQuietErrorHandler')
         gdal.Warp(filetmp, filelist_tmp, **kwargs)
     except Exception as ex:
-        Logger.error(ex)
+        print("[GDALWARP]",ex)
     finally:
         gdal.PopErrorHandler()
 
