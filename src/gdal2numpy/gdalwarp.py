@@ -138,7 +138,7 @@ def gdalwarp(filelist,
         gdal.PushErrorHandler('CPLQuietErrorHandler')
         print("[GDALWARP] out files:", filetmp)
         print("[GDALWARP] warping files:", filelist_tmp)
-        print("[GDALWARP] options:", kwargs)
+        print("[GDALWARP] dstSRS:", dstSRS)
         gdal.Warp(filetmp, filelist_tmp, **kwargs)
     except Exception as ex:
         print("[GDALWARP]",ex)
