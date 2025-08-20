@@ -26,7 +26,7 @@ import os
 import subprocess
 from osgeo import gdal, gdalconst
 from .filesystem import juststem, justpath, tempfilename, listify
-from .filesystem import now, total_seconds_from
+from .filesystem import now, total_seconds_from, forceext
 from .module_ogr import SameSpatialRef, GetSpatialRef
 from .module_meta import GetNoData, GDALFixNoData
 from .module_Numpy2GTiff import CalculateStats
@@ -141,6 +141,8 @@ def gdalwarp(filelist,
         print("[GDALWARP] warping files:", filelist_tmp)
         print("[GDALWARP] dstSRS:", dstSRS)
         gdal.Warp(filetmp, filelist_tmp, **kwargs)
+        print("[GDALWARP] gdalwarp completed successfully")
+        print("[GDALWARP] but fileprj:", os.path.exists(forceext(filetmp, "prj")))
     except Exception as ex:
         print("[GDALWARP]",ex)
     finally:
