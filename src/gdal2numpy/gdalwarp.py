@@ -164,6 +164,7 @@ def gdalwarp(filelist,
         pass
 
     # moving the filetmp to fileout
+    print("[GDALWARP] moved filetmp to fileout:", os.path.exists(forceext(filetmp,"prj")))
     move(filetmp, fileout)
     print("[GDALWARP] moved filetmp to fileout:", os.path.exists(forceext(fileout,"prj")))
 
