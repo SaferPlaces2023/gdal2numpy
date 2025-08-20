@@ -164,9 +164,11 @@ def gdalwarp(filelist,
         pass
 
     # moving the filetmp to fileout
-    print("[GDALWARP] moved filetmp to fileout:", filetmp,  os.path.exists(forceext(filetmp,"prj")))
+    print("[GDALWARP] moved filetmp to fileout:", filetmp,  os.path.isfile(forceext(filetmp,"prj")))
     move(filetmp, fileout)
-    print("[GDALWARP] moved filetmp to fileout:",fileout, os.path.exists(forceext(fileout,"prj")))
+    with open(forceext(fileout, "prj"), "w") as f:
+        print(f.read())
+    print("[GDALWARP] moved filetmp to fileout:",fileout, os.path.isfile(forceext(fileout,"prj")))
 
     Logger.debug("gdalwarp: converted to %s in %.2fs.",
                  fileout, total_seconds_from(t0))
