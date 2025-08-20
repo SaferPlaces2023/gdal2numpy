@@ -143,6 +143,10 @@ def gdalwarp(filelist,
         gdal.Warp(filetmp, filelist_tmp, **kwargs)
         print("[GDALWARP] gdalwarp completed successfully")
         print("[GDALWARP] but fileprj:", os.path.exists(forceext(filetmp, "prj")))
+        for f in os.listdir(justpath(filetmp)):
+            print("[GDALWARP] file:", f)
+        print("===================")
+
     except Exception as ex:
         print("[GDALWARP]",ex)
     finally:
@@ -166,8 +170,6 @@ def gdalwarp(filelist,
     # moving the filetmp to fileout
     print("[GDALWARP]filetmp:", forceext(filetmp,"prj"),  os.path.isfile(forceext(filetmp,"prj")))
     move(filetmp, fileout)
-    with open(forceext(fileout, "prj"), "r") as f:
-        print(f.read())
     print("[GDALWARP] moved filetmp to fileout:",fileout, os.path.isfile(forceext(fileout,"prj")))
 
     Logger.debug("gdalwarp: converted to %s in %.2fs.",
