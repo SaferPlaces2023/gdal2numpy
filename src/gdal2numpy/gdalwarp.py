@@ -137,13 +137,7 @@ def gdalwarp(filelist,
     try:
         gdal.UseExceptions()
         gdal.PushErrorHandler('CPLQuietErrorHandler')
-        print("[GDALWARP] out files:", filetmp)
-        print("[GDALWARP] warping files:", filelist_tmp)
-        print("[GDALWARP] dstSRS:", dstSRS)
         gdal.Warp(filetmp, filelist_tmp, **kwargs)
-        print("[GDALWARP] gdalwarp completed successfully")
-        print("[GDALWARP] but fileprj:", os.path.exists(forceext(filetmp, "prj")))
-
     except Exception as ex:
         print("[GDALWARP]",ex)
     finally:
@@ -153,22 +147,18 @@ def gdalwarp(filelist,
     if dstNodata is not None and GetNoData(filetmp) != dstNodata:
         Logger.debug("gdalwarp: fixing nodata value to %s", dstNodata)
         GDALFixNoData(filetmp, format=format, nodata=dstNodata)
-        print("[GDALFixNoData] but fileprj:", os.path.exists(forceext(filetmp, "prj")))
 
     if stats and isfile(filetmp):
         #subprocess.run(["gdalinfo", "-stats", filetmp], shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         #move(f"{filetmp}.aux.xml", f"{fileout}.aux.xml")
-        # try:
-        #     CalculateStats(filetmp)
-        # except Exception as ex:
-        #     print(f"[GDALWARP]: error calculating stats: {ex}")
-        pass
+        try:
+            CalculateStats(filetmp)
+        except Exception as ex:
+            print(f"[GDALWARP]: error calculating stats: {ex}")
+        
 
     # moving the filetmp to fileout
-    print("[GDALWARP]filetmp:", forceext(filetmp,"prj"),  os.path.isfile(forceext(filetmp,"prj")))
     move(filetmp, fileout)
-    print("[GDALWARP] moved filetmp to fileout:",fileout, os.path.isfile(forceext(fileout,"prj")))
-
     Logger.debug("gdalwarp: converted to %s in %.2fs.",
                  fileout, total_seconds_from(t0))
 
