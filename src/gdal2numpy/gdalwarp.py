@@ -143,9 +143,6 @@ def gdalwarp(filelist,
         gdal.Warp(filetmp, filelist_tmp, **kwargs)
         print("[GDALWARP] gdalwarp completed successfully")
         print("[GDALWARP] but fileprj:", os.path.exists(forceext(filetmp, "prj")))
-        for f in os.listdir(justpath(filetmp)):
-            print("[GDALWARP] file:", f)
-        print("===================")
 
     except Exception as ex:
         print("[GDALWARP]",ex)
