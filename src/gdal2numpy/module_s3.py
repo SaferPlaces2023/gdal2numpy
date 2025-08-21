@@ -420,6 +420,7 @@ def copy(src, dst=None, client=None):
         s3_copy(src, dst, client=client)
     # 4) if the source is a file and the destination is a local file
     elif os.path.isfile(src) and not iss3(dst):
+        os.makedirs(justpath(dst), exist_ok=True)
         shutil.copy2(src, dst)
     # 5) if the source is a folder
     elif os.path.isdir(src):
