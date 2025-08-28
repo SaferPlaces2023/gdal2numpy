@@ -1,3 +1,4 @@
+import os
 import socket
 import requests
 import ssl
@@ -77,7 +78,28 @@ def http_get(url, headers={}, mode="text"):
                         return response.text
                     return response.content
         except requests.exceptions.RequestException as ex:
-            print(ex)
+            #print(ex)
+            Logger.error(ex)
+    return None
+
+
+def http_download(url, filename=None, headers=None):
+    """
+    http_download use requests
+    """
+    if url and isinstance(url, str) and url.startswith("http"):
+        try:
+            with requests.get(url, headers=headers, stream=True, timeout=5) as response:
+                if response.status_code == 200:
+                    if filename:
+                        os.makedirs(os.path.dirname(filename), exist_ok=True)
+                        with open(filename, 'wb') as f:
+                            for chunk in response.iter_content(chunk_size=8192):
+                                f.write(chunk)
+                        return filename
+                    return response.content
+        except requests.exceptions.RequestException as ex:
+            #print(ex)
             Logger.error(ex)
     return None
 
