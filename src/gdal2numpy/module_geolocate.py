@@ -44,7 +44,7 @@ def geolocate(address, limit=16, provider="photon"):
         if limit:
             params["limit"] = limit
 
-        r = requests.get(url, params=params, timeout=30)
+        r = requests.get(url, headers={"content-type": "application/json", "User-Agent": "Mozilla/5.0"}, params=params, timeout=30)
 
         if r.status_code == 200:
             data = r.json()
