@@ -30,7 +30,7 @@ import warnings
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 from .filesystem import *
-from .module_http import http_exists
+from .module_http import http_exists, http_download
 from .module_log import Logger
 
 
@@ -418,6 +418,9 @@ def copy(src, dst=None, client=None):
     # 3) if the source and destination are s3 files
     elif iss3(src) and iss3(dst):
         s3_copy(src, dst, client=client)
+    # 3a) if source is an http(s) uri
+    elif src.startswith("http") and not iss3(dst):
+        http_download(src, dst)
     # 4) if the source is a file and the destination is a local file
     elif os.path.isfile(src) and not iss3(dst):
         os.makedirs(justpath(dst), exist_ok=True)
