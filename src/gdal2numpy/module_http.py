@@ -111,9 +111,24 @@ def nominatim_search(query):
     if query:
         city = quote(query)
         url = f"https://nominatim.openstreetmap.org/search?city={city}&format=json&limit=1&polygon_text=1"
-        ssl._create_default_https_context = ssl._create_unverified_context
-        with urllib.request.urlopen(url) as response:
-            geojson = json.loads(response.read())
-            return geojson[0] if len(geojson) > 0 else None
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
+        for attempt in range(3):
+            try:
+                with requests.get(url, headers=headers, timeout=30) as response:
+                    if response.status_code == 200:
+                        geojson = response.json()
+                        return geojson[0] if len(geojson) > 0 else None
+                    elif response.status_code in (429, 503, 504):
+                        import time
+                        time.sleep(2 ** attempt)
+                        continue
+                    else:
+                        Logger.error(f"nominatim_search: HTTP {response.status_code}")
+                        break
+            except requests.exceptions.Timeout:
+                Logger.warning(f"nominatim_search: timeout (attempt {attempt + 1}/3)")
+            except requests.exceptions.RequestException as ex:
+                Logger.error(ex)
+                break
     return None
 
