@@ -364,8 +364,22 @@ def SameSpatialRef(filename1, filename2):
     srs1 = GetSpatialRef(filename1)
     srs2 = GetSpatialRef(filename2)
     if srs1 and srs2:
-        return srs1.IsSame(srs2) or srs1.ExportToProj4() == srs2.ExportToProj4()
-    return None
+        if srs1.IsSame(srs2):
+            return True
+        try:
+            if srs1.ExportToWkt() == srs2.ExportToWkt():
+                return True
+        except Exception:
+            pass
+        try:
+            if srs1.ExportToProj4() == srs2.ExportToProj4():
+                return True
+        except Exception:
+            pass
+
+        if AutoIdentify(srs1) == AutoIdentify(srs2):
+            return True
+    return False
 
 
 def GetGeometryType(filename):
