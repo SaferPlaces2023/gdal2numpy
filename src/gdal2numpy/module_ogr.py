@@ -334,6 +334,9 @@ def GetSpatialRef(filename):
         if code:
             code = int(code.split(":")[1])
             srs.ImportFromEPSG(code)
+        #Patch for Germany
+        elif wkt == 'LOCAL_CS["ETRS89 / UTM zone 32N",UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]':
+            srs.ImportFromEPSG(25832)
         else:
             srs.ImportFromWkt(wkt)
             AutoIdentifyEPSG(srs)
@@ -410,10 +413,8 @@ def TransformBBOX(bbox, s_srs=None, t_srs=None):
 
     s_srs = GetSpatialRef(s_srs)
     t_srs = GetSpatialRef(t_srs)
-    if s_srs and s_srs.IsGeographic():
-        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    if t_srs and t_srs.IsGeographic():
-        t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
     transform = osr.CoordinateTransformation(s_srs, t_srs)
     # rect = Rectangle(s_minx, s_miny, s_maxx, s_maxy)
@@ -537,10 +538,8 @@ def PolygonFrom(extent, delta=0.0, s_srs=None, t_srs=None):
     if s_srs and t_srs and not SameSpatialRef(s_srs, t_srs):
         s_srs = GetSpatialRef(s_srs)
         t_srs = GetSpatialRef(t_srs)
-        if s_srs and s_srs.IsGeographic():
-            s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-        if t_srs and t_srs.IsGeographic():
-            t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        s_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        t_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
         transform = osr.CoordinateTransformation(s_srs, t_srs)
         geom.Transform(transform)
 
