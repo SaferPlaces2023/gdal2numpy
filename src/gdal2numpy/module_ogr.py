@@ -286,7 +286,7 @@ def isWkt(wkt):
     isWkt - check if the string is a wkt
     """
     if isinstance(wkt, str):
-        for word in ("GEOGCS", "PROJCS", "COMPD_CS"):
+        for word in ("GEOGCS", "PROJCS", "COMPD_CS", "LOCAL_CS"):
             if wkt.upper().startswith(word):
                 return True
     return False
