@@ -501,7 +501,7 @@ def PolygonFrom(extent, delta=0.0, s_srs=None, t_srs=None):
                 geoms = [feature.GetGeometryRef() for feature in features if feature]
                 # merge all the geometries
                 if len(geoms) > 0:
-                    geom = geoms[0].Clone()
+                    geom = geoms[0].Clone().Buffer(0.0)
                     for g in geoms[1:]:
                         geom = geom.Union(g)
             else:
