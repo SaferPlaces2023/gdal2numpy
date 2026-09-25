@@ -39,7 +39,7 @@ def now():
     now
     :return: returns the time in ms
     """
-    return datetime.datetime.now()
+    return datetime.datetime.now(datetime.UTC)
 
 
 def total_seconds_from(t):
@@ -48,7 +48,7 @@ def total_seconds_from(t):
     :param t: the time in ms
     :return: return the timedelta in ms from now es now()-t
     """
-    return (datetime.datetime.now() - t).total_seconds()
+    return (datetime.datetime.now(datetime.UTC) - t).total_seconds()
 
 
 def normpath(pathname):
@@ -364,7 +364,7 @@ def lock(filename, username):
     #get pid if username is not provided
     username = username or f"{os.getpid()}"
     with open(filelock, "w", encoding="utf-8") as f:
-        f.write(f"{username},{datetime.datetime.now()}")
+        f.write(f"{username},{datetime.datetime.now(datetime.UTC)}")
 
 
 def unlock(filename):
@@ -387,8 +387,8 @@ def is_locked(filename, username, timeout=60):
         with open(filelock, "r", encoding="utf-8") as f:
             locker, locktime = f.read().split(",")
             if locker != username:
-                locktime = datetime.datetime.strptime(locktime, "%Y-%m-%d %H:%M:%S.%f")
-                if (datetime.datetime.now() - locktime).total_seconds() < timeout:
+                locktime = datetime.datetime.strptime(locktime, "%Y-%m-%d %H:%M:%S.%f").replace(tzinfo=datetime.UTC)
+                if (datetime.datetime.now(datetime.UTC) - locktime).total_seconds() < timeout:
                     locked = True
                 else:
                     # remove the lock file

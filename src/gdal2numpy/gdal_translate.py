@@ -117,24 +117,29 @@ def gdal_translate(filein, fileout=None, ot=None, a_nodata=None, projwin=None, p
     # assert that the folder exists
     os.makedirs(justpath(filetmp), exist_ok=True)
     # Suppress GDAL warnings and errors
-    gdal.PushErrorHandler('CPLQuietErrorHandler')
-    gdal.Translate(filetmp, filein, **kwargs)
-    gdal.PopErrorHandler()
-
-    # this a workaround for the error: ------------------------------
-    error_message = gdal.GetLastErrorMsg()
-    if error_message and "Error: Computed -srcwin" in error_message:
-        # swap the order of the projwin miny with maxy
-        #print(f"gdal_translate: error message: {error_message}")
-        projwin = [projwin[0], projwin[3], projwin[2], projwin[1]]
-        kwargs["projWin"] = projwin
-        #print(f"gdal_translate: retrying with projwin swapped: {projwin}")
+    _use_exceptions = gdal.GetUseExceptions()
+    gdal.UseExceptions()
+    try:
+        gdal.PushErrorHandler('CPLQuietErrorHandler')
         gdal.Translate(filetmp, filein, **kwargs)
-        #print(f"---")
-    # end of workaround --------------------------------------------
+        gdal.PopErrorHandler()
+    except Exception:
+        #print(f"[GDALTRANSLATE] [MANAGED]{ex}")
+        # this a workaround for the error: ------------------------------
+        error_message = gdal.GetLastErrorMsg()
+        if error_message and "Error: Computed -srcwin" in error_message:
+            # swap the order of the projwin miny with maxy
+            #print(f"gdal_translate: error message: {error_message}")
+            projwin = [projwin[0], projwin[3], projwin[2], projwin[1]]
+            kwargs["projWin"] = projwin
+            gdal.Translate(filetmp, filein, **kwargs)
+    finally:
+        if not _use_exceptions:
+            gdal.DontUseExceptions()
+        # end of workaround --------------------------------------------
 
     move(filetmp, fileout)
 
-    Logger.debug(f"gdal_translate: completed in {total_seconds_from(t0)} s.")
+    Logger.debug("gdal_translate: completed in %ss," % (total_seconds_from(t0)))
     # ----------------------------------------------------------------------
     return fileout

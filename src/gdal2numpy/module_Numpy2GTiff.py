@@ -209,7 +209,8 @@ def Numpy2GTiff(arr, gt, prj, fileout, format="GTiff", save_nodata_as=-9999, met
                 ds.GetRasterBand(1).SetStatistics(minValue, maxValue, meanValue, stdValue)
             # ---
 
-            ds.GetRasterBand(1).SetNoDataValue(save_nodata_as)
+            if save_nodata_as is not None:
+                ds.GetRasterBand(1).SetNoDataValue(save_nodata_as)
             ds.GetRasterBand(1).WriteArray(arr)
 
             if cog:

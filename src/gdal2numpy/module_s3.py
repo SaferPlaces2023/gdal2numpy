@@ -24,6 +24,7 @@
 # -------------------------------------------------------------------------------
 import os
 import hashlib
+import re
 import shutil
 import fnmatch
 import warnings
@@ -191,7 +192,14 @@ def tempname4S3(uri):
     else:
         _, path = os.path.splitdrive(uri)
         tmp = normpath(dest_folder + "/" + path)
+
+    # Remove special characters from the path portion of the temporary filename
+    drive, path = os.path.splitdrive(tmp)
+    path = re.sub(r'[^a-zA-Z0-9_\-./]', '_', path)
+    tmp = drive + path
+    #---
     
+    #--
     os.makedirs(justpath(tmp), exist_ok=True)
     return tmp
 
