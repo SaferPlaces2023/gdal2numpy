@@ -193,6 +193,29 @@ def GetBandCount(filename):
         return bandcount
     return 0
 
+def isEPSG(epsg):
+    """
+    isEPSG - check if the string is a epsg
+    """
+    return isinstance(epsg, str) and epsg.lower().startswith("epsg")
+
+
+def isProj4(proj4):
+    """
+    isProj4 - check if the string is a proj4
+    """
+    return isinstance(proj4, str) and proj4.lower().startswith("+proj")
+
+
+def isWkt(wkt):
+    """
+    isWkt - check if the string is a wkt
+    """
+    if isinstance(wkt, str):
+        for word in ("GEOGCS", "PROJCS", "PROJCRS", "COMPD_CS", "LOCAL_CS"):
+            if wkt.upper().startswith(word):
+                return True
+    return False
 
 def AutoIdentify(wkt):
     """
@@ -221,7 +244,7 @@ def AutoIdentify(wkt):
         wkt = wkt.GetSpatialReference().ExportToWkt()
     elif isinstance(wkt, str) and re.match(r'^.*?\:\d{4,5}$', wkt):
         return wkt
-    elif isinstance(wkt, str) and (wkt.startswith("GEOGCS") or wkt.startswith("PROJCS")):
+    elif isWkt(wkt):
         pass
     else:
         Logger.warning("The wkt is not a valid string or object")
@@ -267,29 +290,7 @@ def AutoIdentify(wkt):
     return code
 
 
-def isEPSG(epsg):
-    """
-    isEPSG - check if the string is a epsg
-    """
-    return isinstance(epsg, str) and epsg.lower().startswith("epsg")
 
-
-def isProj4(proj4):
-    """
-    isProj4 - check if the string is a proj4
-    """
-    return isinstance(proj4, str) and proj4.lower().startswith("+proj")
-
-
-def isWkt(wkt):
-    """
-    isWkt - check if the string is a wkt
-    """
-    if isinstance(wkt, str):
-        for word in ("GEOGCS", "PROJCS", "COMPD_CS", "LOCAL_CS"):
-            if wkt.upper().startswith(word):
-                return True
-    return False
 
 
 def AutoIdentifyEPSG(srs):
