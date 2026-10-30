@@ -55,6 +55,17 @@ def is_cog(filename):
         return res
     return False
 
+def isvector(filename):
+    """
+    isvector - check if the file is a vector dataset
+    """
+    if isinstance(filename, str):
+        if ".shp" in filename.lower():
+            return True
+        elif ".geojson" in filename.lower():
+            return True
+    return False
+
 def OpenShape(fileshp, exclusive=False):
     """
     OpenDataset
@@ -62,15 +73,15 @@ def OpenShape(fileshp, exclusive=False):
     if not fileshp:
         Logger.debug("0) %s...", fileshp)
         ds = None
-    elif isinstance(fileshp, str) and fileshp.startswith("http")  and ".shp" in fileshp.lower():
+    elif isinstance(fileshp, str) and fileshp.startswith("http") and isvector(fileshp):
         Logger.debug("1) Inspect file from https...")
         fileshp = normshape(fileshp)
         ds = ogr.Open(f"/vsicurl/{fileshp}",exclusive)
-    elif isinstance(fileshp, str) and os.path.isfile(fileshp) and ".shp" in fileshp.lower():
+    elif isinstance(fileshp, str) and os.path.isfile(fileshp)  and isvector(fileshp):
         Logger.debug("2) Opening local %s...", fileshp)
         fileshp = normshape(fileshp)
         ds = ogr.Open(fileshp, exclusive)
-    elif isinstance(fileshp, str) and isshape(fileshp):
+    elif isinstance(fileshp, str) and isvector(fileshp):
         Logger.debug("3) Get file from s3...")
         fileshp = fileshp.replace("s3://", "/vsis3/")
         fileshp = normshape(fileshp)

@@ -35,7 +35,7 @@ from osgeo import osr, ogr
 from pyproj import CRS
 from .filesystem import justext, juststem, forceext, justpath
 from .filesystem import strtofile, md5text, listify, normshape, parse_shape_path
-from .module_open import OpenRaster, get
+from .module_open import OpenRaster, get, isvector
 from .module_open import OpenShape
 from .module_s3 import isfile, isshape, israster
 from .module_log import Logger
@@ -342,7 +342,7 @@ def GetSpatialRef(filename):
             srs.ImportFromWkt(wkt)
             AutoIdentifyEPSG(srs)
 
-    elif isinstance(filename, str) and isshape(filename):
+    elif isinstance(filename, str) and isvector(filename):
         ds = OpenShape(filename)
         if ds:
             srs = ds.GetLayer().GetSpatialRef()

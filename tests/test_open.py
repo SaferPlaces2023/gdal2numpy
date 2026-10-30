@@ -5,6 +5,7 @@ from gdal2numpy import *
 
 filetif = "s3://saferplaces.co/packages/gdal2numpy/open/CLSA_LiDAR.tif"
 fileshp = "s3://saferplaces.co/packages/gdal2numpy/open/OSM_BUILDINGS_102258.shp"
+filegeojson = "s3://saferplaces.co/packages/gdal2numpy/open/OSM_BUILDINGS_102258.geojson"
 
 class Test(unittest.TestCase):
     """
@@ -22,6 +23,14 @@ class Test(unittest.TestCase):
         test_open: 
         """
         ds = OpenShape(fileshp)
+        self.assertTrue(ds is not None)
+        self.assertEqual(GetFeatureCount(ds), 23989)
+
+    def test_open_geojson(self):
+        """
+        test_open: 
+        """
+        ds = OpenShape(filegeojson)
         self.assertTrue(ds is not None)
         self.assertEqual(GetFeatureCount(ds), 23989)
     

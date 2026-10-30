@@ -74,6 +74,8 @@ def RasterizeLike(fileshp, filedem, fileout="", dtype=None, burn_fieldname=None,
 
     #filedem = copy(filedem) if iss3(filedem) else filedem
     fileshp = copy(fileshp) if iss3(fileshp) else fileshp
+    print(fileshp)
+    print(f"Transforming {fileshp} to match {filedem}")
     fileshp = Transform(fileshp, filedem)
 
     ds = OpenRaster(filedem)
